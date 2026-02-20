@@ -699,6 +699,60 @@ rm -rf vendor
 composer install --optimize-autoloader --no-dev
 ```
 
+**Login Failed After Adding New Package (composer require):**
+
+If login was working before but failed after running `composer require` for new features (like Excel export):
+
+```bash
+# 1. Check if all dependencies are properly installed
+cd /var/www/hotel/backend
+composer install --optimize-autoloader --no-dev
+
+# 2. Regenerate autoload files
+composer dump-autoload
+
+# 3. Clear all Laravel caches
+php artisan config:clear
+php artisan cache:clear
+php artisan route:clear
+php artisan view:clear
+php artisan optimize:clear
+
+# 4. Rebuild config cache
+php artisan config:cache
+php artisan route:cache
+
+# 5. Check if new package has config file to publish
+php artisan vendor:publish --provider="Maatwebsite\Excel\ExcelServiceProvider"
+
+# 6. Verify .env has all required variables
+cat .env | grep -E "SESSION|SANCTUM|FRONTEND|APP_URL"
+
+# 7. Restart PHP-FPM
+sudo systemctl restart php8.3-fpm
+
+# 8. Check Laravel logs for any errors
+tail -f storage/logs/laravel.log
+
+# 9. If still not working, check autoload issues
+composer validate
+composer diagnose
+
+# 10. Frontend also needs to be rebuilt if .env changed
+cd /var/www/hotel/frontend
+nano .env.production  # Update with correct domain
+npm run build
+```
+
+**Common issues after composer update:**
+- Autoload files not regenerated
+- Config cache using old values
+- Session configuration changed by new package
+- Missing config files from new packages
+- Permission issues on vendor directory
+
+```
+
 **Git Ownership Issues:**
 ```bash
 # Add safe directory for git
