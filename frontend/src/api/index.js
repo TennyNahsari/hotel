@@ -75,6 +75,33 @@ export const roomApi = {
   },
 }
 
+export const roomTypeApi = {
+  async getRoomTypes(params = {}) {
+    const response = await api.get('/room-types', { params })
+    return response.data
+  },
+
+  async getRoomType(roomTypeId) {
+    const response = await api.get(`/room-types/${roomTypeId}`)
+    return response.data
+  },
+
+  async createRoomType(data) {
+    const response = await api.post('/room-types', data)
+    return response.data
+  },
+
+  async updateRoomType(roomTypeId, data) {
+    const response = await api.put(`/room-types/${roomTypeId}`, data)
+    return response.data
+  },
+
+  async deleteRoomType(roomTypeId) {
+    const response = await api.delete(`/room-types/${roomTypeId}`)
+    return response.data
+  },
+}
+
 export const guestApi = {
   async getGuests(params = {}) {
     const response = await api.get('/guests', { params })

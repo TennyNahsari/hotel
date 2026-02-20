@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\RoomController;
+use App\Http\Controllers\Api\RoomTypeController;
 use App\Http\Controllers\Api\GuestController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\PaymentController;
@@ -29,8 +30,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
 
+    // Room Types Management
+    Route::apiResource('room-types', RoomTypeController::class);
+    
     // Rooms Management
-    Route::get('/room-types', [RoomController::class, 'roomTypes']);
     Route::get('/rooms-statistics', [RoomController::class, 'statistics']);
     Route::get('/rooms/export', [RoomController::class, 'export']);
     Route::apiResource('rooms', RoomController::class);

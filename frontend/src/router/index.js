@@ -28,6 +28,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/room-types',
+      name: 'room-types',
+      component: () => import('../views/RoomTypesView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/bookings',
       name: 'bookings',
       component: () => import('../views/BookingsView.vue'),
