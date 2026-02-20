@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Guest;
 use Illuminate\Http\Request;
+use App\Exports\GuestsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class GuestController extends Controller
 {
@@ -113,5 +115,18 @@ class GuestController extends Controller
         ->get();
 
         return response()->json($guests);
+    }
+
+    public function export(Request $request)
+    {
+        $search = $request->input('search');
+        $nationality = $request->input('nationality');
+
+        $filename = 'guests_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(
+            new GuestsExport($search, $nationality),
+            $filename
+        );
     }
 }

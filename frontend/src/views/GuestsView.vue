@@ -15,8 +15,8 @@
         </button>
       </div>
 
-      <!-- Search Bar -->
-      <div class="bg-white rounded-lg shadow p-4">
+      <!-- Search & Export -->
+      <div class="bg-white rounded-lg shadow p-4 space-y-4">
         <input
           v-model="searchQuery"
           @input="loadGuests"
@@ -24,6 +24,15 @@
           placeholder="Search by name, email, phone, or ID number..."
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
+        <div>
+          <button
+            @click="exportGuests"
+            :disabled="exporting"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ exporting ? 'Exporting...' : '📊 Export Excel' }}
+          </button>
+        </div>
       </div>
 
       <!-- Guests Table -->
@@ -331,6 +340,7 @@ const showDeleteConfirm = ref(false)
 const isEditing = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
+const exporting = ref(false)
 const error = ref('')
 const searchQuery = ref('')
 const guestToDelete = ref(null)
@@ -471,4 +481,31 @@ function formatDate(date) {
     year: 'numeric'
   })
 }
+
+async function exportGuests() {
+  exporting.value = true
+  try {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    
+    // Build query parameters
+    const params = new URLSearchParams()
+    if (searchQuery.value) params.append('search', searchQuery.value)
+    
+    const url = `${apiUrl}/guests/export?${params.toString()}`
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', '')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (err) {
+    console.error('Failed to export guests:', err)
+    alert('Failed to export guests')
+  } finally {
+    exporting.value = false
+  }
+}
+
 </script>

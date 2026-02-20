@@ -37,6 +37,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::patch('/rooms/{room}/status', [RoomController::class, 'updateStatus']);
 
     // Guests Management
+    Route::get('/guests/export', [GuestController::class, 'export']);
     Route::apiResource('guests', GuestController::class);
     Route::get('/guests/search/{query}', [GuestController::class, 'search']);
 
