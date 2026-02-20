@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Room;
 use App\Models\RoomType;
+use App\Exports\RoomsExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class RoomController extends Controller
 {
@@ -128,5 +130,14 @@ class RoomController extends Controller
         }
 
         return response()->json($stats);
+    }
+
+    public function export(Request $request)
+    {
+        $filters = $request->only(['status', 'room_type_id', 'floor', 'include_inactive']);
+        
+        $filename = 'rooms_' . date('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(new RoomsExport($filters), $filename);
     }
 }

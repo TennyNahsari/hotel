@@ -55,6 +55,23 @@ export const roomApi = {
     const response = await api.delete(`/rooms/${roomId}`)
     return response.data
   },
+
+  async exportRooms(params = {}) {
+    const response = await api.get('/rooms/export', { 
+      params,
+      responseType: 'blob' 
+    })
+    
+    // Create download link
+    const url = window.URL.createObjectURL(new Blob([response.data]))
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', `rooms_${new Date().toISOString().split('T')[0]}.xlsx`)
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    window.URL.revokeObjectURL(url)
+  },
 }
 
 export const guestApi = {
