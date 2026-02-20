@@ -42,6 +42,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Bookings Management
     Route::get('/bookings/check-availability', [BookingController::class, 'checkAvailability']);
+    Route::get('/bookings/export', [BookingController::class, 'export']);
     Route::apiResource('bookings', BookingController::class);
     Route::post('/bookings/{booking}/confirm', [BookingController::class, 'confirm']);
     Route::post('/bookings/{booking}/check-in', [BookingController::class, 'checkIn']);

@@ -17,8 +17,8 @@
 
       <!-- Filters -->
       <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex flex-col md:flex-row gap-4">
-          <div class="flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="lg:col-span-2">
             <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
             <input
               v-model="filters.search"
@@ -28,7 +28,7 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
-          <div class="flex-1">
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
             <select
               v-model="filters.status"
@@ -43,6 +43,40 @@
               <option value="cancelled">Cancelled</option>
             </select>
           </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Check-In From</label>
+            <input
+              v-model="filters.start_date"
+              @change="loadBookings"
+              type="date"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Check-In To</label>
+            <input
+              v-model="filters.end_date"
+              @change="loadBookings"
+              type="date"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+        </div>
+        <div class="mt-4 flex justify-end">
+          <button
+            @click="exportBookings"
+            :disabled="exporting"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <svg v-if="exporting" class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {{ exporting ? 'Exporting...' : 'Export Excel' }}
+          </button>
         </div>
       </div>
 
@@ -458,6 +492,7 @@ const bookings = ref([])
 const guests = ref([])
 const availableRooms = ref([])
 const loading = ref(false)
+const exporting = ref(false)
 const showModal = ref(false)
 const showCancelConfirm = ref(false)
 const showDeleteConfirm = ref(false)
@@ -472,6 +507,8 @@ const bookingToDelete = ref(null)
 const filters = ref({
   search: '',
   status: '',
+  start_date: '',
+  end_date: '',
 })
 
 const formData = ref({
@@ -509,6 +546,8 @@ async function loadBookings() {
     const params = {}
     if (filters.value.search) params.search = filters.value.search
     if (filters.value.status) params.status = filters.value.status
+    if (filters.value.start_date) params.start_date = filters.value.start_date
+    if (filters.value.end_date) params.end_date = filters.value.end_date
 
     bookings.value = await bookingApi.getBookings(params)
   } catch (err) {
@@ -536,6 +575,45 @@ async function checkAvailability() {
     })
   } catch (err) {
     console.error('Failed to check availability:', err)
+  }
+}
+
+async function exportBookings() {
+  exporting.value = true
+  try {
+    const params = {}
+    if (filters.value.start_date) params.start_date = filters.value.start_date
+    if (filters.value.end_date) params.end_date = filters.value.end_date
+    if (filters.value.status) params.status = filters.value.status
+    
+    // Build query string
+    const queryString = new URLSearchParams(params).toString()
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const url = `${apiBaseUrl}/bookings/export${queryString ? '?' + queryString : ''}`
+    
+    // Download the file
+    const response = await axios.get(url, {
+      responseType: 'blob',
+      withCredentials: true
+    })
+    
+    // Create a blob URL and trigger download
+    const blob = new Blob([response.data], { 
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+    })
+    const downloadUrl = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = downloadUrl
+    link.download = `bookings_${new Date().toISOString().split('T')[0]}.xlsx`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(downloadUrl)
+  } catch (err) {
+    console.error('Failed to export bookings:', err)
+    alert('Failed to export bookings. Please try again.')
+  } finally {
+    exporting.value = false
   }
 }
 

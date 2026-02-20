@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\Guest;
+use App\Exports\BookingsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BookingController extends Controller
 {
@@ -303,5 +305,14 @@ class BookingController extends Controller
         $date = now()->format('Ymd');
         $random = strtoupper(Str::random(4));
         return "BK{$date}{$random}";
+    }
+
+    public function export(Request $request)
+    {
+        $filters = $request->only(['start_date', 'end_date', 'status', 'guest_id']);
+        
+        $filename = 'bookings_' . date('Y-m-d_His') . '.xlsx';
+        
+        return Excel::download(new BookingsExport($filters), $filename);
     }
 }
