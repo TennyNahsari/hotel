@@ -39,7 +39,8 @@ export const useAuthStore = defineStore('auth', () => {
     loading.value = true
     try {
       // Ensure CSRF cookie is set
-      await axios.get('http://localhost:8000/sanctum/csrf-cookie', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
         withCredentials: true
       })
       

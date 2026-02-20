@@ -180,37 +180,7 @@ VITE_API_URL=http://your-domain.com
 VITE_API_BASE_URL=http://your-domain.com/api
 ```
 
-**Important:** Before building, you need to update hardcoded URLs in the source code.
-
-**Option 1: Quick fix for production (using sed):**
-```bash
-# Replace localhost:8000 with your domain in all files
-cd /var/www/hotel/frontend/src
-
-# Replace in api/axios.js
-sed -i "s|http://localhost:8000|http://your-domain.com|g" api/axios.js
-
-# Replace in api/index.js
-sed -i "s|http://localhost:8000|http://your-domain.com|g" api/index.js
-
-# Replace in stores/auth.js
-sed -i "s|http://localhost:8000|http://your-domain.com|g" stores/auth.js
-
-# Replace in all view files
-find views -name "*.vue" -type f -exec sed -i "s|http://localhost:8000|http://your-domain.com|g" {} \;
-
-# Verify changes
-grep -r "localhost:8000" .
-# Should return no results
-```
-
-**Option 2: Manual edit (recommended):**
-Edit these files and replace `http://localhost:8000` with environment variable or your domain:
-
-1. `src/api/axios.js` - Line 4
-2. `src/api/index.js` - Line 6  
-3. `src/stores/auth.js` - Line 42
-4. All view files (`src/views/*.vue`)
+**Note:** The application now uses environment variables, so you only need to configure the `.env.production` file with your domain. The source code will automatically use these values during build.
 
 **Build for production:**
 ```bash

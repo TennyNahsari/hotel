@@ -3,7 +3,8 @@ import api from './axios'
 export const authApi = {
   async login(credentials) {
     // Get CSRF cookie first
-    await api.get('http://localhost:8000/sanctum/csrf-cookie')
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    await api.get(`${apiUrl}/sanctum/csrf-cookie`)
     // Then login
     const response = await api.post('/login', credentials)
     return response.data
