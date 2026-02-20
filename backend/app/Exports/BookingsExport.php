@@ -24,7 +24,7 @@ class BookingsExport implements FromCollection, WithHeadings, WithMapping, WithS
      */
     public function collection()
     {
-        $query = Booking::with(['guest', 'rooms.roomType', 'payment']);
+        $query = Booking::with(['guest', 'rooms.roomType', 'payments']);
 
         // Apply date filters for check-in
         if (!empty($this->filters['start_date'])) {
@@ -83,10 +83,11 @@ class BookingsExport implements FromCollection, WithHeadings, WithMapping, WithS
         // Get room numbers
         $roomNumbers = $booking->rooms->pluck('room_number')->join(', ');
 
-        // Payment status
+        // Payment status - get latest payment
         $paymentStatus = '-';
-        if ($booking->payment) {
-            $paymentStatus = ucfirst($booking->payment->status);
+        if ($booking->payments && $booking->payments->isNotEmpty()) {
+            $latestPayment = $booking->payments->sortByDesc('created_at')->first();
+            $paymentStatus = ucfirst($latestPayment->status);
         }
 
         return [
