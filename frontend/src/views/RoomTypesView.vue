@@ -40,10 +40,7 @@
                   Capacity
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Base Price
-                </th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Weekend Price
+                  Price per Night
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Rooms
@@ -68,9 +65,6 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(roomType.base_price) }}</div>
-                </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(roomType.weekend_price) }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-500">{{ roomType.rooms_count || 0 }} rooms</div>
@@ -131,7 +125,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Base Price *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Price per Night *</label>
               <input
                 v-model.number="formData.base_price"
                 type="number"
@@ -140,18 +134,6 @@
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="500000"
-              />
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Weekend Price</label>
-              <input
-                v-model.number="formData.weekend_price"
-                type="number"
-                min="0"
-                step="1000"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Leave empty to use base price"
               />
             </div>
 
@@ -277,7 +259,6 @@ const formData = ref({
   name: '',
   description: '',
   base_price: null,
-  weekend_price: null,
   capacity: 2,
   facilities: [],
 })
@@ -313,7 +294,6 @@ function openAddModal() {
     name: '',
     description: '',
     base_price: null,
-    weekend_price: null,
     capacity: 2,
     facilities: [],
   }
@@ -328,7 +308,6 @@ function openEditModal(roomType) {
     name: roomType.name,
     description: roomType.description || '',
     base_price: roomType.base_price,
-    weekend_price: roomType.weekend_price,
     capacity: roomType.capacity,
     facilities: Array.isArray(roomType.facilities) ? [...roomType.facilities] : [],
   }
