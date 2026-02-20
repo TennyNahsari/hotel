@@ -13,7 +13,6 @@ class RoomType extends Model
         'name',
         'description',
         'base_price',
-        'weekend_price',
         'capacity',
         'facilities',
         'is_active',
@@ -21,7 +20,6 @@ class RoomType extends Model
 
     protected $casts = [
         'base_price' => 'decimal:2',
-        'weekend_price' => 'decimal:2',
         'capacity' => 'integer',
         'facilities' => 'array',
         'is_active' => 'boolean',

@@ -28,15 +28,9 @@ class RoomTypeController extends Controller
             'name' => 'required|string|max:100|unique:room_types,name',
             'description' => 'nullable|string',
             'base_price' => 'required|numeric|min:0',
-            'weekend_price' => 'nullable|numeric|min:0',
             'capacity' => 'required|integer|min:1',
             'facilities' => 'nullable|array',
         ]);
-
-        // Set weekend price to base price if not provided
-        if (!isset($validated['weekend_price'])) {
-            $validated['weekend_price'] = $validated['base_price'];
-        }
 
         $roomType = RoomType::create($validated);
 
@@ -57,7 +51,6 @@ class RoomTypeController extends Controller
             'name' => 'sometimes|string|max:100|unique:room_types,name,' . $roomType->id,
             'description' => 'nullable|string',
             'base_price' => 'sometimes|numeric|min:0',
-            'weekend_price' => 'nullable|numeric|min:0',
             'capacity' => 'sometimes|integer|min:1',
             'facilities' => 'nullable|array',
             'is_active' => 'boolean',
