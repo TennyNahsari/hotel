@@ -50,6 +50,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/bookings/{booking}/cancel', [BookingController::class, 'cancel']);
 
     // Payments Management
+    Route::get('/payments/export', [PaymentController::class, 'export']);
     Route::apiResource('payments', PaymentController::class);
     Route::get('/bookings/{booking}/payments', [PaymentController::class, 'bookingPayments']);
 

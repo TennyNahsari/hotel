@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Payment;
 use App\Models\Booking;
 use Illuminate\Http\Request;
+use App\Exports\PaymentsExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PaymentController extends Controller
 {
@@ -103,5 +105,20 @@ class PaymentController extends Controller
                 'balance' => $balance,
             ],
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+        $paymentType = $request->input('payment_type');
+        $paymentMethod = $request->input('payment_method');
+
+        $filename = 'payments_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(
+            new PaymentsExport($startDate, $endDate, $paymentType, $paymentMethod),
+            $filename
+        );
     }
 }

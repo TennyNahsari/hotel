@@ -17,7 +17,25 @@
 
       <!-- Filters -->
       <div class="bg-white rounded-lg shadow p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date From</label>
+            <input
+              v-model="filters.start_date"
+              @change="loadPayments"
+              type="date"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
+          <div class="flex-1">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date To</label>
+            <input
+              v-model="filters.end_date"
+              @change="loadPayments"
+              type="date"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+          </div>
           <div class="flex-1">
             <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
             <select
@@ -58,6 +76,15 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+        </div>
+        <div class="mt-4">
+          <button
+            @click="exportPayments"
+            :disabled="exporting"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ exporting ? 'Exporting...' : '📊 Export Excel' }}
+          </button>
         </div>
       </div>
 
@@ -468,12 +495,15 @@ const showBookingDropdown = ref(false)
 const isEditing = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
+const exporting = ref(false)
 const error = ref('')
 const paymentToDelete = ref(null)
 const invoiceTemplate = ref(null)
 const bookingSearch = ref('')
 
 const filters = ref({
+  start_date: '',
+  end_date: '',
   payment_type: '',
   payment_method: '',
   search: '',
@@ -626,6 +656,35 @@ async function handleDelete() {
     alert(err.response?.data?.message || 'Failed to delete payment')
   } finally {
     deleting.value = false
+  }
+}
+
+async function exportPayments() {
+  exporting.value = true
+  try {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    
+    // Build query parameters
+    const params = new URLSearchParams()
+    if (filters.value.start_date) params.append('start_date', filters.value.start_date)
+    if (filters.value.end_date) params.append('end_date', filters.value.end_date)
+    if (filters.value.payment_type) params.append('payment_type', filters.value.payment_type)
+    if (filters.value.payment_method) params.append('payment_method', filters.value.payment_method)
+    
+    const url = `${apiUrl}/payments/export?${params.toString()}`
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', '')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (err) {
+    console.error('Failed to export payments:', err)
+    alert('Failed to export payments')
+  } finally {
+    exporting.value = false
   }
 }
 
