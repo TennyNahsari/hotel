@@ -344,16 +344,200 @@ sudo systemctl restart nginx
 sudo systemctl enable nginx
 ```
 
-### Step 8: Setup SSL (Optional but Recommended)
+### Step 8: Setup SSL with Let's Encrypt (Recommended)
+
+**Important:** SSL/HTTPS is highly recommended for production. Let's Encrypt provides free SSL certificates.
 
 ```bash
-# Install Certbot
+# 1. Install Certbot
 sudo apt install -y certbot python3-certbot-nginx
 
-# Get SSL certificate
-sudo certbot --nginx -d your-domain.com
+# 2. Stop nginx temporarily (or use --nginx option)
+sudo systemctl stop nginx
 
-# Auto-renewal is automatically configured
+# 3. Get SSL certificate (interactive mode)
+# Replace your-domain.com with your actual domain
+sudo certbot certonly --standalone -d your-domain.com
+
+# Or if you prefer, use nginx plugin (with nginx running)
+# sudo certbot --nginx -d your-domain.com
+
+# 4. Certificate will be saved to:
+# /etc/letsencrypt/live/your-domain.com/fullchain.pem
+# /etc/letsencrypt/live/your-domain.com/privkey.pem
+```
+
+**Update Nginx Configuration for HTTPS:**
+
+```bash
+sudo nano /etc/nginx/sites-available/hotel
+```
+
+**Replace with SSL-enabled configuration:**
+
+```nginx
+# HTTP - Redirect to HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name your-domain.com;
+    
+    # Redirect all HTTP to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+# HTTPS
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name your-domain.com;
+    
+    # SSL Configuration
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    
+    # SSL Security Settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    
+    # Serve frontend from root
+    root /var/www/hotel/frontend/dist;
+    index index.html;
+
+    # Frontend - Vue.js SPA (for non-api routes)
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Backend API routes - proxy to Laravel
+    location ~ ^/(api|sanctum)/ {
+        root /var/www/hotel/backend/public;
+        try_files $uri /index.php$is_args$args;
+
+        location ~ \.php$ {
+            include snippets/fastcgi-php.conf;
+            fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+            fastcgi_param SCRIPT_FILENAME /var/www/hotel/backend/public/index.php;
+            include fastcgi_params;
+            fastcgi_param HTTPS on;
+        }
+    }
+
+    # Handle PHP files in Laravel public directory
+    location ~ \.php$ {
+        root /var/www/hotel/backend/public;
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.2-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME /var/www/hotel/backend/public$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_param HTTPS on;
+    }
+
+    # Security headers
+    add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    
+    server_tokens off;
+
+    access_log /var/log/nginx/hotel_access.log;
+    error_log /var/log/nginx/hotel_error.log;
+}
+```
+
+**Update Backend .env for HTTPS:**
+
+```bash
+cd /var/www/hotel/backend
+nano .env
+```
+
+**Update these values:**
+```env
+APP_URL=https://your-domain.com
+FRONTEND_URL=https://your-domain.com
+SESSION_SECURE_COOKIE=true
+SESSION_DOMAIN=your-domain.com
+SANCTUM_STATEFUL_DOMAINS=your-domain.com
+```
+
+**Update Frontend .env.production:**
+
+```bash
+cd /var/www/hotel/frontend
+nano .env.production
+```
+
+**Update to use HTTPS:**
+```env
+VITE_API_URL=https://your-domain.com
+VITE_API_BASE_URL=https://your-domain.com/api
+```
+
+**Rebuild and Restart:**
+
+```bash
+# Clear Laravel cache
+cd /var/www/hotel/backend
+php artisan config:clear
+php artisan cache:clear
+php artisan config:cache
+
+# Rebuild frontend
+cd /var/www/hotel/frontend
+npm run build
+
+# Test nginx config
+sudo nginx -t
+
+# Restart services
+sudo systemctl restart nginx
+sudo systemctl restart php8.2-fpm
+```
+
+**Setup Auto-Renewal:**
+
+```bash
+# Certbot automatically adds a cron job, but verify:
+sudo systemctl status certbot.timer
+
+# Or manually test renewal:
+sudo certbot renew --dry-run
+
+# Certificates will auto-renew before expiry
+```
+
+**Verify SSL Installation:**
+
+```bash
+# Check certificate expiry
+sudo certbot certificates
+
+# Test HTTPS access
+curl -I https://your-domain.com
+
+# Should return 200 OK with SSL headers
+```
+
+**Troubleshooting SSL:**
+
+```bash
+# If certificate fails to renew:
+sudo certbot renew --force-renewal
+
+# Check certbot logs:
+sudo tail -f /var/log/letsencrypt/letsencrypt.log
+
+# Verify firewall allows HTTPS:
+sudo ufw status
+sudo ufw allow 'Nginx Full'
+
+# Test SSL configuration:
+openssl s_client -connect your-domain.com:443 -servername your-domain.com
 ```
 
 ### Step 9: Setup Process Manager (Optional - for Laravel Queue)
