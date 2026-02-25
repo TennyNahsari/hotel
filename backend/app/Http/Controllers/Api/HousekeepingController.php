@@ -15,22 +15,22 @@ class HousekeepingController extends Controller
         $query = HousekeepingTask::with(['room.roomType', 'assignedUser']);
 
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         // Filter by priority
-        if ($request->has('priority')) {
+        if ($request->filled('priority')) {
             $query->where('priority', $request->priority);
         }
 
         // Filter by room
-        if ($request->has('room_id')) {
+        if ($request->filled('room_id')) {
             $query->where('room_id', $request->room_id);
         }
 
         // Filter by assigned user
-        if ($request->has('assigned_to')) {
+        if ($request->filled('assigned_to')) {
             $query->where('assigned_to', $request->assigned_to);
         }
 

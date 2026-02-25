@@ -16,22 +16,22 @@ class PaymentController extends Controller
         $query = Payment::with(['booking.guest', 'booking.room', 'processedBy']);
 
         // Filter by booking
-        if ($request->has('booking_id')) {
+        if ($request->filled('booking_id')) {
             $query->where('booking_id', $request->booking_id);
         }
 
         // Filter by payment type
-        if ($request->has('payment_type')) {
+        if ($request->filled('payment_type')) {
             $query->where('payment_type', $request->payment_type);
         }
 
         // Filter by payment method
-        if ($request->has('payment_method')) {
+        if ($request->filled('payment_method')) {
             $query->where('payment_method', $request->payment_method);
         }
 
         // Search by payment number
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $query->where('payment_number', 'like', '%' . $request->search . '%');
         }
 
