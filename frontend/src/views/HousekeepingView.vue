@@ -159,6 +159,29 @@
             </div>
           </div>
 
+          <!-- Pagination (Mobile) -->
+          <div v-if="pagination.last_page > 1" class="md:hidden mt-4 px-4 pb-4">
+            <div class="text-sm text-gray-700 mb-2 text-center">
+              Page {{ pagination.current_page }} of {{ pagination.last_page }}
+            </div>
+            <div class="flex gap-2 justify-center">
+              <button
+                @click="changePage(pagination.current_page - 1)"
+                :disabled="pagination.current_page === 1"
+                class="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                @click="changePage(pagination.current_page + 1)"
+                :disabled="pagination.current_page === pagination.last_page"
+                class="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
           <!-- Desktop Table View -->
           <div class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -244,6 +267,31 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- Pagination (Desktop) -->
+          <div v-if="pagination.last_page > 1" class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-700">
+              Showing {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to 
+              {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }} of 
+              {{ pagination.total }} tasks
+            </div>
+            <div class="flex gap-2">
+              <button
+                @click="changePage(pagination.current_page - 1)"
+                :disabled="pagination.current_page === 1"
+                class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                @click="changePage(pagination.current_page + 1)"
+                :disabled="pagination.current_page === pagination.last_page"
+                class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
           </div>
         </div>
       </div>
@@ -441,6 +489,12 @@ const halls = ref([])
 const users = ref([])
 const statistics = ref({})
 const loading = ref(false)
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0
+})
 const showModal = ref(false)
 const showDeleteConfirm = ref(false)
 const isEditing = ref(false)
@@ -483,19 +537,39 @@ onMounted(async () => {
   loadStatistics()
 })
 
-async function loadTasks() {
+async function loadTasks(page = 1) {
   loading.value = true
   try {
-    const params = {}
+    const params = { page }
     if (filters.value.status) params.status = filters.value.status
     if (filters.value.priority) params.priority = filters.value.priority
     if (filters.value.assigned_to) params.assigned_to = filters.value.assigned_to
 
-    tasks.value = await housekeepingApi.getTasks(params)
+    const response = await housekeepingApi.getTasks(params)
+    
+    // Handle paginated response
+    if (response.data && Array.isArray(response.data)) {
+      tasks.value = response.data
+      pagination.value = {
+        current_page: response.current_page,
+        last_page: response.last_page,
+        per_page: response.per_page,
+        total: response.total
+      }
+    } else {
+      // Fallback for non-paginated response
+      tasks.value = response
+    }
   } catch (err) {
     console.error('Failed to load tasks:', err)
   } finally {
     loading.value = false
+  }
+}
+
+function changePage(page) {
+  if (page >= 1 && page <= pagination.value.last_page) {
+    loadTasks(page)
   }
 }
 

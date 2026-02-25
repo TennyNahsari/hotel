@@ -36,7 +36,7 @@ class HousekeepingController extends Controller
 
         $tasks = $query->orderBy('priority', 'asc')
                        ->orderBy('created_at', 'desc')
-                       ->get();
+                       ->paginate(10);
 
         return response()->json($tasks);
     }
