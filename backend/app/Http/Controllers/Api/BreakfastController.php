@@ -17,8 +17,8 @@ class BreakfastController extends Controller
         $today = Carbon::today();
         
         $query = Booking::with(['guest', 'room.roomType'])
-            ->where('check_in', '<=', $today)
-            ->where('check_out', '>', $today)
+            ->where('check_in_date', '<=', $today)
+            ->where('check_out_date', '>', $today)
             ->whereIn('status', ['confirmed', 'checked_in']);
 
         // Filter by breakfast status
@@ -73,13 +73,13 @@ class BreakfastController extends Controller
     {
         $today = Carbon::today();
 
-        $total = Booking::where('check_in', '<=', $today)
-            ->where('check_out', '>', $today)
+        $total = Booking::where('check_in_date', '<=', $today)
+            ->where('check_out_date', '>', $today)
             ->whereIn('status', ['confirmed', 'checked_in'])
             ->count();
 
-        $taken = Booking::where('check_in', '<=', $today)
-            ->where('check_out', '>', $today)
+        $taken = Booking::where('check_in_date', '<=', $today)
+            ->where('check_out_date', '>', $today)
             ->whereIn('status', ['confirmed', 'checked_in'])
             ->where('breakfast_status', 'taken')
             ->where('breakfast_date', $today)
