@@ -14,20 +14,29 @@ class HallController extends Controller
      */
     public function index(Request $request)
     {
+        // Simple test: return all halls without pagination
+        $allHalls = Hall::all();
+        if ($allHalls->isEmpty()) {
+            return response()->json([
+                'message' => 'No halls found in database',
+                'total_count' => Hall::count()
+            ]);
+        }
+
         $query = Hall::query();
 
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         // Filter by hall type
-        if ($request->has('hall_type')) {
+        if ($request->filled('hall_type')) {
             $query->where('hall_type', $request->hall_type);
         }
 
         // Search by name
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $query->where('name', 'like', '%' . $request->search . '%');
         }
 
