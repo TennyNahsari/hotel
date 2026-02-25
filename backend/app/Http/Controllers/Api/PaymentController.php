@@ -13,11 +13,16 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payment::with(['booking.guest', 'booking.room', 'processedBy']);
+        $query = Payment::with(['booking.guest', 'booking.room', 'hallBooking.hall', 'processedBy']);
 
         // Filter by booking
         if ($request->filled('booking_id')) {
             $query->where('booking_id', $request->booking_id);
+        }
+
+        // Filter by hall booking
+        if ($request->filled('hall_booking_id')) {
+            $query->where('hall_booking_id', $request->hall_booking_id);
         }
 
         // Filter by payment type
@@ -43,7 +48,8 @@ class PaymentController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'booking_id' => 'required|exists:bookings,id',
+            'booking_id' => 'nullable|exists:bookings,id',
+            'hall_booking_id' => 'nullable|exists:hall_bookings,id',
             'payment_type' => 'required|in:deposit,partial,full,refund,extra_charge',
             'payment_method' => 'required|in:cash,transfer,qris,card,other',
             'amount' => 'required|numeric|min:0',
@@ -51,17 +57,41 @@ class PaymentController extends Controller
             'notes' => 'nullable|string',
         ]);
 
+        // Validate that at least one booking type is provided
+        if (empty($validated['booking_id']) && empty($validated['hall_booking_id'])) {
+            return response()->json([
+                'message' => 'Either booking_id or hall_booking_id is required'
+            ], 422);
+        }
+
+        // Validate that only one booking type is provided
+        if (!empty($validated['booking_id']) && !empty($validated['hall_booking_id'])) {
+            return response()->json([
+                'message' => 'Cannot specify both booking_id and hall_booking_id'
+            ], 422);
+        }
+
         $validated['processed_by'] = auth()->id();
 
         $payment = Payment::create($validated);
-        $payment->load(['booking.guest', 'booking.room', 'processedBy']);
+        
+        // Load relationships based on booking type
+        if ($payment->booking_id) {
+            $payment->load(['booking.guest', 'booking.room', 'processedBy']);
+        } else {
+            $payment->load(['hallBooking.hall', 'processedBy']);
+        }
 
         return response()->json($payment, 201);
     }
 
     public function show(Payment $payment)
     {
-        $payment->load(['booking.guest', 'booking.room.roomType', 'processedBy']);
+        if ($payment->booking_id) {
+            $payment->load(['booking.guest', 'booking.room.roomType', 'processedBy']);
+        } else {
+            $payment->load(['hallBooking.hall', 'processedBy']);
+        }
         return response()->json($payment);
     }
 

@@ -713,6 +713,8 @@ async function savePayment() {
       } else {
         payload.booking_id = null
       }
+      // Remove booking_type from payload as it's not a backend field
+      delete payload.booking_type
       await paymentApi.createPayment(payload)
     }
     
