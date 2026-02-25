@@ -7,6 +7,7 @@ use Illuminate\Database\Seeder;
 use App\Models\HousekeepingTask;
 use App\Models\User;
 use App\Models\Room;
+use App\Models\Hall;
 use Carbon\Carbon;
 
 class HousekeepingSeeder extends Seeder
@@ -18,6 +19,7 @@ class HousekeepingSeeder extends Seeder
     {
         $housekeeping = User::where('email', 'housekeeping@hotel.com')->first();
 
+        // ROOM CLEANING TASKS
         // Task 1 - Room 102 needs cleaning (checked out)
         HousekeepingTask::create([
             'room_id' => 2, // Room 102
@@ -86,5 +88,59 @@ class HousekeepingSeeder extends Seeder
             'status' => 'pending',
             'notes' => 'Spill reported, needs immediate attention',
         ]);
+
+        // HALL CLEANING TASKS
+        $halls = Hall::all();
+        
+        if ($halls->isNotEmpty()) {
+            // Task 7 - Ballroom A post-event cleaning
+            $ballroom = $halls->where('name', 'Ballroom A')->first();
+            if ($ballroom) {
+                HousekeepingTask::create([
+                    'hall_id' => $ballroom->id,
+                    'room_id' => null,
+                    'assigned_to' => $housekeeping->id,
+                    'task_type' => 'hall_cleaning',
+                    'priority' => 'high',
+                    'status' => 'pending',
+                    'notes' => 'Post-wedding event cleanup - remove decorations, clean floors, arrange furniture',
+                ]);
+            }
+
+            // Task 8 - Conference Hall cleaning in progress
+            $conference = $halls->where('name', 'Conference Hall')->first();
+            if ($conference) {
+                HousekeepingTask::create([
+                    'hall_id' => $conference->id,
+                    'room_id' => null,
+                    'assigned_to' => $housekeeping->id,
+                    'task_type' => 'hall_cleaning',
+                    'priority' => 'normal',
+                    'status' => 'in_progress',
+                    'started_at' => Carbon::now()->subMinutes(20),
+                    'notes' => 'Preparing for afternoon seminar',
+                ]);
+            }
+
+            // Task 9 - Function Room completed cleaning
+            $function = $halls->where('name', 'Function Room')->first();
+            if ($function) {
+                HousekeepingTask::create([
+                    'hall_id' => $function->id,
+                    'room_id' => null,
+                    'assigned_to' => $housekeeping->id,
+                    'task_type' => 'hall_cleaning',
+                    'priority' => 'normal',
+                    'status' => 'completed',
+                    'started_at' => Carbon::now()->subHours(3),
+                    'completed_at' => Carbon::now()->subHours(2),
+                    'notes' => 'Post-birthday party cleanup completed',
+                ]);
+            }
+
+            $this->command->info('✅ Hall cleaning tasks created successfully!');
+        } else {
+            $this->command->warn('⚠️  No halls found. Skipping hall cleaning tasks.');
+        }
     }
 }
