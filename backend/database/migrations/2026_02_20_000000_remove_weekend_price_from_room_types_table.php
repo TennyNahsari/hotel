@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('room_types', function (Blueprint $table) {
-            $table->dropColumn('weekend_price');
+            // Check if column exists before dropping
+            if (Schema::hasColumn('room_types', 'weekend_price')) {
+                $table->dropColumn('weekend_price');
+            }
         });
     }
 
