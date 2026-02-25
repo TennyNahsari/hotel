@@ -29,6 +29,18 @@ class PaymentSeeder extends Seeder
             return;
         }
 
+        // Get last payment number to continue sequence
+        $lastPayment = Payment::whereDate('created_at', now()->toDateString())
+            ->orderBy('payment_number', 'desc')
+            ->first();
+        
+        $counter = 1;
+        if ($lastPayment) {
+            // Extract counter from payment number (PAY-YYYYMMDD-XXXX)
+            preg_match('/PAY-\d{8}-(\d{4})/', $lastPayment->payment_number, $matches);
+            $counter = isset($matches[1]) ? intval($matches[1]) + 1 : 1;
+        }
+
         $payments = [];
 
         // ROOM BOOKING PAYMENTS
@@ -41,7 +53,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => $booking->id,
                     'hall_booking_id' => null,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'full',
                     'payment_method' => 'transfer',
                     'amount' => $totalAmount,
@@ -59,7 +71,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => $booking->id,
                     'hall_booking_id' => null,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'deposit',
                     'payment_method' => 'cash',
                     'amount' => $deposit,
@@ -73,7 +85,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => $booking->id,
                     'hall_booking_id' => null,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'partial',
                     'payment_method' => 'qris',
                     'amount' => $partial,
@@ -88,7 +100,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => $booking->id,
                     'hall_booking_id' => null,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'full',
                     'payment_method' => 'card',
                     'amount' => $totalAmount,
@@ -102,7 +114,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => $booking->id,
                     'hall_booking_id' => null,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'extra_charge',
                     'payment_method' => 'cash',
                     'amount' => 150000,
@@ -117,7 +129,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => $booking->id,
                     'hall_booking_id' => null,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'full',
                     'payment_method' => 'cash',
                     'amount' => $totalAmount,
@@ -139,7 +151,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => null,
                     'hall_booking_id' => $hallBooking->id,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'full',
                     'payment_method' => 'transfer',
                     'amount' => $totalAmount,
@@ -155,7 +167,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => null,
                     'hall_booking_id' => $hallBooking->id,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'deposit',
                     'payment_method' => 'transfer',
                     'amount' => $deposit,
@@ -171,7 +183,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => null,
                     'hall_booking_id' => $hallBooking->id,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'partial',
                     'payment_method' => 'card',
                     'amount' => $partial,
@@ -185,7 +197,7 @@ class PaymentSeeder extends Seeder
                 $payments[] = [
                     'booking_id' => null,
                     'hall_booking_id' => $hallBooking->id,
-                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad(count($payments) + 1, 4, '0', STR_PAD_LEFT),
+                    'payment_number' => 'PAY-' . now()->format('Ymd') . '-' . str_pad($counter++, 4, '0', STR_PAD_LEFT),
                     'payment_type' => 'extra_charge',
                     'payment_method' => 'cash',
                     'amount' => 500000,
