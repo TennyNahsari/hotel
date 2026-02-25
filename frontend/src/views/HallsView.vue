@@ -437,6 +437,7 @@ const fetchHalls = async (page = 1) => {
       ...filters.value
     }
     const response = await hallApi.getHalls(params)
+    console.log('Halls API Response:', response)
     halls.value = response.data
     pagination.value = {
       current_page: response.current_page,
