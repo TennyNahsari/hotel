@@ -40,7 +40,7 @@ class PaymentController extends Controller
             $query->where('payment_number', 'like', '%' . $request->search . '%');
         }
 
-        $payments = $query->orderBy('created_at', 'desc')->get();
+        $payments = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return response()->json($payments);
     }

@@ -107,8 +107,8 @@
                 <div class="flex justify-between items-start">
                   <div>
                     <div class="font-medium text-gray-900">{{ payment.payment_number }}</div>
-                    <div class="text-sm text-gray-600">{{ payment.booking?.booking_number }}</div>
-                    <div class="text-sm text-gray-600">{{ payment.booking?.guest?.name }}</div>
+                    <div class="text-sm text-gray-600">{{ payment.booking?.booking_number || payment.hall_booking?.booking_number }}</div>
+                    <div class="text-sm text-gray-600">{{ payment.booking?.guest?.name || payment.hall_booking?.customer_name }}</div>
                   </div>
                   <div class="text-right">
                     <div class="font-semibold text-gray-900">{{ formatCurrency(payment.amount) }}</div>
@@ -149,6 +149,29 @@
             </div>
           </div>
 
+          <!-- Pagination (Mobile) -->
+          <div v-if="pagination.last_page > 1" class="md:hidden mt-4 px-4 pb-4">
+            <div class="text-sm text-gray-700 mb-2 text-center">
+              Page {{ pagination.current_page }} of {{ pagination.last_page }}
+            </div>
+            <div class="flex gap-2 justify-center">
+              <button
+                @click="changePage(pagination.current_page - 1)"
+                :disabled="pagination.current_page === 1"
+                class="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                @click="changePage(pagination.current_page + 1)"
+                :disabled="pagination.current_page === pagination.last_page"
+                class="px-4 py-2 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+
           <!-- Desktop Table View -->
           <div class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
@@ -181,8 +204,10 @@
                   <div class="text-sm text-gray-500">{{ payment.reference_number || '-' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ payment.booking?.guest?.name }}</div>
-                  <div class="text-sm text-gray-500">Room {{ payment.booking?.room?.room_number }}</div>
+                  <div v-if="payment.booking_id" class="text-sm font-medium text-gray-900">{{ payment.booking?.guest?.name }}</div>
+                  <div v-else class="text-sm font-medium text-gray-900">{{ payment.hall_booking?.customer_name }}</div>
+                  <div v-if="payment.booking_id" class="text-sm text-gray-500">Room {{ payment.booking?.room?.room_number }}</div>
+                  <div v-else class="text-sm text-gray-500">Hall {{ payment.hall_booking?.hall?.name }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div>
@@ -223,6 +248,31 @@
               </tr>
             </tbody>
           </table>
+
+          <!-- Pagination -->
+          <div v-if="pagination.last_page > 1" class="mt-4 flex justify-between items-center">
+            <div class="text-sm text-gray-700">
+              Showing {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to 
+              {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }} of 
+              {{ pagination.total }} payments
+            </div>
+            <div class="flex gap-2">
+              <button
+                @click="changePage(pagination.current_page - 1)"
+                :disabled="pagination.current_page === 1"
+                class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Previous
+              </button>
+              <button
+                @click="changePage(pagination.current_page + 1)"
+                :disabled="pagination.current_page === pagination.last_page"
+                class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Next
+              </button>
+            </div>
+          </div>
           </div>
         </div>
       </div>
@@ -445,9 +495,16 @@
             </div>
             <div>
               <h3 class="font-bold text-gray-900 mb-2">To:</h3>
-              <p class="text-gray-700 font-semibold">{{ selectedPayment.booking?.guest?.name }}</p>
-              <p class="text-gray-600">{{ selectedPayment.booking?.guest?.email }}</p>
-              <p class="text-gray-600">{{ selectedPayment.booking?.guest?.phone }}</p>
+              <template v-if="selectedPayment.booking_id">
+                <p class="text-gray-700 font-semibold">{{ selectedPayment.booking?.guest?.name }}</p>
+                <p class="text-gray-600">{{ selectedPayment.booking?.guest?.email }}</p>
+                <p class="text-gray-600">{{ selectedPayment.booking?.guest?.phone }}</p>
+              </template>
+              <template v-else>
+                <p class="text-gray-700 font-semibold">{{ selectedPayment.hall_booking?.customer_name }}</p>
+                <p class="text-gray-600">{{ selectedPayment.hall_booking?.customer_email }}</p>
+                <p class="text-gray-600">{{ selectedPayment.hall_booking?.customer_phone }}</p>
+              </template>
             </div>
           </div>
 
@@ -461,13 +518,21 @@
               <p class="text-sm text-gray-600">Payment Date</p>
               <p class="font-bold text-gray-900">{{ formatDate(selectedPayment.created_at) }}</p>
             </div>
-            <div>
+            <div v-if="selectedPayment.booking_id">
               <p class="text-sm text-gray-600">Room Number</p>
               <p class="font-bold text-gray-900">{{ selectedPayment.booking?.room?.room_number }}</p>
             </div>
-            <div>
+            <div v-else>
+              <p class="text-sm text-gray-600">Hall Name</p>
+              <p class="font-bold text-gray-900">{{ selectedPayment.hall_booking?.hall?.name }}</p>
+            </div>
+            <div v-if="selectedPayment.booking_id">
               <p class="text-sm text-gray-600">Room Type</p>
               <p class="font-bold text-gray-900">{{ selectedPayment.booking?.room?.room_type?.name }}</p>
+            </div>
+            <div v-else>
+              <p class="text-sm text-gray-600">Event Type</p>
+              <p class="font-bold text-gray-900">{{ selectedPayment.hall_booking?.event_type }}</p>
             </div>
           </div>
 
@@ -526,6 +591,12 @@ const hallBookings = ref([])
 const filteredBookings = ref([])
 const selectedPayment = ref(null)
 const loading = ref(false)
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 10,
+  total: 0
+})
 const showModal = ref(false)
 const showDeleteConfirm = ref(false)
 const showBookingDropdown = ref(false)
@@ -572,19 +643,39 @@ onMounted(async () => {
   loadHallBookings()
 })
 
-async function loadPayments() {
+async function loadPayments(page = 1) {
   loading.value = true
   try {
-    const params = {}
+    const params = { page }
     if (filters.value.payment_type) params.payment_type = filters.value.payment_type
     if (filters.value.payment_method) params.payment_method = filters.value.payment_method
     if (filters.value.search) params.search = filters.value.search
 
-    payments.value = await paymentApi.getPayments(params)
+    const response = await paymentApi.getPayments(params)
+    
+    // Handle paginated response
+    if (response.data && Array.isArray(response.data)) {
+      payments.value = response.data
+      pagination.value = {
+        current_page: response.current_page,
+        last_page: response.last_page,
+        per_page: response.per_page,
+        total: response.total
+      }
+    } else {
+      // Fallback for non-paginated response
+      payments.value = response
+    }
   } catch (err) {
     console.error('Failed to load payments:', err)
   } finally {
     loading.value = false
+  }
+}
+
+function changePage(page) {
+  if (page >= 1 && page <= pagination.value.last_page) {
+    loadPayments(page)
   }
 }
 
