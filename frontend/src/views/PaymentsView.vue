@@ -241,7 +241,39 @@
 
         <form @submit.prevent="savePayment" class="space-y-4">
           <div v-if="!isEditing">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Booking *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Booking Type *</label>
+            <div class="grid grid-cols-2 gap-2 mb-4">
+              <button
+                type="button"
+                @click="formData.booking_type = 'room'; switchBookingType()"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors',
+                  formData.booking_type === 'room'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ]"
+              >
+                Room Booking
+              </button>
+              <button
+                type="button"
+                @click="formData.booking_type = 'hall'; switchBookingType()"
+                :class="[
+                  'px-4 py-2 rounded-lg font-medium transition-colors',
+                  formData.booking_type === 'hall'
+                    ? 'bg-indigo-600 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                ]"
+              >
+                Hall Booking
+              </button>
+            </div>
+          </div>
+
+          <div v-if="!isEditing">
+            <label class="block text-sm font-medium text-gray-700 mb-1">
+              {{ formData.booking_type === 'room' ? 'Room Booking *' : 'Hall Booking *' }}
+            </label>
             <div class="relative">
               <input
                 v-model="bookingSearch"
@@ -263,9 +295,13 @@
                   class="px-3 py-2 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0"
                 >
                   <div class="font-medium text-gray-900">{{ booking.booking_number }}</div>
-                  <div class="text-sm text-gray-600">
+                  <div v-if="formData.booking_type === 'room'" class="text-sm text-gray-600">
                     {{ booking.guest?.name }} - Room {{ booking.room?.room_number }}
                     <span class="text-xs text-gray-500">({{ getStatusLabel(booking.status) }})</span>
+                  </div>
+                  <div v-else class="text-sm text-gray-600">
+                    {{ booking.customer_name }} - {{ booking.hall?.name }}
+                    <span class="text-xs text-gray-500">({{ booking.event_type }})</span>
                   </div>
                 </div>
               </div>
@@ -481,11 +517,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import LayoutMain from '../components/LayoutMain.vue'
-import { paymentApi, bookingApi } from '../api'
+import { paymentApi, bookingApi, hallBookingApi } from '../api'
 import axios from 'axios'
 
 const payments = ref([])
 const bookings = ref([])
+const hallBookings = ref([])
 const filteredBookings = ref([])
 const selectedPayment = ref(null)
 const loading = ref(false)
@@ -510,7 +547,9 @@ const filters = ref({
 })
 
 const formData = ref({
+  booking_type: 'room',
   booking_id: '',
+  hall_booking_id: '',
   payment_type: 'full',
   payment_method: 'cash',
   amount: 0,
@@ -530,6 +569,7 @@ onMounted(async () => {
   
   loadPayments()
   loadBookings()
+  loadHallBookings()
 })
 
 async function loadPayments() {
@@ -553,32 +593,72 @@ async function loadBookings() {
     // Load all bookings for search
     const allBookings = await bookingApi.getBookings()
     bookings.value = allBookings
-    filteredBookings.value = allBookings
+    if (formData.value.booking_type === 'room') {
+      filteredBookings.value = allBookings
+    }
   } catch (err) {
     console.error('Failed to load bookings:', err)
   }
 }
 
-function filterBookings() {
-  const search = bookingSearch.value.toLowerCase()
-  if (!search) {
+async function loadHallBookings() {
+  try {
+    const allHallBookings = await hallBookingApi.getHallBookings()
+    hallBookings.value = allHallBookings
+    if (formData.value.booking_type === 'hall') {
+      filteredBookings.value = allHallBookings
+    }
+  } catch (err) {
+    console.error('Failed to load hall bookings:', err)
+  }
+}
+
+function switchBookingType() {
+  // Clear selection when switching
+  formData.value.booking_id = ''
+  formData.value.hall_booking_id = ''
+  bookingSearch.value = ''
+  
+  // Update filtered bookings based on type
+  if (formData.value.booking_type === 'room') {
     filteredBookings.value = bookings.value
   } else {
-    filteredBookings.value = bookings.value.filter(booking => {
+    filteredBookings.value = hallBookings.value
+  }
+}
+
+function filterBookings() {
+  const search = bookingSearch.value.toLowerCase()
+  const sourceBookings = formData.value.booking_type === 'room' ? bookings.value : hallBookings.value
+  
+  if (!search) {
+    filteredBookings.value = sourceBookings
+  } else {
+    filteredBookings.value = sourceBookings.filter(booking => {
       const bookingNumber = booking.booking_number?.toLowerCase() || ''
-      const guestName = booking.guest?.name?.toLowerCase() || ''
-      const roomNumber = booking.room?.room_number?.toString() || ''
+      const guestName = (booking.guest?.name || booking.customer_name)?.toLowerCase() || ''
+      const location = formData.value.booking_type === 'room' 
+        ? booking.room?.room_number?.toString() || ''
+        : booking.hall?.name?.toLowerCase() || ''
       return bookingNumber.includes(search) || 
              guestName.includes(search) || 
-             roomNumber.includes(search)
+             location.includes(search)
     })
   }
   showBookingDropdown.value = true
 }
 
 function selectBooking(booking) {
-  formData.value.booking_id = booking.id
-  bookingSearch.value = `${booking.booking_number} - ${booking.guest?.name}`
+  if (formData.value.booking_type === 'room') {
+    formData.value.booking_id = booking.id
+    formData.value.hall_booking_id = ''
+    bookingSearch.value = `${booking.booking_number} - ${booking.guest?.name}`
+  } else {
+    formData.value.hall_booking_id = booking.id
+    formData.value.booking_id = ''
+    const guestName = booking.customer_name || booking.guest?.name || 'N/A'
+    bookingSearch.value = `${booking.booking_number} - ${guestName}`
+  }
   showBookingDropdown.value = false
 }
 
@@ -626,7 +706,14 @@ async function savePayment() {
     if (isEditing.value) {
       await paymentApi.updatePayment(formData.value.id, formData.value)
     } else {
-      await paymentApi.createPayment(formData.value)
+      // Create payment payload based on booking type
+      const payload = { ...formData.value }
+      if (formData.value.booking_type === 'room') {
+        payload.hall_booking_id = null
+      } else {
+        payload.booking_id = null
+      }
+      await paymentApi.createPayment(payload)
     }
     
     closeModal()
