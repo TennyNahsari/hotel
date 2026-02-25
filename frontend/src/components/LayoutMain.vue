@@ -31,7 +31,8 @@
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 px-4 py-6 space-y-2">
+        <nav class="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
+          <!-- Dashboard -->
           <router-link
             to="/"
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
@@ -43,39 +44,7 @@
             Dashboard
           </router-link>
 
-          <router-link
-            to="/rooms"
-            class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            active-class="bg-blue-50 text-blue-600 font-medium"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            Rooms
-          </router-link>
-
-          <router-link
-            to="/room-types"
-            class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            active-class="bg-blue-50 text-blue-600 font-medium"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-            </svg>
-            Room Types
-          </router-link>
-
-          <router-link
-            to="/bookings"
-            class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            active-class="bg-blue-50 text-blue-600 font-medium"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Bookings
-          </router-link>
-
+          <!-- Guests -->
           <router-link
             to="/guests"
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
@@ -87,6 +56,116 @@
             Guests
           </router-link>
 
+          <!-- Room Management -->
+          <div>
+            <button
+              @click="roomMenuOpen = !roomMenuOpen"
+              class="w-full flex items-center justify-between px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              :class="{ 'bg-blue-50 text-blue-600': isRoomMenuActive }"
+            >
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Room Management
+              </div>
+              <svg
+                :class="{ 'transform rotate-180': roomMenuOpen }"
+                class="w-4 h-4 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <div v-show="roomMenuOpen" class="ml-4 mt-1 space-y-1">
+              <router-link
+                to="/rooms"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-100 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Rooms
+              </router-link>
+              
+              <router-link
+                to="/room-types"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-100 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Room Types
+              </router-link>
+
+              <router-link
+                to="/bookings"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-100 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Room Bookings
+              </router-link>
+            </div>
+          </div>
+
+          <!-- Hall Management -->
+          <div>
+            <button
+              @click="hallMenuOpen = !hallMenuOpen"
+              class="w-full flex items-center justify-between px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              :class="{ 'bg-blue-50 text-blue-600': isHallMenuActive }"
+            >
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+                Hall Management
+              </div>
+              <svg
+                :class="{ 'transform rotate-180': hallMenuOpen }"
+                class="w-4 h-4 transition-transform"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <div v-show="hallMenuOpen" class="ml-4 mt-1 space-y-1">
+              <router-link
+                to="/halls"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-100 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Halls
+              </router-link>
+              
+              <router-link
+                to="/hall-bookings"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-100 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Hall Bookings
+              </router-link>
+            </div>
+          </div>
+
+          <!-- Housekeeping -->
           <router-link
             to="/housekeeping"
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
@@ -98,6 +177,7 @@
             Housekeeping
           </router-link>
 
+          <!-- Payments -->
           <router-link
             to="/payments"
             class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
@@ -107,28 +187,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             Payments
-          </router-link>
-
-          <router-link
-            to="/halls"
-            class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            active-class="bg-blue-50 text-blue-600 font-medium"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-            </svg>
-            Halls
-          </router-link>
-
-          <router-link
-            to="/hall-bookings"
-            class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-            active-class="bg-blue-50 text-blue-600 font-medium"
-          >
-            <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-            Hall Bookings
           </router-link>
         </nav>
 
@@ -172,14 +230,29 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
+const route = useRoute()
 const authStore = useAuthStore()
 
+const sidebarOpen = ref(false)
+const roomMenuOpen = ref(true) // Default open
+const hallMenuOpen = ref(true) // Default open
+
 const user = computed(() => authStore.user)
+
+// Check if Room Management menu is active
+const isRoomMenuActive = computed(() => {
+  return route.path === '/rooms' || route.path === '/room-types' || route.path === '/bookings'
+})
+
+// Check if Hall Management menu is active
+const isHallMenuActive = computed(() => {
+  return route.path === '/halls' || route.path === '/hall-bookings'
+})
 
 const userInitials = computed(() => {
   if (!user.value?.name) return '?'
