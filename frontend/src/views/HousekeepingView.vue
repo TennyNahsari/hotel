@@ -316,8 +316,8 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select hall</option>
-              <option v-for="hall in halls" :key="hall.id" :value="hall.id">
-                {{ hall.name }} - {{ hall.hall_type }} (Floor {{ hall.floor }})
+              <option v-for="hall in (halls || [])" :key="hall.id" :value="hall.id">
+                {{ hall?.name }} - {{ hall?.hall_type }} (Floor {{ hall?.floor }})
               </option>
             </select>
           </div>
@@ -510,8 +510,10 @@ async function loadRooms() {
 async function loadHalls() {
   try {
     halls.value = await hallApi.getHalls()
+    if (!halls.value) halls.value = []
   } catch (err) {
     console.error('Failed to load halls:', err)
+    halls.value = []
   }
 }
 
