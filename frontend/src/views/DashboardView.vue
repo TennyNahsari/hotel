@@ -284,7 +284,7 @@ const loading = ref(false)
 onMounted(async () => {
   // Ensure CSRF cookie
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
     await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
       withCredentials: true
     })

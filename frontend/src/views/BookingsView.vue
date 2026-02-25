@@ -528,7 +528,7 @@ const today = computed(() => {
 onMounted(async () => {
   // Ensure CSRF cookie
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
     await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
       withCredentials: true
     })
@@ -588,7 +588,7 @@ async function exportBookings() {
     
     // Build query string
     const queryString = new URLSearchParams(params).toString()
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://hotel.tazkia.web.id/api'
     const url = `${apiBaseUrl}/bookings/export${queryString ? '?' + queryString : ''}`
     
     // Download the file

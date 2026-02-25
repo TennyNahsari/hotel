@@ -520,7 +520,7 @@ const formData = ref({
 
 onMounted(async () => {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
     await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
       withCredentials: true
     })
@@ -662,7 +662,7 @@ async function handleDelete() {
 async function exportPayments() {
   exporting.value = true
   try {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://hotel.tazkia.web.id/api'
     
     // Build query parameters
     const params = new URLSearchParams()
