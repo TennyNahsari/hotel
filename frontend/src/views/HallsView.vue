@@ -364,7 +364,15 @@
           <div v-if="viewData.facilities">
             <p class="text-sm text-gray-500 mb-2">Facilities</p>
             <div class="bg-gray-50 p-4 rounded-lg">
-              <pre class="text-sm text-gray-700 whitespace-pre-wrap">{{ JSON.stringify(viewData.facilities, null, 2) }}</pre>
+              <div v-if="parsedFacilities" class="space-y-3">
+                <div v-for="(items, category) in parsedFacilities" :key="category">
+                  <p class="font-semibold text-gray-700 mb-1 capitalize">{{ category.replace('_', ' ') }}</p>
+                  <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                    <li v-for="(item, idx) in items" :key="idx">{{ item }}</li>
+                  </ul>
+                </div>
+              </div>
+              <p v-else class="text-sm text-gray-500">No facilities listed</p>
             </div>
           </div>
         </div>
@@ -383,7 +391,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { hallApi } from '@/api'
 import LayoutMain from '@/components/LayoutMain.vue'
@@ -426,6 +434,22 @@ const formData = ref({
 
 const viewData = ref({})
 const editingId = ref(null)
+
+// Parse facilities JSON for display
+const parsedFacilities = computed(() => {
+  if (!viewData.value.facilities) return null
+  try {
+    // If it's already an object, return it
+    if (typeof viewData.value.facilities === 'object') {
+      return viewData.value.facilities
+    }
+    // If it's a string, parse it
+    return JSON.parse(viewData.value.facilities)
+  } catch (e) {
+    console.error('Error parsing facilities:', e)
+    return null
+  }
+})
 
 // Fetch halls
 const fetchHalls = async (page = 1) => {
