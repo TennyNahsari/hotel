@@ -12,7 +12,7 @@ class HousekeepingController extends Controller
 {
     public function index(Request $request)
     {
-        $query = HousekeepingTask::with(['room.roomType', 'assignedUser']);
+        $query = HousekeepingTask::with(['room.roomType', 'hall', 'assignedUser']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -44,15 +44,31 @@ class HousekeepingController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'room_id' => 'required|exists:rooms,id',
-            'task_type' => 'required|in:cleaning,maintenance,inspection,deep_clean',
+            'room_id' => 'nullable|exists:rooms,id',
+            'hall_id' => 'nullable|exists:halls,id',
+            'task_type' => 'required|in:cleaning,maintenance,inspection,deep_clean,hall_cleaning',
             'priority' => 'required|in:low,normal,high,urgent',
             'assigned_to' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
         ]);
 
+        // Ensure either room_id or hall_id is provided
+        if (empty($validated['room_id']) && empty($validated['hall_id'])) {
+            return response()->json([
+                'message' => 'Either room_id or hall_id must be provided'
+            ], 422);
+        }
+
+        // Ensure only one is provided
+        if (!empty($validated['room_id']) && !empty($validated['hall_id'])) {
+            return response()->json([
+                'message' => 'Cannot assign task to both room and hall'
+            ], 422);
+        }
+
         $task = HousekeepingTask::create([
-            'room_id' => $validated['room_id'],
+            'room_id' => $validated['room_id'] ?? null,
+            'hall_id' => $validated['hall_id'] ?? null,
             'task_type' => $validated['task_type'],
             'priority' => $validated['priority'],
             'status' => 'pending',
@@ -62,21 +78,21 @@ class HousekeepingController extends Controller
 
         return response()->json([
             'message' => 'Housekeeping task created successfully',
-            'data' => $task->load(['room.roomType', 'assignedUser'])
+            'data' => $task->load(['room.roomType', 'hall', 'assignedUser'])
         ], 201);
     }
 
     public function show(HousekeepingTask $housekeeping)
     {
         return response()->json(
-            $housekeeping->load(['room.roomType', 'assignedUser'])
+            $housekeeping->load(['room.roomType', 'hall', 'assignedUser'])
         );
     }
 
     public function update(Request $request, HousekeepingTask $housekeeping)
     {
         $validated = $request->validate([
-            'task_type' => 'sometimes|in:cleaning,maintenance,inspection,deep_clean',
+            'task_type' => 'sometimes|in:cleaning,maintenance,inspection,deep_clean,hall_cleaning',
             'priority' => 'sometimes|in:low,medium,high,urgent',
             'assigned_to' => 'nullable|exists:users,id',
             'notes' => 'nullable|string',
@@ -86,7 +102,7 @@ class HousekeepingController extends Controller
 
         return response()->json([
             'message' => 'Housekeeping task updated successfully',
-            'data' => $housekeeping->load(['room.roomType', 'assignedUser'])
+            'data' => $housekeeping->load(['room.roomType', 'hall', 'assignedUser'])
         ]);
     }
 
