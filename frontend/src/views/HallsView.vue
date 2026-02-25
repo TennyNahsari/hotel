@@ -475,17 +475,31 @@ const fetchHalls = async (page = 1) => {
     }
     const response = await hallApi.getHalls(params)
     console.log('Halls API Response:', response)
-    halls.value = response.data
-    pagination.value = {
-      current_page: response.current_page,
-      last_page: response.last_page,
-      total: response.total,
-      from: response.from,
-      to: response.to
+    
+    // Handle both array and paginated response
+    if (Array.isArray(response)) {
+      halls.value = response
+      pagination.value = {
+        current_page: 1,
+        last_page: 1,
+        total: response.length,
+        from: 1,
+        to: response.length
+      }
+    } else {
+      halls.value = response.data || response
+      pagination.value = {
+        current_page: response.current_page || 1,
+        last_page: response.last_page || 1,
+        total: response.total || halls.value.length,
+        from: response.from || 1,
+        to: response.to || halls.value.length
+      }
     }
   } catch (error) {
     console.error('Error fetching halls:', error)
     alert('Failed to fetch halls')
+    halls.value = []
   } finally {
     loading.value = false
   }

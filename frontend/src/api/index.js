@@ -315,7 +315,8 @@ export const hallApi = {
 export const hallBookingApi = {
   async getHallBookings(params) {
     const response = await api.get('/hall-bookings', { params })
-    return response.data
+    // Handle paginated response - extract data array
+    return response.data.data || response.data
   },
 
   async getHallBooking(bookingId) {

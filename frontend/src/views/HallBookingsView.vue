@@ -550,17 +550,31 @@ const fetchBookings = async (page = 1) => {
     const params = { page, per_page: 15, ...filters.value }
     const response = await hallBookingApi.getHallBookings(params)
     console.log('Hall Bookings API Response:', response)
-    bookings.value = response.data
-    pagination.value = {
-      current_page: response.current_page,
-      last_page: response.last_page,
-      total: response.total,
-      from: response.from,
-      to: response.to
+    
+    // Handle both array and paginated response
+    if (Array.isArray(response)) {
+      bookings.value = response
+      pagination.value = {
+        current_page: 1,
+        last_page: 1,
+        total: response.length,
+        from: 1,
+        to: response.length
+      }
+    } else {
+      bookings.value = response.data || response
+      pagination.value = {
+        current_page: response.current_page || 1,
+        last_page: response.last_page || 1,
+        total: response.total || bookings.value.length,
+        from: response.from || 1,
+        to: response.to || bookings.value.length
+      }
     }
   } catch (error) {
     console.error('Error fetching bookings:', error)
     alert('Failed to fetch bookings')
+    bookings.value = []
   } finally {
     loading.value = false
   }
