@@ -78,11 +78,12 @@ class HousekeepingController extends Controller
 
         // Update hall status when task is created
         if ($task->hall_id) {
-            $status = match($task->task_type) {
-                'cleaning', 'hall_cleaning' => 'cleaning',
-                'maintenance' => 'maintenance',
-                default => 'occupied'
-            };
+            $status = 'occupied';
+            if (in_array($task->task_type, ['cleaning', 'hall_cleaning'])) {
+                $status = 'cleaning';
+            } elseif ($task->task_type === 'maintenance') {
+                $status = 'maintenance';
+            }
             $task->hall->update(['status' => $status]);
         }
 
@@ -164,11 +165,12 @@ class HousekeepingController extends Controller
             
             // Update hall status when task starts
             if ($housekeeping->hall_id && $housekeeping->hall) {
-                $status = match($housekeeping->task_type) {
-                    'cleaning', 'hall_cleaning' => 'cleaning',
-                    'maintenance' => 'maintenance',
-                    default => 'occupied'
-                };
+                $status = 'occupied';
+                if (in_array($housekeeping->task_type, ['cleaning', 'hall_cleaning'])) {
+                    $status = 'cleaning';
+                } elseif ($housekeeping->task_type === 'maintenance') {
+                    $status = 'maintenance';
+                }
                 $housekeeping->hall->update(['status' => $status]);
             }
         }
