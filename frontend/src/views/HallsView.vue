@@ -366,7 +366,7 @@
             <div class="bg-gray-50 p-4 rounded-lg">
               <div v-if="parsedFacilities" class="space-y-3">
                 <div v-for="(items, category) in parsedFacilities" :key="category">
-                  <p class="font-semibold text-gray-700 mb-1 capitalize">{{ category.replace('_', ' ') }}</p>
+                  <p class="font-semibold text-gray-700 mb-1 capitalize">{{ String(category).replace(/_/g, ' ') }}</p>
                   <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
                     <li v-for="(item, idx) in items" :key="idx">{{ item }}</li>
                   </ul>
