@@ -99,7 +99,7 @@
         <div v-else>
           <!-- Mobile Card View -->
           <div class="block md:hidden">
-            <div v-for="task in tasks" :key="task.id" class="p-4 border-b border-gray-200 last:border-b-0">
+            <div v-for="task in (tasks || [])" :key="task.id" class="p-4 border-b border-gray-200 last:border-b-0">
               <div class="space-y-2">
                 <div class="flex justify-between items-start">
                   <div>
@@ -182,7 +182,7 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
-              <tr v-for="task in tasks" :key="task.id" class="hover:bg-gray-50">
+              <tr v-for="task in (tasks || [])" :key="task.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">
                     {{ task.hall ? task.hall.name : task.room?.room_number }}
@@ -301,7 +301,7 @@
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select room</option>
-              <option v-for="room in rooms" :key="room.id" :value="room.id">
+              <option v-for="room in (rooms || [])" :key="room.id" :value="room.id">
                 {{ room.room_number }} - {{ room.room_type?.name }}
               </option>
             </select>

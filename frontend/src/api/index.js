@@ -277,7 +277,8 @@ export const paymentApi = {
 export const hallApi = {
   async getHalls(params) {
     const response = await api.get('/halls', { params })
-    return response.data
+    // Handle paginated response - extract data array
+    return response.data.data || response.data
   },
 
   async getHall(hallId) {
