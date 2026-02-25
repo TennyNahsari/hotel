@@ -23,8 +23,12 @@ return new class extends Migration
             $table->foreignId('room_id')->nullable()->change();
         });
 
-        // Modify task_type enum to include hall_cleaning
-        DB::statement("ALTER TABLE housekeeping_tasks MODIFY COLUMN task_type ENUM('cleaning', 'inspection', 'maintenance', 'hall_cleaning') DEFAULT 'cleaning'");
+        // Modify task_type enum to include hall_cleaning (PostgreSQL compatible)
+        // Drop the old check constraint
+        DB::statement("ALTER TABLE housekeeping_tasks DROP CONSTRAINT IF EXISTS housekeeping_tasks_task_type_check");
+        
+        // Add new check constraint with hall_cleaning option
+        DB::statement("ALTER TABLE housekeeping_tasks ADD CONSTRAINT housekeeping_tasks_task_type_check CHECK (task_type IN ('cleaning', 'inspection', 'maintenance', 'hall_cleaning'))");
     }
 
     /**
@@ -32,8 +36,9 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Restore task_type enum
-        DB::statement("ALTER TABLE housekeeping_tasks MODIFY COLUMN task_type ENUM('cleaning', 'inspection', 'maintenance') DEFAULT 'cleaning'");
+        // Restore task_type enum (PostgreSQL compatible)
+        DB::statement("ALTER TABLE housekeeping_tasks DROP CONSTRAINT IF EXISTS housekeeping_tasks_task_type_check");
+        DB::statement("ALTER TABLE housekeeping_tasks ADD CONSTRAINT housekeeping_tasks_task_type_check CHECK (task_type IN ('cleaning', 'inspection', 'maintenance'))");
 
         // Restore room_id to not nullable
         Schema::table('housekeeping_tasks', function (Blueprint $table) {
