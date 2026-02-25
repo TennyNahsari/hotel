@@ -438,13 +438,26 @@ const editingId = ref(null)
 // Parse facilities JSON for display
 const parsedFacilities = computed(() => {
   if (!viewData.value.facilities) return null
+  
+  let facilities = viewData.value.facilities
+  
   try {
-    // If it's already an object, return it
-    if (typeof viewData.value.facilities === 'object') {
-      return viewData.value.facilities
+    // If it's a string, try to parse it
+    if (typeof facilities === 'string') {
+      facilities = JSON.parse(facilities)
+      
+      // If still a string after first parse (double-encoded), parse again
+      if (typeof facilities === 'string') {
+        facilities = JSON.parse(facilities)
+      }
     }
-    // If it's a string, parse it
-    return JSON.parse(viewData.value.facilities)
+    
+    // Make sure we have an object
+    if (typeof facilities === 'object' && facilities !== null && !Array.isArray(facilities)) {
+      return facilities
+    }
+    
+    return null
   } catch (e) {
     console.error('Error parsing facilities:', e)
     return null
@@ -510,6 +523,25 @@ const openAddModal = () => {
 const openEditModal = (hall) => {
   isEditing.value = true
   editingId.value = hall.id
+  
+  // Parse facilities properly
+  let facilitiesStr = ''
+  if (hall.facilities) {
+    if (typeof hall.facilities === 'string') {
+      // If it's already a string, try to parse and re-stringify for formatting
+      try {
+        const parsed = JSON.parse(hall.facilities)
+        facilitiesStr = JSON.stringify(parsed, null, 2)
+      } catch (e) {
+        // If parsing fails, use as-is
+        facilitiesStr = hall.facilities
+      }
+    } else {
+      // If it's an object, stringify it
+      facilitiesStr = JSON.stringify(hall.facilities, null, 2)
+    }
+  }
+  
   formData.value = {
     name: hall.name,
     hall_type: hall.hall_type,
@@ -517,7 +549,7 @@ const openEditModal = (hall) => {
     capacity: hall.capacity,
     area_sqm: hall.area_sqm,
     price_per_hour: hall.price_per_hour,
-    facilities: hall.facilities ? JSON.stringify(hall.facilities, null, 2) : '',
+    facilities: facilitiesStr,
     description: hall.description || '',
     image_url: hall.image_url || '',
     status: hall.status
