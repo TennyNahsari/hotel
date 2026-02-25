@@ -11,6 +11,7 @@ class HousekeepingTask extends Model
 
     protected $fillable = [
         'room_id',
+        'hall_id',
         'task_type',
         'priority',
         'status',
@@ -29,6 +30,11 @@ class HousekeepingTask extends Model
     public function room()
     {
         return $this->belongsTo(Room::class);
+    }
+
+    public function hall()
+    {
+        return $this->belongsTo(Hall::class);
     }
 
     public function assignedUser()

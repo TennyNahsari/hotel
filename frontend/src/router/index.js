@@ -63,6 +63,18 @@ const router = createRouter({
       component: () => import('../views/PaymentsView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/halls',
+      name: 'halls',
+      component: () => import('../views/HallsView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/hall-bookings',
+      name: 'hall-bookings',
+      component: () => import('../views/HallBookingsView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

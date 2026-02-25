@@ -1,0 +1,393 @@
+<?php
+
+namespace App\Http\Controllers\Api;
+
+use App\Http\Controllers\Controller;
+use App\Models\HallBooking;
+use App\Models\Hall;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\DB;
+
+class HallBookingController extends Controller
+{
+    /**
+     * Display a listing of hall bookings.
+     */
+    public function index(Request $request)
+    {
+        $query = HallBooking::with(['hall', 'guest', 'bookedBy']);
+
+        // Filter by status
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        // Filter by hall
+        if ($request->has('hall_id')) {
+            $query->where('hall_id', $request->hall_id);
+        }
+
+        // Filter by date range
+        if ($request->has('start_date') && $request->has('end_date')) {
+            $query->whereBetween('event_date', [$request->start_date, $request->end_date]);
+        }
+
+        // Search
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('booking_number', 'like', '%' . $search . '%')
+                  ->orWhere('customer_name', 'like', '%' . $search . '%')
+                  ->orWhere('event_name', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Sort
+        $sortBy = $request->get('sort_by', 'event_date');
+        $sortDir = $request->get('sort_dir', 'desc');
+        $query->orderBy($sortBy, $sortDir);
+
+        $bookings = $query->paginate($request->get('per_page', 15));
+
+        return response()->json($bookings);
+    }
+
+    /**
+     * Store a newly created hall booking.
+     */
+    public function store(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'hall_id' => 'required|exists:halls,id',
+            'guest_id' => 'nullable|exists:guests,id',
+            'customer_name' => 'required|string|max:100',
+            'customer_email' => 'required|email|max:100',
+            'customer_phone' => 'required|string|max:20',
+            'customer_company' => 'nullable|string|max:100',
+            'event_name' => 'required|string|max:200',
+            'event_date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'attendees' => 'required|integer|min:1',
+            'special_requests' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Get hall
+        $hall = Hall::findOrFail($request->hall_id);
+
+        // Validate capacity
+        if ($request->attendees > $hall->capacity) {
+            return response()->json([
+                'errors' => ['attendees' => ['Number of attendees exceeds hall capacity of ' . $hall->capacity]]
+            ], 422);
+        }
+
+        // Check availability
+        $isAvailable = HallBooking::isAvailable(
+            $request->hall_id,
+            $request->event_date,
+            $request->start_time,
+            $request->end_time
+        );
+
+        if (!$isAvailable) {
+            return response()->json([
+                'errors' => ['event_date' => ['Hall is not available for the selected date and time']]
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Calculate duration and total
+            $duration = HallBooking::calculateDuration($request->start_time, $request->end_time);
+            $total = HallBooking::calculateTotal($request->hall_id, $duration);
+
+            // Create booking
+            $booking = HallBooking::create([
+                'booking_number' => HallBooking::generateBookingNumber(),
+                'hall_id' => $request->hall_id,
+                'guest_id' => $request->guest_id,
+                'customer_name' => $request->customer_name,
+                'customer_email' => $request->customer_email,
+                'customer_phone' => $request->customer_phone,
+                'customer_company' => $request->customer_company,
+                'event_name' => $request->event_name,
+                'event_date' => $request->event_date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'duration_hours' => $duration,
+                'attendees' => $request->attendees,
+                'total_amount' => $total,
+                'status' => 'pending',
+                'special_requests' => $request->special_requests,
+                'notes' => $request->notes,
+                'booked_by' => auth()->id(),
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Hall booking created successfully',
+                'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to create booking',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Display the specified hall booking.
+     */
+    public function show($id)
+    {
+        $booking = HallBooking::with(['hall', 'guest', 'bookedBy', 'payments.processedBy'])
+            ->findOrFail($id);
+
+        return response()->json($booking);
+    }
+
+    /**
+     * Update the specified hall booking.
+     */
+    public function update(Request $request, $id)
+    {
+        $booking = HallBooking::findOrFail($id);
+
+        // Cannot update completed or cancelled bookings
+        if (in_array($booking->status, ['completed', 'cancelled'])) {
+            return response()->json([
+                'message' => 'Cannot update ' . $booking->status . ' booking'
+            ], 400);
+        }
+
+        $validator = Validator::make($request->all(), [
+            'hall_id' => 'required|exists:halls,id',
+            'guest_id' => 'nullable|exists:guests,id',
+            'customer_name' => 'required|string|max:100',
+            'customer_email' => 'required|email|max:100',
+            'customer_phone' => 'required|string|max:20',
+            'customer_company' => 'nullable|string|max:100',
+            'event_name' => 'required|string|max:200',
+            'event_date' => 'required|date',
+            'start_time' => 'required|date_format:H:i',
+            'end_time' => 'required|date_format:H:i|after:start_time',
+            'attendees' => 'required|integer|min:1',
+            'special_requests' => 'nullable|string',
+            'notes' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Get hall
+        $hall = Hall::findOrFail($request->hall_id);
+
+        // Validate capacity
+        if ($request->attendees > $hall->capacity) {
+            return response()->json([
+                'errors' => ['attendees' => ['Number of attendees exceeds hall capacity of ' . $hall->capacity]]
+            ], 422);
+        }
+
+        // Check availability (exclude current booking)
+        $isAvailable = HallBooking::isAvailable(
+            $request->hall_id,
+            $request->event_date,
+            $request->start_time,
+            $request->end_time,
+            $id
+        );
+
+        if (!$isAvailable) {
+            return response()->json([
+                'errors' => ['event_date' => ['Hall is not available for the selected date and time']]
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            // Calculate duration and total
+            $duration = HallBooking::calculateDuration($request->start_time, $request->end_time);
+            $total = HallBooking::calculateTotal($request->hall_id, $duration);
+
+            $booking->update([
+                'hall_id' => $request->hall_id,
+                'guest_id' => $request->guest_id,
+                'customer_name' => $request->customer_name,
+                'customer_email' => $request->customer_email,
+                'customer_phone' => $request->customer_phone,
+                'customer_company' => $request->customer_company,
+                'event_name' => $request->event_name,
+                'event_date' => $request->event_date,
+                'start_time' => $request->start_time,
+                'end_time' => $request->end_time,
+                'duration_hours' => $duration,
+                'attendees' => $request->attendees,
+                'total_amount' => $total,
+                'special_requests' => $request->special_requests,
+                'notes' => $request->notes,
+            ]);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Hall booking updated successfully',
+                'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
+            ]);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to update booking',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Remove the specified hall booking.
+     */
+    public function destroy($id)
+    {
+        $booking = HallBooking::findOrFail($id);
+
+        // Only pending bookings can be deleted
+        if ($booking->status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending bookings can be deleted'
+            ], 400);
+        }
+
+        $booking->delete();
+
+        return response()->json([
+            'message' => 'Hall booking deleted successfully'
+        ]);
+    }
+
+    /**
+     * Confirm a hall booking.
+     */
+    public function confirm($id)
+    {
+        $booking = HallBooking::findOrFail($id);
+
+        if ($booking->status !== 'pending') {
+            return response()->json([
+                'message' => 'Only pending bookings can be confirmed'
+            ], 400);
+        }
+
+        $booking->update(['status' => 'confirmed']);
+
+        return response()->json([
+            'message' => 'Hall booking confirmed successfully',
+            'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
+        ]);
+    }
+
+    /**
+     * Cancel a hall booking.
+     */
+    public function cancel($id)
+    {
+        $booking = HallBooking::findOrFail($id);
+
+        if (in_array($booking->status, ['completed', 'cancelled'])) {
+            return response()->json([
+                'message' => 'Cannot cancel ' . $booking->status . ' booking'
+            ], 400);
+        }
+
+        $booking->update(['status' => 'cancelled']);
+
+        return response()->json([
+            'message' => 'Hall booking cancelled successfully',
+            'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
+        ]);
+    }
+
+    /**
+     * Mark a hall booking as completed.
+     */
+    public function complete($id)
+    {
+        $booking = HallBooking::findOrFail($id);
+
+        if ($booking->status !== 'confirmed') {
+            return response()->json([
+                'message' => 'Only confirmed bookings can be completed'
+            ], 400);
+        }
+
+        $booking->update(['status' => 'completed']);
+
+        return response()->json([
+            'message' => 'Hall booking completed successfully',
+            'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
+        ]);
+    }
+
+    /**
+     * Get calendar view of hall bookings.
+     */
+    public function calendar(Request $request)
+    {
+        $query = HallBooking::with(['hall', 'guest'])
+            ->whereNotIn('status', ['cancelled']);
+
+        // Filter by date range
+        if ($request->has('start') && $request->has('end')) {
+            $query->whereBetween('event_date', [$request->start, $request->end]);
+        }
+
+        // Filter by hall
+        if ($request->has('hall_id')) {
+            $query->where('hall_id', $request->hall_id);
+        }
+
+        $bookings = $query->get()->map(function ($booking) {
+            return [
+                'id' => $booking->id,
+                'title' => $booking->event_name,
+                'start' => $booking->event_date . ' ' . $booking->start_time,
+                'end' => $booking->event_date . ' ' . $booking->end_time,
+                'backgroundColor' => $this->getStatusColor($booking->status),
+                'borderColor' => $this->getStatusColor($booking->status),
+                'extendedProps' => [
+                    'booking_number' => $booking->booking_number,
+                    'hall_name' => $booking->hall->name,
+                    'customer_name' => $booking->customer_name,
+                    'attendees' => $booking->attendees,
+                    'status' => $booking->status,
+                ]
+            ];
+        });
+
+        return response()->json($bookings);
+    }
+
+    /**
+     * Get status color for calendar.
+     */
+    private function getStatusColor($status)
+    {
+        return match($status) {
+            'pending' => '#FFA500',
+            'confirmed' => '#28A745',
+            'completed' => '#6C757D',
+            'cancelled' => '#DC3545',
+            default => '#007BFF',
+        };
+    }
+}

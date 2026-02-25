@@ -11,6 +11,8 @@ use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\HousekeepingController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\HallController;
+use App\Http\Controllers\Api\HallBookingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -66,4 +68,16 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Users Management
     Route::get('/users', [UserController::class, 'index']);
     Route::get('/users/{user}', [UserController::class, 'show']);
+
+    // Halls Management
+    Route::get('/halls/types', [HallController::class, 'getTypes']);
+    Route::get('/halls/{hall}/availability', [HallController::class, 'checkAvailability']);
+    Route::apiResource('halls', HallController::class);
+
+    // Hall Bookings Management
+    Route::get('/hall-bookings/calendar', [HallBookingController::class, 'calendar']);
+    Route::post('/hall-bookings/{hallBooking}/confirm', [HallBookingController::class, 'confirm']);
+    Route::post('/hall-bookings/{hallBooking}/cancel', [HallBookingController::class, 'cancel']);
+    Route::post('/hall-bookings/{hallBooking}/complete', [HallBookingController::class, 'complete']);
+    Route::apiResource('hall-bookings', HallBookingController::class);
 });
