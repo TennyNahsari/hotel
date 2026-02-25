@@ -103,8 +103,12 @@
               <div class="space-y-2">
                 <div class="flex justify-between items-start">
                   <div>
-                    <div class="font-medium text-gray-900">{{ task.room?.room_number }}</div>
-                    <div class="text-sm text-gray-500">{{ task.room?.room_type?.name }}</div>
+                    <div class="font-medium text-gray-900">
+                      {{ task.hall ? task.hall.name : task.room?.room_number }}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      {{ task.hall ? `${task.hall.hall_type} - Floor ${task.hall.floor}` : task.room?.room_type?.name }}
+                    </div>
                   </div>
                   <span :class="getPriorityBadgeClass(task.priority)" class="px-2 py-1 text-xs font-semibold rounded-full">
                     {{ getPriorityLabel(task.priority) }}
@@ -161,7 +165,7 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Room
+                  Location
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Task Type
@@ -180,8 +184,12 @@
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="task in tasks" :key="task.id" class="hover:bg-gray-50">
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ task.room?.room_number }}</div>
-                  <div class="text-sm text-gray-500">{{ task.room?.room_type?.name }}</div>
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ task.hall ? task.hall.name : task.room?.room_number }}
+                  </div>
+                  <div class="text-sm text-gray-500">
+                    {{ task.hall ? `${task.hall.hall_type} - Floor ${task.hall.floor}` : task.room?.room_type?.name }}
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="getTaskTypeBadgeClass(task.task_type)" class="px-2 py-1 text-xs font-semibold rounded-full">
@@ -253,16 +261,63 @@
         </h2>
 
         <form @submit.prevent="saveTask" class="space-y-4">
+          <!-- Location Type Selector -->
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Location Type *</label>
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                @click="formData.location_type = 'room'; formData.hall_id = ''"
+                :class="[
+                  'px-4 py-2 rounded-lg border-2 transition-all',
+                  formData.location_type === 'room'
+                    ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                ]"
+              >
+                Room
+              </button>
+              <button
+                type="button"
+                @click="formData.location_type = 'hall'; formData.room_id = ''"
+                :class="[
+                  'px-4 py-2 rounded-lg border-2 transition-all',
+                  formData.location_type === 'hall'
+                    ? 'border-blue-600 bg-blue-50 text-blue-700 font-semibold'
+                    : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
+                ]"
+              >
+                Hall
+              </button>
+            </div>
+          </div>
+
+          <!-- Room Selection (shown when location_type is 'room') -->
+          <div v-if="formData.location_type === 'room'">
             <label class="block text-sm font-medium text-gray-700 mb-1">Room *</label>
             <select
               v-model="formData.room_id"
-              required
+              :required="formData.location_type === 'room'"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">Select room</option>
               <option v-for="room in rooms" :key="room.id" :value="room.id">
                 {{ room.room_number }} - {{ room.room_type?.name }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Hall Selection (shown when location_type is 'hall') -->
+          <div v-else>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Hall *</label>
+            <select
+              v-model="formData.hall_id"
+              :required="formData.location_type === 'hall'"
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="">Select hall</option>
+              <option v-for="hall in halls" :key="hall.id" :value="hall.id">
+                {{ hall.name }} - {{ hall.hall_type }} (Floor {{ hall.floor }})
               </option>
             </select>
           </div>
@@ -278,6 +333,7 @@
               <option value="maintenance">Maintenance</option>
               <option value="inspection">Inspection</option>
               <option value="deep_clean">Deep Clean</option>
+              <option value="hall_cleaning">Hall Cleaning</option>
             </select>
           </div>
 
@@ -374,13 +430,14 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import LayoutMain from '../components/LayoutMain.vue'
-import { housekeepingApi, roomApi, userApi } from '../api'
+import { housekeepingApi, roomApi, hallApi, userApi } from '../api'
 import axios from 'axios'
 
 const tasks = ref([])
 const rooms = ref([])
+const halls = ref([])
 const users = ref([])
 const statistics = ref({})
 const loading = ref(false)
@@ -399,7 +456,9 @@ const filters = ref({
 })
 
 const formData = ref({
+  location_type: 'room',
   room_id: '',
+  hall_id: '',
   task_type: 'cleaning',
   priority: 'normal',
   assigned_to: '',
@@ -419,6 +478,7 @@ onMounted(async () => {
   
   loadTasks()
   loadRooms()
+  loadHalls()
   loadUsers()
   loadStatistics()
 })
@@ -447,6 +507,14 @@ async function loadRooms() {
   }
 }
 
+async function loadHalls() {
+  try {
+    halls.value = await hallApi.getHalls()
+  } catch (err) {
+    console.error('Failed to load halls:', err)
+  }
+}
+
 async function loadUsers() {
   try {
     // Get all users or filter by role (e.g., housekeeping staff)
@@ -467,7 +535,9 @@ async function loadStatistics() {
 function openCreateModal() {
   isEditing.value = false
   formData.value = {
+    location_type: 'room',
     room_id: '',
+    hall_id: '',
     task_type: 'cleaning',
     priority: 'normal',
     assigned_to: '',
@@ -481,7 +551,9 @@ function openEditModal(task) {
   isEditing.value = true
   formData.value = {
     id: task.id,
-    room_id: task.room_id,
+    location_type: task.hall_id ? 'hall' : 'room',
+    room_id: task.room_id || '',
+    hall_id: task.hall_id || '',
     task_type: task.task_type,
     priority: task.priority,
     assigned_to: task.assigned_to || '',
@@ -501,10 +573,27 @@ async function saveTask() {
   error.value = ''
 
   try {
-    if (isEditing.value) {
-      await housekeepingApi.updateTask(formData.value.id, formData.value)
+    // Prepare payload based on location type
+    const payload = {
+      task_type: formData.value.task_type,
+      priority: formData.value.priority,
+      assigned_to: formData.value.assigned_to || null,
+      notes: formData.value.notes || '',
+    }
+
+    // Add room_id or hall_id based on location_type
+    if (formData.value.location_type === 'room') {
+      payload.room_id = formData.value.room_id
+      payload.hall_id = null
     } else {
-      await housekeepingApi.createTask(formData.value)
+      payload.hall_id = formData.value.hall_id
+      payload.room_id = null
+    }
+
+    if (isEditing.value) {
+      await housekeepingApi.updateTask(formData.value.id, payload)
+    } else {
+      await housekeepingApi.createTask(payload)
     }
     
     closeModal()
@@ -593,6 +682,7 @@ function getTaskTypeBadgeClass(type) {
     maintenance: 'bg-orange-100 text-orange-800',
     inspection: 'bg-purple-100 text-purple-800',
     deep_clean: 'bg-indigo-100 text-indigo-800',
+    hall_cleaning: 'bg-teal-100 text-teal-800',
   }
   return classes[type] || 'bg-gray-100 text-gray-800'
 }
@@ -603,6 +693,7 @@ function getTaskTypeLabel(type) {
     maintenance: 'Maintenance',
     inspection: 'Inspection',
     deep_clean: 'Deep Clean',
+    hall_cleaning: 'Hall Cleaning',
   }
   return labels[type] || type
 }
