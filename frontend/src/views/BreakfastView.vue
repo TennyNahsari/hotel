@@ -128,8 +128,8 @@
                 <div class="flex justify-between items-start">
                   <div>
                     <div class="font-medium text-gray-900">{{ booking.guest?.name }}</div>
-                    <div class="text-sm text-gray-600">Room {{ booking.room?.room_number }}</div>
-                    <div class="text-sm text-gray-500">{{ booking.room?.room_type?.name }}</div>
+                    <div class="text-sm text-gray-600">Room {{ booking.rooms?.[0]?.room_number }}</div>
+                    <div class="text-sm text-gray-500">{{ booking.rooms?.[0]?.room_type?.name }}</div>
                   </div>
                   <span 
                     :class="getStatusBadgeClass(booking.breakfast_status)"
@@ -189,10 +189,10 @@
                     <div class="text-sm text-gray-500">{{ booking.guest?.phone }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ booking.room?.room_number }}</div>
+                    <div class="text-sm text-gray-900">{{ booking.rooms?.[0]?.room_number }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ booking.room?.room_type?.name }}</div>
+                    <div class="text-sm text-gray-900">{{ booking.rooms?.[0]?.room_type?.name }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="bg-blue-50 inline-block px-3 py-1 rounded-full">

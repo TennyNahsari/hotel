@@ -16,7 +16,7 @@ class BreakfastController extends Controller
     {
         $today = Carbon::today();
         
-        $query = Booking::with(['guest', 'room.roomType'])
+        $query = Booking::with(['guest', 'rooms.roomType'])
             ->where('check_in_date', '<=', $today)
             ->where('check_out_date', '>', $today)
             ->whereIn('status', ['confirmed', 'checked_in']);
@@ -33,13 +33,13 @@ class BreakfastController extends Controller
                 $q->whereHas('guest', function($guestQuery) use ($search) {
                     $guestQuery->where('name', 'like', "%{$search}%");
                 })
-                ->orWhereHas('room', function($roomQuery) use ($search) {
+                ->orWhereHas('rooms', function($roomQuery) use ($search) {
                     $roomQuery->where('room_number', 'like', "%{$search}%");
                 });
             });
         }
 
-        $bookings = $query->orderBy('room_id', 'asc')->paginate(15);
+        $bookings = $query->orderBy('id', 'asc')->paginate(15);
 
         return response()->json($bookings);
     }
@@ -58,7 +58,7 @@ class BreakfastController extends Controller
             'breakfast_date' => Carbon::today(),
         ]);
 
-        $booking->load(['guest', 'room.roomType']);
+        $booking->load(['guest', 'rooms.roomType']);
 
         return response()->json([
             'message' => 'Breakfast status updated successfully',
