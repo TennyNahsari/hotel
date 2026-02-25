@@ -549,6 +549,7 @@ const fetchBookings = async (page = 1) => {
   try {
     const params = { page, per_page: 15, ...filters.value }
     const response = await hallBookingApi.getHallBookings(params)
+    console.log('Hall Bookings API Response:', response)
     bookings.value = response.data
     pagination.value = {
       current_page: response.current_page,

@@ -19,22 +19,27 @@ class HallBookingController extends Controller
         $query = HallBooking::with(['hall', 'guest', 'bookedBy']);
 
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         // Filter by hall
-        if ($request->has('hall_id')) {
+        if ($request->filled('hall_id')) {
             $query->where('hall_id', $request->hall_id);
         }
 
         // Filter by date range
-        if ($request->has('start_date') && $request->has('end_date')) {
+        if ($request->filled('start_date') && $request->filled('end_date')) {
             $query->whereBetween('event_date', [$request->start_date, $request->end_date]);
         }
 
+        // Filter by event_date
+        if ($request->filled('event_date')) {
+            $query->whereDate('event_date', $request->event_date);
+        }
+
         // Search
-        if ($request->has('search')) {
+        if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('booking_number', 'like', '%' . $search . '%')
