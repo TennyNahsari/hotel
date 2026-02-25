@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             BookingSeeder::class,
             HousekeepingSeeder::class,
             HallSeeder::class,
+            HallBookingSeeder::class,
         ]);
     }
 }
