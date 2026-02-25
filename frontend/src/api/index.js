@@ -359,3 +359,22 @@ export const hallBookingApi = {
     return response.data
   },
 }
+
+export const breakfastApi = {
+  async getBreakfasts(params) {
+    const response = await api.get('/breakfasts', { params })
+    return response.data
+  },
+
+  async getStatistics() {
+    const response = await api.get('/breakfasts/statistics')
+    return response.data
+  },
+
+  async updateStatus(bookingId, status) {
+    const response = await api.patch(`/bookings/${bookingId}/breakfast`, {
+      breakfast_status: status
+    })
+    return response.data
+  },
+}

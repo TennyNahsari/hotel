@@ -21,6 +21,8 @@ class Booking extends Model
         'adults',
         'children',
         'status',
+        'breakfast_status',
+        'breakfast_date',
         'total_amount',
         'deposit_amount',
         'notes',
@@ -32,6 +34,7 @@ class Booking extends Model
     protected $casts = [
         'check_in_date' => 'date',
         'check_out_date' => 'date',
+        'breakfast_date' => 'date',
         'nights' => 'integer',
         'adults' => 'integer',
         'children' => 'integer',

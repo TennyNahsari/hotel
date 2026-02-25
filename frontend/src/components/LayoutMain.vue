@@ -188,6 +188,44 @@
             </svg>
             Payments
           </router-link>
+
+          <!-- F&B Menu -->
+          <div class="mb-2">
+            <button
+              @click="fnbOpen = !fnbOpen"
+              class="w-full flex items-center justify-between px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              :class="{ 'bg-blue-50 text-blue-600': fnbOpen }"
+            >
+              <div class="flex items-center">
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                F & B
+              </div>
+              <svg
+                class="w-4 h-4 transition-transform"
+                :class="{ 'rotate-180': fnbOpen }"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+            
+            <div v-show="fnbOpen" class="ml-4 mt-1 space-y-1">
+              <router-link
+                to="/breakfast"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-50 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Breakfast
+              </router-link>
+            </div>
+          </div>
         </nav>
 
         <!-- User section -->
@@ -241,6 +279,7 @@ const authStore = useAuthStore()
 const sidebarOpen = ref(false)
 const roomMenuOpen = ref(true) // Default open
 const hallMenuOpen = ref(true) // Default open
+const fnbOpen = ref(true) // Default open
 
 const user = computed(() => authStore.user)
 

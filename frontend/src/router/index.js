@@ -64,6 +64,12 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/breakfast',
+      name: 'breakfast',
+      component: () => import('../views/BreakfastView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/halls',
       name: 'halls',
       component: () => import('../views/HallsView.vue'),

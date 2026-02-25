@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\HallController;
 use App\Http\Controllers\Api\HallBookingController;
+use App\Http\Controllers\Api\BreakfastController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,6 +65,11 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/housekeeping-statistics', [HousekeepingController::class, 'statistics']);
     Route::apiResource('housekeeping', HousekeepingController::class);
     Route::patch('/housekeeping/{housekeeping}/status', [HousekeepingController::class, 'updateStatus']);
+
+    // Breakfast Management
+    Route::get('/breakfasts', [BreakfastController::class, 'index']);
+    Route::get('/breakfasts/statistics', [BreakfastController::class, 'statistics']);
+    Route::patch('/bookings/{booking}/breakfast', [BreakfastController::class, 'updateStatus']);
 
     // Users Management
     Route::get('/users', [UserController::class, 'index']);
