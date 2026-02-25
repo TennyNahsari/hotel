@@ -385,7 +385,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/api'
+import { hallApi } from '@/api'
 import LayoutMain from '@/components/LayoutMain.vue'
 
 const router = useRouter()
@@ -436,14 +436,14 @@ const fetchHalls = async (page = 1) => {
       per_page: 15,
       ...filters.value
     }
-    const response = await api.get('/halls', { params })
-    halls.value = response.data.data
+    const response = await hallApi.getHalls(params)
+    halls.value = response.data
     pagination.value = {
-      current_page: response.data.current_page,
-      last_page: response.data.last_page,
-      total: response.data.total,
-      from: response.data.from,
-      to: response.data.to
+      current_page: response.current_page,
+      last_page: response.last_page,
+      total: response.total,
+      from: response.from,
+      to: response.to
     }
   } catch (error) {
     console.error('Error fetching halls:', error)
@@ -456,8 +456,8 @@ const fetchHalls = async (page = 1) => {
 // Fetch hall types
 const fetchHallTypes = async () => {
   try {
-    const response = await api.get('/halls/types')
-    hallTypes.value = response.data
+    const response = await hallApi.getHallTypes()
+    hallTypes.value = response
   } catch (error) {
     console.error('Error fetching hall types:', error)
   }
@@ -539,10 +539,10 @@ const saveHall = async () => {
     }
 
     if (isEditing.value) {
-      await api.put(`/halls/${editingId.value}`, data)
+      await hallApi.updateHall(editingId.value, data)
       alert('Hall updated successfully')
     } else {
-      await api.post('/halls', data)
+      await hallApi.createHall(data)
       alert('Hall created successfully')
     }
 
@@ -571,7 +571,7 @@ const confirmDelete = (hall) => {
 // Delete hall
 const deleteHall = async (id) => {
   try {
-    await api.delete(`/halls/${id}`)
+    await hallApi.deleteHall(id)
     alert('Hall deleted successfully')
     fetchHalls(pagination.value.current_page)
   } catch (error) {

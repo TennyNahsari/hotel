@@ -273,3 +273,87 @@ export const paymentApi = {
     return response.data
   },
 }
+
+export const hallApi = {
+  async getHalls(params) {
+    const response = await api.get('/halls', { params })
+    return response.data
+  },
+
+  async getHall(hallId) {
+    const response = await api.get(`/halls/${hallId}`)
+    return response.data
+  },
+
+  async getHallTypes() {
+    const response = await api.get('/halls/types')
+    return response.data
+  },
+
+  async createHall(data) {
+    const response = await api.post('/halls', data)
+    return response.data
+  },
+
+  async updateHall(hallId, data) {
+    const response = await api.put(`/halls/${hallId}`, data)
+    return response.data
+  },
+
+  async deleteHall(hallId) {
+    const response = await api.delete(`/halls/${hallId}`)
+    return response.data
+  },
+
+  async checkAvailability(hallId, data) {
+    const response = await api.post(`/halls/${hallId}/availability`, data)
+    return response.data
+  },
+}
+
+export const hallBookingApi = {
+  async getHallBookings(params) {
+    const response = await api.get('/hall-bookings', { params })
+    return response.data
+  },
+
+  async getHallBooking(bookingId) {
+    const response = await api.get(`/hall-bookings/${bookingId}`)
+    return response.data
+  },
+
+  async createHallBooking(data) {
+    const response = await api.post('/hall-bookings', data)
+    return response.data
+  },
+
+  async updateHallBooking(bookingId, data) {
+    const response = await api.put(`/hall-bookings/${bookingId}`, data)
+    return response.data
+  },
+
+  async deleteHallBooking(bookingId) {
+    const response = await api.delete(`/hall-bookings/${bookingId}`)
+    return response.data
+  },
+
+  async confirmHallBooking(bookingId) {
+    const response = await api.post(`/hall-bookings/${bookingId}/confirm`)
+    return response.data
+  },
+
+  async cancelHallBooking(bookingId) {
+    const response = await api.post(`/hall-bookings/${bookingId}/cancel`)
+    return response.data
+  },
+
+  async completeHallBooking(bookingId) {
+    const response = await api.post(`/hall-bookings/${bookingId}/complete`)
+    return response.data
+  },
+
+  async getCalendar(params) {
+    const response = await api.get('/hall-bookings/calendar', { params })
+    return response.data
+  },
+}

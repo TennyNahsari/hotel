@@ -496,7 +496,7 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
-import api from '@/api'
+import { hallApi, hallBookingApi } from '@/api'
 import LayoutMain from '@/components/LayoutMain.vue'
 
 const bookings = ref([])
@@ -548,14 +548,14 @@ const fetchBookings = async (page = 1) => {
   loading.value = true
   try {
     const params = { page, per_page: 15, ...filters.value }
-    const response = await api.get('/hall-bookings', { params })
-    bookings.value = response.data.data
+    const response = await hallBookingApi.getHallBookings(params)
+    bookings.value = response.data
     pagination.value = {
-      current_page: response.data.current_page,
-      last_page: response.data.last_page,
-      total: response.data.total,
-      from: response.data.from,
-      to: response.data.to
+      current_page: response.current_page,
+      last_page: response.last_page,
+      total: response.total,
+      from: response.from,
+      to: response.to
     }
   } catch (error) {
     console.error('Error fetching bookings:', error)
@@ -568,8 +568,8 @@ const fetchBookings = async (page = 1) => {
 // Fetch halls
 const fetchHalls = async () => {
   try {
-    const response = await api.get('/halls', { params: { status: 'available', per_page: 100 } })
-    availableHalls.value = response.data.data
+    const response = await hallApi.getHalls({ status: 'available', per_page: 100 })
+    availableHalls.value = response.data
   } catch (error) {
     console.error('Error fetching halls:', error)
   }
@@ -661,10 +661,10 @@ const saveBooking = async () => {
     }
 
     if (isEditing.value) {
-      await api.put(`/hall-bookings/${editingId.value}`, data)
+      await hallBookingApi.updateHallBooking(editingId.value, data)
       alert('Booking updated successfully')
     } else {
-      await api.post('/hall-bookings', data)
+      await hallBookingApi.createHallBooking(data)
       alert('Booking created successfully')
     }
 
@@ -687,7 +687,7 @@ const saveBooking = async () => {
 const confirmBooking = async (booking) => {
   if (confirm(`Confirm booking ${booking.booking_number}?`)) {
     try {
-      await api.post(`/hall-bookings/${booking.id}/confirm`)
+      await hallBookingApi.confirmHallBooking(booking.id)
       alert('Booking confirmed successfully')
       fetchBookings(pagination.value.current_page)
     } catch (error) {
@@ -701,7 +701,7 @@ const confirmBooking = async (booking) => {
 const completeBooking = async (booking) => {
   if (confirm(`Mark booking ${booking.booking_number} as completed?`)) {
     try {
-      await api.post(`/hall-bookings/${booking.id}/complete`)
+      await hallBookingApi.completeHallBooking(booking.id)
       alert('Booking completed successfully')
       fetchBookings(pagination.value.current_page)
     } catch (error) {
@@ -715,7 +715,7 @@ const completeBooking = async (booking) => {
 const cancelBooking = async (booking) => {
   if (confirm(`Cancel booking ${booking.booking_number}?`)) {
     try {
-      await api.post(`/hall-bookings/${booking.id}/cancel`)
+      await hallBookingApi.cancelHallBooking(booking.id)
       alert('Booking cancelled successfully')
       fetchBookings(pagination.value.current_page)
     } catch (error) {
