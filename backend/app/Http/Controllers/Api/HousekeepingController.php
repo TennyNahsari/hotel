@@ -142,18 +142,28 @@ class HousekeepingController extends Controller
             'status' => 'required|in:pending,in_progress,completed',
         ]);
 
+        // Load relationships if not already loaded
+        if (!$housekeeping->relationLoaded('room')) {
+            $housekeeping->load('room');
+        }
+        if (!$housekeeping->relationLoaded('hall')) {
+            $housekeeping->load('hall');
+        }
+
         $updates = ['status' => $validated['status']];
 
         if ($validated['status'] === 'in_progress' && !$housekeeping->started_at) {
             $updates['started_at'] = now();
             
             // Update room status to cleaning when task starts
-            if ($housekeeping->room_id && $housekeeping->task_type === 'cleaning') {
-                $housekeeping->room->update(['status' => 'cleaning']);
+            if ($housekeeping->room_id && $housekeeping->room) {
+                if ($housekeeping->task_type === 'cleaning') {
+                    $housekeeping->room->update(['status' => 'cleaning']);
+                }
             }
             
             // Update hall status when task starts
-            if ($housekeeping->hall_id) {
+            if ($housekeeping->hall_id && $housekeeping->hall) {
                 $status = match($housekeeping->task_type) {
                     'cleaning', 'hall_cleaning' => 'cleaning',
                     'maintenance' => 'maintenance',
@@ -167,12 +177,14 @@ class HousekeepingController extends Controller
             $updates['completed_at'] = now();
             
             // Update room status based on task type
-            if ($housekeeping->room_id && $housekeeping->task_type === 'cleaning') {
-                $housekeeping->room->update(['status' => 'available']);
+            if ($housekeeping->room_id && $housekeeping->room) {
+                if ($housekeeping->task_type === 'cleaning') {
+                    $housekeeping->room->update(['status' => 'available']);
+                }
             }
             
             // Update hall status to available when task completed
-            if ($housekeeping->hall_id) {
+            if ($housekeeping->hall_id && $housekeeping->hall) {
                 $housekeeping->hall->update(['status' => 'available']);
             }
         }
