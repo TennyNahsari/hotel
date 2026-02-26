@@ -392,9 +392,7 @@
 import { ref, reactive, onMounted, watch, computed } from 'vue'
 import LayoutMain from '../components/LayoutMain.vue'
 import { menuItemApi, restaurantOrderApi, bookingApi } from '../api'
-import { useToast } from 'vue-toastification'
 
-const toast = useToast()
 const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
 
 // Tabs
@@ -441,7 +439,7 @@ const loadMenuItems = async (url = null) => {
     const response = await menuItemApi.getMenuItems(params)
     menuItems.value = response
   } catch (error) {
-    toast.error('Failed to load menu items')
+    alert('Failed to load menu items')
   }
 }
 
@@ -498,15 +496,15 @@ const saveMenuItem = async () => {
     submitting.value = true
     if (editingMenuItem.value) {
       await menuItemApi.updateMenuItem(editingMenuItem.value.id, menuItemForm)
-      toast.success('Menu item updated successfully')
+      alert('Menu item updated successfully')
     } else {
       await menuItemApi.createMenuItem(menuItemForm)
-      toast.success('Menu item created successfully')
+      alert('Menu item created successfully')
     }
     closeMenuItemModal()
     loadMenuItems()
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to save menu item')
+    alert(error.response?.data?.message || 'Failed to save menu item')
   } finally {
     submitting.value = false
   }
@@ -516,10 +514,10 @@ const deleteMenuItem = async (item) => {
   if (!confirm(`Delete ${item.name}?`)) return
   try {
     await menuItemApi.deleteMenuItem(item.id)
-    toast.success('Menu item deleted successfully')
+    alert('Menu item deleted successfully')
     loadMenuItems()
   } catch (error) {
-    toast.error('Failed to delete menu item')
+    alert('Failed to delete menu item')
   }
 }
 
@@ -529,7 +527,7 @@ const loadBookings = async () => {
     const response = await bookingApi.getBookings({ status: 'checked-in' })
     bookings.value = response.data
   } catch (error) {
-    toast.error('Failed to load bookings')
+    alert('Failed to load bookings')
   }
 }
 
@@ -538,7 +536,7 @@ const loadAvailableMenuItems = async () => {
     const response = await menuItemApi.getMenuItems({ is_available: 1 })
     availableMenuItems.value = response.data
   } catch (error) {
-    toast.error('Failed to load menu items')
+    alert('Failed to load menu items')
   }
 }
 
@@ -551,7 +549,7 @@ const loadBookingDetails = async () => {
     const response = await bookingApi.getBooking(orderForm.booking_id)
     selectedBooking.value = response.data
   } catch (error) {
-    toast.error('Failed to load booking details')
+    alert('Failed to load booking details')
   }
 }
 
@@ -566,7 +564,6 @@ const addItemToCart = (item) => {
       price: item.price
     })
   }
-  toast.success(`${item.name} added to cart`)
 }
 
 const updateQuantity = (index, delta) => {
@@ -598,17 +595,17 @@ const resetOrderForm = () => {
 
 const submitOrder = async () => {
   if (!orderForm.booking_id || orderForm.items.length === 0) {
-    toast.error('Please select a booking and add items to the order')
+    alert('Please select a booking and add items to the order')
     return
   }
   try {
     submitting.value = true
     await restaurantOrderApi.createOrder(orderForm)
-    toast.success('Order created successfully')
+    alert('Order created successfully')
     resetOrderForm()
     activeTab.value = 'menu'
   } catch (error) {
-    toast.error(error.response?.data?.message || 'Failed to create order')
+    alert(error.response?.data?.message || 'Failed to create order')
   } finally {
     submitting.value = false
   }
