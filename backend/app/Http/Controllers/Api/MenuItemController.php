@@ -30,7 +30,7 @@ class MenuItemController extends Controller
 
         $menuItems = $query->orderBy('category', 'asc')
                            ->orderBy('name', 'asc')
-                           ->get();
+                           ->paginate(15);
 
         return response()->json($menuItems);
     }

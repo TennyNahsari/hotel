@@ -394,7 +394,12 @@ export const menuItemApi = {
     const formData = new FormData()
     Object.keys(data).forEach(key => {
       if (data[key] !== null && data[key] !== undefined) {
-        formData.append(key, data[key])
+        // Convert boolean to integer for Laravel
+        if (key === 'is_available') {
+          formData.append(key, data[key] ? '1' : '0')
+        } else {
+          formData.append(key, data[key])
+        }
       }
     })
     const response = await api.post('/menu-items', formData, {
@@ -407,7 +412,12 @@ export const menuItemApi = {
     const formData = new FormData()
     Object.keys(data).forEach(key => {
       if (data[key] !== null && data[key] !== undefined) {
-        formData.append(key, data[key])
+        // Convert boolean to integer for Laravel
+        if (key === 'is_available') {
+          formData.append(key, data[key] ? '1' : '0')
+        } else {
+          formData.append(key, data[key])
+        }
       }
     })
     formData.append('_method', 'PUT')

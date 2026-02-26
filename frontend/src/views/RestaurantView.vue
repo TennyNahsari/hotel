@@ -525,7 +525,8 @@ const deleteMenuItem = async (item) => {
 const loadBookings = async () => {
   try {
     const response = await bookingApi.getBookings({ status: 'checked-in' })
-    bookings.value = response.data
+    // Response is direct array, not wrapped in {data: ...}
+    bookings.value = Array.isArray(response) ? response : (response.data || [])
   } catch (error) {
     alert('Failed to load bookings')
   }
@@ -533,8 +534,8 @@ const loadBookings = async () => {
 
 const loadAvailableMenuItems = async () => {
   try {
-    const response = await menuItemApi.getMenuItems({ is_available: 1 })
-    availableMenuItems.value = response.data
+    const response = await menuItemApi.getMenuItems({ is_available: 1, per_page: 100 })
+    availableMenuItems.value = response.data || []
   } catch (error) {
     alert('Failed to load menu items')
   }
@@ -547,7 +548,8 @@ const loadBookingDetails = async () => {
   }
   try {
     const response = await bookingApi.getBooking(orderForm.booking_id)
-    selectedBooking.value = response.data
+    // Response is direct booking object, not wrapped in {data: ...}
+    selectedBooking.value = response.data || response
   } catch (error) {
     alert('Failed to load booking details')
   }
