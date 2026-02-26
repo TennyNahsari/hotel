@@ -70,6 +70,18 @@ const router = createRouter({
       meta: { requiresAuth: true },
     },
     {
+      path: '/restaurant',
+      name: 'restaurant',
+      component: () => import('../views/RestaurantView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/laundry',
+      name: 'laundry',
+      component: () => import('../views/LaundryView.vue'),
+      meta: { requiresAuth: true },
+    },
+    {
       path: '/halls',
       name: 'halls',
       component: () => import('../views/HallsView.vue'),

@@ -165,22 +165,22 @@
             </div>
           </div>
 
-          <!-- F&B Menu -->
+          <!-- Services Menu -->
           <div>
             <button
-              @click="fnbOpen = !fnbOpen"
+              @click="servicesOpen = !servicesOpen"
               class="w-full flex items-center justify-between px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
-              :class="{ 'bg-blue-50 text-blue-600': fnbOpen }"
+              :class="{ 'bg-blue-50 text-blue-600': servicesOpen }"
             >
               <div class="flex items-center">
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                F & B
+                Services
               </div>
               <svg
                 class="w-4 h-4 transition-transform"
-                :class="{ 'rotate-180': fnbOpen }"
+                :class="{ 'rotate-180': servicesOpen }"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -189,7 +189,7 @@
               </svg>
             </button>
             
-            <div v-show="fnbOpen" class="ml-4 mt-1 space-y-1">
+            <div v-show="servicesOpen" class="ml-4 mt-1 space-y-1">
               <router-link
                 to="/breakfast"
                 class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
@@ -199,6 +199,28 @@
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
                 Breakfast
+              </router-link>
+              
+              <router-link
+                to="/restaurant"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-50 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Restaurant & Cafe
+              </router-link>
+              
+              <router-link
+                to="/laundry"
+                class="flex items-center px-4 py-2 text-sm text-gray-600 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                active-class="bg-blue-50 text-blue-600 font-medium"
+              >
+                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+                Laundry
               </router-link>
             </div>
           </div>
@@ -279,7 +301,7 @@ const authStore = useAuthStore()
 const sidebarOpen = ref(false)
 const roomMenuOpen = ref(true) // Default open
 const hallMenuOpen = ref(true) // Default open
-const fnbOpen = ref(true) // Default open
+const servicesOpen = ref(true) // Default open
 
 const user = computed(() => authStore.user)
 
