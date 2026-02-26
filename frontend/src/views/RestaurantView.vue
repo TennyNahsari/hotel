@@ -169,7 +169,7 @@
               </option>
             </select>
             <p v-if="bookings.length === 0" class="text-sm text-gray-500 mt-1">
-              No checked-in bookings available
+              No checked-in bookings available. Please check in a booking first.
             </p>
           </div>
 
@@ -442,9 +442,13 @@ const loadMenuItems = async (url = null) => {
       const page = urlObj.searchParams.get('page')
       if (page) params.page = page
     }
+    console.log('Loading menu items with params:', params)
     const response = await menuItemApi.getMenuItems(params)
+    console.log('Menu items response:', response)
     menuItems.value = response
+    console.log('Menu items loaded:', menuItems.value?.data?.length || 0)
   } catch (error) {
+    console.error('Failed to load menu items:', error)
     alert('Failed to load menu items')
   }
 }
@@ -530,24 +534,32 @@ const deleteMenuItem = async (item) => {
 // Orders
 const loadBookings = async () => {
   try {
-    const response = await bookingApi.getBookings({ status: 'checked-in' })
+    console.log('Loading all bookings for debug...')
+    const allBookings = await bookingApi.getBookings({})
+    console.log('All bookings:', allBookings.length, allBookings.map(b => ({ id: b.id, number: b.booking_number, status: b.status })))
+    
+    console.log('Loading bookings with status: checked_in')
+    const response = await bookingApi.getBookings({ status: 'checked_in' })
+    console.log('Checked-in bookings raw response:', response)
     // bookingApi.getBookings() already returns response.data which is array
     bookings.value = response || []
-    console.log('Loaded bookings:', bookings.value.length, bookings.value)
+    console.log('Checked-in bookings loaded:', bookings.value.length, bookings.value)
   } catch (error) {
-    console.error('Failed to load bookings:', error)
-    alert('Failed to load bookings')
+    console.error('Failed to load bookings:', error, error.response)
+    alert('Failed to load bookings: ' + (error.response?.data?.message || error.message))
   }
 }
 
 const loadAvailableMenuItems = async () => {
   try {
+    console.log('Loading available menu items...')
     const response = await menuItemApi.getMenuItems({ is_available: 1, per_page: 100 })
+    console.log('Available menu items raw response:', response)
     // For paginated response, data is in response.data
     availableMenuItems.value = response.data || []
-    console.log('Loaded menu items:', availableMenuItems.value.length, availableMenuItems.value)
+    console.log('Available menu items loaded:', availableMenuItems.value.length, availableMenuItems.value)
   } catch (error) {
-    console.error('Failed to load menu items:', error)
+    console.error('Failed to load available menu items:', error)
     alert('Failed to load menu items')
   }
 }
@@ -648,6 +660,7 @@ const getCategoryBadgeClass = (category) => {
 
 // Initialize
 onMounted(() => {
+  console.log('RestaurantView mounted, initializing...')
   loadMenuItems()
   loadBookings()
   loadAvailableMenuItems()
