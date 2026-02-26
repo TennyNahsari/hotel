@@ -19,8 +19,8 @@ class MenuItemController extends Controller
         }
 
         // Filter by availability
-        if ($request->filled('is_available')) {
-            $query->where('is_available', $request->is_available);
+        if ($request->has('is_available')) {
+            $query->where('is_available', $request->boolean('is_available'));
         }
 
         // Search by name

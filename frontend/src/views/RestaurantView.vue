@@ -168,6 +168,9 @@
                 {{ booking.booking_number }} - {{ booking.guest?.name }} (Room {{ booking.rooms?.[0]?.room_number }})
               </option>
             </select>
+            <p v-if="bookings.length === 0" class="text-sm text-gray-500 mt-1">
+              No checked-in bookings available
+            </p>
           </div>
 
           <!-- Booking Details (if booking selected) -->
@@ -184,6 +187,9 @@
           <!-- Menu Items Selection -->
           <div class="mb-6">
             <label class="block text-sm font-medium text-gray-700 mb-2">Add Items to Order</label>
+            <p v-if="availableMenuItems.length === 0" class="text-sm text-gray-500 mb-2">
+              No available menu items. Please add menu items first.
+            </p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div
                 v-for="item in availableMenuItems"
@@ -525,9 +531,11 @@ const deleteMenuItem = async (item) => {
 const loadBookings = async () => {
   try {
     const response = await bookingApi.getBookings({ status: 'checked-in' })
-    // Response is direct array, not wrapped in {data: ...}
-    bookings.value = Array.isArray(response) ? response : (response.data || [])
+    // bookingApi.getBookings() already returns response.data which is array
+    bookings.value = response || []
+    console.log('Loaded bookings:', bookings.value.length, bookings.value)
   } catch (error) {
+    console.error('Failed to load bookings:', error)
     alert('Failed to load bookings')
   }
 }
@@ -535,8 +543,11 @@ const loadBookings = async () => {
 const loadAvailableMenuItems = async () => {
   try {
     const response = await menuItemApi.getMenuItems({ is_available: 1, per_page: 100 })
+    // For paginated response, data is in response.data
     availableMenuItems.value = response.data || []
+    console.log('Loaded menu items:', availableMenuItems.value.length, availableMenuItems.value)
   } catch (error) {
+    console.error('Failed to load menu items:', error)
     alert('Failed to load menu items')
   }
 }
@@ -548,8 +559,8 @@ const loadBookingDetails = async () => {
   }
   try {
     const response = await bookingApi.getBooking(orderForm.booking_id)
-    // Response is direct booking object, not wrapped in {data: ...}
-    selectedBooking.value = response.data || response
+    // bookingApi.getBooking() already returns response.data which is booking object
+    selectedBooking.value = response
   } catch (error) {
     alert('Failed to load booking details')
   }
