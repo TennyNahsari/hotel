@@ -65,6 +65,7 @@
               <option value="food">Food</option>
               <option value="beverage">Beverage</option>
               <option value="snack">Snack</option>
+              <option value="package">Package</option>
             </select>
             <select
               v-model="filters.is_available"
@@ -254,37 +255,48 @@
                 >
                   🍿 Snack ({{ availableMenuItems.filter(i => i.category === 'snack').length }})
                 </button>
+                <button
+                  @click="menuCategoryFilter = 'package'"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                    menuCategoryFilter === 'package' 
+                      ? 'bg-purple-600 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  📦 Package ({{ availableMenuItems.filter(i => i.category === 'package').length }})
+                </button>
               </div>
             </div>
             <p v-if="availableMenuItems.length === 0" class="text-sm text-gray-500 mb-2">
               No available menu items. Please add menu items first.
             </p>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
               <div
                 v-for="item in filteredMenuItems"
                 :key="item.id"
-                class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors"
+                class="border border-gray-200 rounded-lg p-3 hover:border-blue-500 transition-colors"
               >
                 <img
                   v-if="item.photo"
                   :src="`${apiUrl}/storage/${item.photo}`"
                   alt="Menu photo"
-                  class="w-full h-32 object-cover rounded mb-2"
+                  class="w-full h-24 object-cover rounded mb-2"
                 />
-                <div v-else class="w-full h-32 rounded bg-gray-200 flex items-center justify-center mb-2">
-                  <span class="text-gray-400">No photo</span>
+                <div v-else class="w-full h-24 rounded bg-gray-200 flex items-center justify-center mb-2">
+                  <span class="text-gray-400 text-xs">No photo</span>
                 </div>
-                <h4 class="font-medium text-gray-900">{{ item.name }}</h4>
-                <p class="text-sm text-gray-500 mb-2">{{ item.description }}</p>
+                <h4 class="font-medium text-gray-900 text-sm">{{ item.name }}</h4>
+                <p class="text-xs text-gray-500 mb-2 line-clamp-2">{{ item.description }}</p>
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-blue-600 font-medium">Rp {{ formatNumber(item.price) }}</span>
+                  <span class="text-blue-600 font-medium text-sm">Rp {{ formatNumber(item.price) }}</span>
                   <span :class="getCategoryBadgeClass(item.category)">
                     {{ item.category }}
                   </span>
                 </div>
                 <button
                   @click="addItemToCart(item)"
-                  class="w-full px-3 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm"
+                  class="w-full px-2 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-medium"
                 >
                   Add to Cart
                 </button>
@@ -517,6 +529,7 @@
               <option value="food">Food</option>
               <option value="beverage">Beverage</option>
               <option value="snack">Snack</option>
+              <option value="package">Package</option>
             </select>
           </div>
           <div class="mb-4">
@@ -930,7 +943,8 @@ const getCategoryBadgeClass = (category) => {
   const classes = {
     food: 'px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800',
     beverage: 'px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800',
-    snack: 'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800'
+    snack: 'px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800',
+    package: 'px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800'
   }
   return classes[category] || classes.food
 }
