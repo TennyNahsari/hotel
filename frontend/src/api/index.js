@@ -464,3 +464,30 @@ export const restaurantOrderApi = {
     return response.data
   },
 }
+
+export const laundryOrderApi = {
+  async getOrders(params = {}) {
+    const response = await api.get('/laundry-orders', { params })
+    return response.data
+  },
+
+  async getOrder(orderId) {
+    const response = await api.get(`/laundry-orders/${orderId}`)
+    return response.data
+  },
+
+  async createOrder(data) {
+    const response = await api.post('/laundry-orders', data)
+    return response.data
+  },
+
+  async deleteOrder(orderId) {
+    const response = await api.delete(`/laundry-orders/${orderId}`)
+    return response.data
+  },
+
+  async getBookingCharges(bookingId) {
+    const response = await api.get(`/bookings/${bookingId}/laundry-charges`)
+    return response.data
+  },
+}

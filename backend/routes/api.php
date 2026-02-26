@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\HallBookingController;
 use App\Http\Controllers\Api\BreakfastController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\RestaurantOrderController;
+use App\Http\Controllers\Api\LaundryOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -94,4 +95,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/bookings/{booking}/restaurant-charges', [RestaurantOrderController::class, 'getBookingCharges']);
     Route::patch('/restaurant-orders/{restaurantOrder}/status', [RestaurantOrderController::class, 'updateStatus']);
     Route::apiResource('restaurant-orders', RestaurantOrderController::class);
+
+    // Laundry Management
+    Route::get('/bookings/{booking}/laundry-charges', [LaundryOrderController::class, 'getBookingCharges']);
+    Route::apiResource('laundry-orders', LaundryOrderController::class)->only(['index', 'store', 'show', 'destroy']);
 });
