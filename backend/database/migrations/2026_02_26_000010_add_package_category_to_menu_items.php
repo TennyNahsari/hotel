@@ -12,8 +12,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Change enum to add 'package' category
-        DB::statement("ALTER TABLE menu_items MODIFY COLUMN category ENUM('food', 'beverage', 'snack', 'package') NOT NULL");
+        // PostgreSQL: Drop old constraint and add new one with 'package'
+        DB::statement("ALTER TABLE menu_items DROP CONSTRAINT IF EXISTS menu_items_category_check");
+        DB::statement("ALTER TABLE menu_items ADD CONSTRAINT menu_items_category_check CHECK (category IN ('food', 'beverage', 'snack', 'package'))");
     }
 
     /**
@@ -21,6 +22,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("ALTER TABLE menu_items MODIFY COLUMN category ENUM('food', 'beverage', 'snack') NOT NULL");
+        DB::statement("ALTER TABLE menu_items DROP CONSTRAINT IF EXISTS menu_items_category_check");
+        DB::statement("ALTER TABLE menu_items ADD CONSTRAINT menu_items_category_check CHECK (category IN ('food', 'beverage', 'snack'))");
     }
 };
