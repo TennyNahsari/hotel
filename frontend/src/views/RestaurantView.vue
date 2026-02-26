@@ -570,11 +570,18 @@ const loadBookingDetails = async () => {
     return
   }
   try {
+    console.log('Loading booking details for ID:', orderForm.booking_id)
     const response = await bookingApi.getBooking(orderForm.booking_id)
+    console.log('Booking details response:', response)
     // bookingApi.getBooking() already returns response.data which is booking object
     selectedBooking.value = response
+    console.log('Selected booking loaded:', selectedBooking.value)
   } catch (error) {
-    alert('Failed to load booking details')
+    console.error('Failed to load booking details:', error, error.response)
+    alert('Failed to load booking details: ' + (error.response?.data?.message || error.message))
+    // Reset selection if error
+    orderForm.booking_id = ''
+    selectedBooking.value = null
   }
 }
 

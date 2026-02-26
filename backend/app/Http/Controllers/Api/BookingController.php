@@ -128,9 +128,17 @@ class BookingController extends Controller
 
     public function show(Booking $booking)
     {
-        return response()->json(
-            $booking->load(['guest', 'rooms.roomType', 'payments', 'housekeepingTasks', 'createdBy'])
-        );
+        try {
+            return response()->json(
+                $booking->load(['guest', 'rooms.roomType', 'payments', 'createdBy'])
+            );
+        } catch (\Exception $e) {
+            \Log::error('Failed to load booking: ' . $e->getMessage());
+            return response()->json([
+                'message' => 'Failed to load booking details',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     public function update(Request $request, Booking $booking)
