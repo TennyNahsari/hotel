@@ -537,7 +537,7 @@
           </div>
 
           <!-- Company & Customer Info -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+          <div class="grid grid-cols-2 gap-8 mb-8">
             <div>
               <h3 class="font-bold text-gray-900 mb-2">From:</h3>
               <p class="text-gray-700 font-semibold">Your Hotel Name</p>
