@@ -126,18 +126,37 @@
       <!-- Order History Tab -->
       <div v-show="activeTab === 'history'" class="mt-6">
         <!-- Filters -->
-        <div class="mb-4 flex gap-4">
+        <div class="mb-4 flex flex-col sm:flex-row gap-4">
           <input
             v-model="historyFilters.search"
             type="text"
             placeholder="Search by order # or booking #"
             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
+          <input
+            v-model="historyFilters.start_date"
+            type="date"
+            placeholder="Start Date"
+            class="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          />
+          <input
+            v-model="historyFilters.end_date"
+            type="date"
+            placeholder="End Date"
+            class="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          />
           <button
             @click="loadOrders"
-            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50"
+            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 whitespace-nowrap"
           >
             Search
+          </button>
+          <button
+            @click="exportOrders"
+            :disabled="exporting"
+            class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            {{ exporting ? 'Exporting...' : 'Export Excel' }}
           </button>
         </div>
 
@@ -287,8 +306,11 @@ const bookings = ref([])
 // Order History
 const orders = ref([])
 const loadingOrders = ref(false)
+const exporting = ref(false)
 const historyFilters = ref({
   search: '',
+  start_date: '',
+  end_date: '',
   page: 1
 })
 const pagination = ref({
@@ -423,6 +445,34 @@ async function deleteOrder(orderId) {
   } catch (error) {
     console.error('Error deleting order:', error)
     alert('Failed to delete order')
+  }
+}
+
+// Export orders
+async function exportOrders() {
+  exporting.value = true
+  try {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://hotel.tazkia.web.id/api'
+    
+    // Build query parameters
+    const params = new URLSearchParams()
+    if (historyFilters.value.start_date) params.append('start_date', historyFilters.value.start_date)
+    if (historyFilters.value.end_date) params.append('end_date', historyFilters.value.end_date)
+    
+    const url = `${apiUrl}/laundry-orders/export?${params.toString()}`
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', '')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (err) {
+    console.error('Failed to export orders:', err)
+    alert('Failed to export orders')
+  } finally {
+    exporting.value = false
   }
 }
 

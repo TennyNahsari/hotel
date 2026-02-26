@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\LaundryOrder;
 use App\Models\Payment;
+use App\Exports\LaundryOrdersExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaundryOrderController extends Controller
 {
@@ -112,5 +114,18 @@ class LaundryOrderController extends Controller
             'booking_id' => $bookingId,
             'laundry_charges' => $total
         ]);
+    }
+
+    public function export(Request $request)
+    {
+        $startDate = $request->input('start_date');
+        $endDate = $request->input('end_date');
+
+        $filename = 'laundry_orders_' . date('Y-m-d_His') . '.xlsx';
+
+        return Excel::download(
+            new LaundryOrdersExport($startDate, $endDate),
+            $filename
+        );
     }
 }
