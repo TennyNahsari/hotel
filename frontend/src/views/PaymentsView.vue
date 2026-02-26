@@ -111,7 +111,7 @@
                     <div class="text-sm text-gray-600">{{ payment.booking?.guest?.name || payment.hall_booking?.customer_name }}</div>
                   </div>
                   <div class="text-right">
-                    <div class="font-semibold text-gray-900">{{ formatCurrency(payment.amount) }}</div>
+                    <div class="font-semibold text-gray-900">{{ formatCurrency(getPaymentTotal(payment)) }}</div>
                   </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
@@ -218,7 +218,7 @@
                   <div class="mt-1 text-xs text-gray-500">{{ getPaymentMethodLabel(payment.payment_method) }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-bold text-gray-900">{{ formatCurrency(payment.amount) }}</div>
+                  <div class="text-sm font-bold text-gray-900">{{ formatCurrency(getPaymentTotal(payment)) }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {{ formatDate(payment.created_at) }}
@@ -607,9 +607,21 @@
                 </td>
                 <td class="py-3 px-4 text-right font-bold">{{ formatCurrency(selectedPayment.amount) }}</td>
               </tr>
+              <tr v-if="selectedPayment.restaurant_charges > 0" class="border-b border-gray-300">
+                <td class="py-3 px-4">
+                  <p class="font-medium">Restaurant Charges</p>
+                </td>
+                <td class="py-3 px-4 text-right font-bold">{{ formatCurrency(selectedPayment.restaurant_charges) }}</td>
+              </tr>
+              <tr v-if="selectedPayment.laundry_charges > 0" class="border-b border-gray-300">
+                <td class="py-3 px-4">
+                  <p class="font-medium">Laundry Charges</p>
+                </td>
+                <td class="py-3 px-4 text-right font-bold">{{ formatCurrency(selectedPayment.laundry_charges) }}</td>
+              </tr>
               <tr class="border-t-2 border-gray-800">
                 <td class="py-3 px-4 text-right font-bold">TOTAL PAID</td>
-                <td class="py-3 px-4 text-right font-bold text-xl">{{ formatCurrency(selectedPayment.amount) }}</td>
+                <td class="py-3 px-4 text-right font-bold text-xl">{{ formatCurrency(getPaymentTotal(selectedPayment)) }}</td>
               </tr>
             </tbody>
           </table>
@@ -988,6 +1000,13 @@ function formatDate(date) {
     hour: '2-digit',
     minute: '2-digit'
   })
+}
+
+function getPaymentTotal(payment) {
+  const amount = parseFloat(payment.amount || 0)
+  const restaurantCharges = parseFloat(payment.restaurant_charges || 0)
+  const laundryCharges = parseFloat(payment.laundry_charges || 0)
+  return amount + restaurantCharges + laundryCharges
 }
 
 function getPaymentTypeBadgeClass(type) {

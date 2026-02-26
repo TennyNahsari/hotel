@@ -53,6 +53,8 @@ class PaymentController extends Controller
             'payment_type' => 'required|in:deposit,partial,full,refund,extra_charge',
             'payment_method' => 'required|in:cash,transfer,qris,card,other',
             'amount' => 'required|numeric|min:0',
+            'restaurant_charges' => 'nullable|numeric|min:0',
+            'laundry_charges' => 'nullable|numeric|min:0',
             'reference_number' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
@@ -101,6 +103,8 @@ class PaymentController extends Controller
             'payment_type' => 'sometimes|required|in:deposit,partial,full,refund,extra_charge',
             'payment_method' => 'sometimes|required|in:cash,transfer,qris,card,other',
             'amount' => 'sometimes|required|numeric|min:0',
+            'restaurant_charges' => 'nullable|numeric|min:0',
+            'laundry_charges' => 'nullable|numeric|min:0',
             'reference_number' => 'nullable|string|max:255',
             'notes' => 'nullable|string',
         ]);
