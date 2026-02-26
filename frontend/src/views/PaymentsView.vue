@@ -750,6 +750,12 @@ function selectBooking(booking) {
     const guestName = booking.customer_name || booking.guest?.name || 'N/A'
     bookingSearch.value = `${booking.booking_number} - ${guestName}`
   }
+  
+  // Auto-fill amount with booking total
+  if (booking.total_amount) {
+    formData.value.amount = parseFloat(booking.total_amount)
+  }
+  
   showBookingDropdown.value = false
 }
 
