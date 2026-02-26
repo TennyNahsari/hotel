@@ -207,13 +207,61 @@
 
           <!-- Menu Items Selection -->
           <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Add Items to Order</label>
+            <div class="flex items-center justify-between mb-4">
+              <label class="block text-sm font-medium text-gray-700">Add Items to Order</label>
+              <div class="flex gap-2">
+                <button
+                  @click="menuCategoryFilter = ''"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                    menuCategoryFilter === '' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  All ({{ availableMenuItems.length }})
+                </button>
+                <button
+                  @click="menuCategoryFilter = 'food'"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                    menuCategoryFilter === 'food' 
+                      ? 'bg-green-600 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  🍽️ Food ({{ availableMenuItems.filter(i => i.category === 'food').length }})
+                </button>
+                <button
+                  @click="menuCategoryFilter = 'beverage'"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                    menuCategoryFilter === 'beverage' 
+                      ? 'bg-blue-600 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  🥤 Beverage ({{ availableMenuItems.filter(i => i.category === 'beverage').length }})
+                </button>
+                <button
+                  @click="menuCategoryFilter = 'snack'"
+                  :class="[
+                    'px-4 py-2 text-sm font-medium rounded-lg transition-colors',
+                    menuCategoryFilter === 'snack' 
+                      ? 'bg-yellow-600 text-white' 
+                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ]"
+                >
+                  🍿 Snack ({{ availableMenuItems.filter(i => i.category === 'snack').length }})
+                </button>
+              </div>
+            </div>
             <p v-if="availableMenuItems.length === 0" class="text-sm text-gray-500 mb-2">
               No available menu items. Please add menu items first.
             </p>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               <div
-                v-for="item in availableMenuItems"
+                v-for="item in filteredMenuItems"
                 :key="item.id"
                 class="border border-gray-200 rounded-lg p-4 hover:border-blue-500 transition-colors"
               >
@@ -567,6 +615,7 @@ const menuItemForm = reactive({
 // Orders
 const bookings = ref([])
 const availableMenuItems = ref([])
+const menuCategoryFilter = ref('')
 const selectedBooking = ref(null)
 const orderForm = reactive({
   booking_id: '',
@@ -580,6 +629,14 @@ const orders = ref({ data: [], meta: null })
 const orderFilters = reactive({
   search: '',
   status: ''
+})
+
+// Computed
+const filteredMenuItems = computed(() => {
+  if (!menuCategoryFilter.value) {
+    return availableMenuItems.value
+  }
+  return availableMenuItems.value.filter(item => item.category === menuCategoryFilter.value)
 })
 
 // Load menu items
@@ -777,6 +834,7 @@ const resetOrderForm = () => {
   orderForm.items = []
   orderForm.notes = ''
   selectedBooking.value = null
+  menuCategoryFilter.value = ''
 }
 
 const submitOrder = async () => {
