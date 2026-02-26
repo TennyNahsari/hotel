@@ -32,11 +32,22 @@
           >
             Create Order
           </button>
+          <button
+            @click="activeTab = 'history'"
+            :class="[
+              'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+              activeTab === 'history'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            ]"
+          >
+            Order History
+          </button>
         </nav>
       </div>
 
       <!-- Menu Items Tab -->
-      <div v-if="activeTab === 'menu'">
+      <div v-show="activeTab === 'menu'">
         <!-- Filters and Actions -->
         <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
           <div class="flex flex-col sm:flex-row gap-4 flex-1">
@@ -152,7 +163,7 @@
       </div>
 
       <!-- Create Order Tab -->
-      <div v-if="activeTab === 'orders'">
+      <div v-show="activeTab === 'orders'">
         <div class="bg-white rounded-lg shadow p-6">
           <!-- Select Booking -->
           <div class="mb-6">
@@ -295,6 +306,127 @@
           </div>
         </div>
       </div>
+
+      <!-- Order History Tab -->
+      <div v-show="activeTab === 'history'">
+        <!-- Filters -->
+        <div class="mb-4 flex flex-col sm:flex-row gap-4">
+          <input
+            v-model="orderFilters.search"
+            type="text"
+            placeholder="Search by order number or booking..."
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <select
+            v-model="orderFilters.status"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="preparing">Preparing</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button
+            @click="loadOrders()"
+            class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+          >
+            Refresh
+          </button>
+        </div>
+
+        <!-- Orders Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="order in orders.data" :key="order.id">
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  {{ order.order_number }}
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm font-medium text-gray-900">{{ order.booking?.booking_number }}</div>
+                  <div class="text-sm text-gray-500">{{ order.booking?.guest?.name }}</div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-900">
+                  {{ order.order_items?.length || 0 }} items
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  Rp {{ formatNumber(order.total_amount) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span :class="getOrderStatusBadgeClass(order.status)">
+                    {{ order.status }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  {{ formatDate(order.created_at) }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                  <button
+                    v-if="order.status === 'pending'"
+                    @click="updateOrderStatus(order.id, 'preparing')"
+                    class="text-blue-600 hover:text-blue-900 mr-2"
+                  >
+                    Prepare
+                  </button>
+                  <button
+                    v-if="order.status === 'preparing'"
+                    @click="updateOrderStatus(order.id, 'delivered')"
+                    class="text-green-600 hover:text-green-900 mr-2"
+                  >
+                    Deliver
+                  </button>
+                  <button
+                    v-if="['pending', 'preparing'].includes(order.status)"
+                    @click="updateOrderStatus(order.id, 'cancelled')"
+                    class="text-red-600 hover:text-red-900"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    @click="viewOrderDetails(order)"
+                    class="text-gray-600 hover:text-gray-900 ml-2"
+                  >
+                    View
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div v-if="orders.meta" class="mt-4 flex items-center justify-between">
+          <div class="text-sm text-gray-700">
+            Showing {{ orders.meta.from }} to {{ orders.meta.to }} of {{ orders.meta.total }} results
+          </div>
+          <div class="flex gap-2">
+            <button
+              v-for="link in orders.meta.links"
+              :key="link.label"
+              @click="changeOrderPage(link.url)"
+              :disabled="!link.url"
+              :class="[
+                'px-3 py-1 rounded',
+                link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
+                !link.url && 'opacity-50 cursor-not-allowed'
+              ]"
+              v-html="link.label"
+            ></button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Menu Item Modal -->
@@ -432,6 +564,13 @@ const orderForm = reactive({
   notes: ''
 })
 const submitting = ref(false)
+
+// Order History
+const orders = ref({ data: [], meta: null })
+const orderFilters = reactive({
+  search: '',
+  status: ''
+})
 
 // Load menu items
 const loadMenuItems = async (url = null) => {
@@ -635,13 +774,71 @@ const submitOrder = async () => {
     await restaurantOrderApi.createOrder(orderForm)
     alert('Order created successfully')
     resetOrderForm()
-    activeTab.value = 'menu'
+    activeTab.value = 'history'
+    loadOrders()
   } catch (error) {
     alert(error.response?.data?.message || 'Failed to create order')
   } finally {
     submitting.value = false
   }
 }
+
+// Order History
+const loadOrders = async (url = null) => {
+  try {
+    const params = { ...orderFilters }
+    if (url) {
+      const urlObj = new URL(url)
+      const page = urlObj.searchParams.get('page')
+      if (page) params.page = page
+    }
+    console.log('Loading orders with params:', params)
+    const response = await restaurantOrderApi.getOrders(params)
+    console.log('Orders response:', response)
+    orders.value = response
+  } catch (error) {
+    console.error('Failed to load orders:', error)
+    alert('Failed to load orders')
+  }
+}
+
+const changeOrderPage = (url) => {
+  if (url) loadOrders(url)
+}
+
+const updateOrderStatus = async (orderId, status) => {
+  if (!confirm(`Change order status to ${status}?`)) return
+  try {
+    await restaurantOrderApi.updateOrderStatus(orderId, status)
+    alert('Order status updated successfully')
+    loadOrders()
+  } catch (error) {
+    alert('Failed to update order status')
+  }
+}
+
+const viewOrderDetails = (order) => {
+  const items = order.order_items?.map(item => 
+    `${item.quantity}x ${item.menu_item?.name} @ Rp ${formatNumber(item.price)} = Rp ${formatNumber(item.subtotal)}`
+  ).join('\n') || 'No items'
+  
+  alert(`Order Details\n\nOrder #: ${order.order_number}\nBooking: ${order.booking?.booking_number}\nGuest: ${order.booking?.guest?.name}\nStatus: ${order.status}\n\nItems:\n${items}\n\nTotal: Rp ${formatNumber(order.total_amount)}\n\nNotes: ${order.notes || '-'}`)
+}
+
+const getOrderStatusBadgeClass = (status) => {
+  const classes = {
+    pending: 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800',
+    preparing: 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800',
+    delivered: 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800',
+    cancelled: 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800'
+  }
+  return classes[status] || classes.pending
+}
+
+// Watch order filters
+watch(orderFilters, () => {
+  loadOrders()
+})
 
 // Utilities
 const formatNumber = (value) => {
@@ -671,5 +868,6 @@ onMounted(() => {
   loadMenuItems()
   loadBookings()
   loadAvailableMenuItems()
+  loadOrders()
 })
 </script>
