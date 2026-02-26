@@ -335,7 +335,7 @@ const visiblePages = computed(() => {
 async function loadBookings() {
   try {
     const response = await bookingApi.getBookings({ status: 'checked_in' })
-    bookings.value = response.data
+    bookings.value = response || []
   } catch (error) {
     console.error('Error loading bookings:', error)
     alert('Failed to load bookings')
