@@ -186,12 +186,19 @@
               required
             >
               <option value="">Select a booking...</option>
-              <option v-for="booking in bookings" :key="booking.id" :value="booking.id">
-                {{ booking.booking_number }} - {{ booking.guest?.name }} (Room {{ booking.rooms?.[0]?.room_number }})
-              </option>
+              <optgroup v-if="bookings.filter(b => b.type === 'room').length > 0" label="Room Bookings">
+                <option v-for="booking in bookings.filter(b => b.type === 'room')" :key="'room-' + booking.id" :value="'room-' + booking.id">
+                  {{ booking.booking_number }} - {{ booking.guest?.name }} (Room {{ booking.rooms?.[0]?.room_number }})
+                </option>
+              </optgroup>
+              <optgroup v-if="bookings.filter(b => b.type === 'hall').length > 0" label="Hall Bookings">
+                <option v-for="booking in bookings.filter(b => b.type === 'hall')" :key="'hall-' + booking.id" :value="'hall-' + booking.id">
+                  {{ booking.booking_number }} - {{ booking.customer_name }} ({{ booking.hall?.name }})
+                </option>
+              </optgroup>
             </select>
             <p v-if="bookings.length === 0" class="text-sm text-gray-500 mt-1">
-              No checked-in bookings available. Please check in a booking first.
+              No active bookings available.
             </p>
           </div>
 
@@ -199,10 +206,18 @@
           <div v-if="selectedBooking" class="mb-6 p-4 bg-blue-50 rounded-lg">
             <h3 class="font-medium text-gray-900 mb-2">Booking Details</h3>
             <div class="grid grid-cols-2 gap-2 text-sm">
-              <div><span class="text-gray-600">Guest:</span> {{ selectedBooking.guest?.name }}</div>
-              <div><span class="text-gray-600">Room:</span> {{ selectedBooking.rooms?.[0]?.room_number }}</div>
-              <div><span class="text-gray-600">Check-in:</span> {{ formatDate(selectedBooking.check_in_date) }}</div>
-              <div><span class="text-gray-600">Check-out:</span> {{ formatDate(selectedBooking.check_out_date) }}</div>
+              <template v-if="selectedBooking.type === 'room'">
+                <div><span class="text-gray-600">Guest:</span> {{ selectedBooking.guest?.name }}</div>
+                <div><span class="text-gray-600">Room:</span> {{ selectedBooking.rooms?.[0]?.room_number }}</div>
+                <div><span class="text-gray-600">Check-in:</span> {{ formatDate(selectedBooking.check_in_date) }}</div>
+                <div><span class="text-gray-600">Check-out:</span> {{ formatDate(selectedBooking.check_out_date) }}</div>
+              </template>
+              <template v-else>
+                <div><span class="text-gray-600">Customer:</span> {{ selectedBooking.customer_name }}</div>
+                <div><span class="text-gray-600">Hall:</span> {{ selectedBooking.hall?.name }}</div>
+                <div><span class="text-gray-600">Event Date:</span> {{ formatDate(selectedBooking.event_date) }}</div>
+                <div><span class="text-gray-600">Duration:</span> {{ selectedBooking.duration }} hours</div>
+              </template>
             </div>
           </div>
 
@@ -387,6 +402,18 @@
             placeholder="Search by order number or booking..."
             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
+          <input
+            v-model="orderFilters.start_date"
+            type="date"
+            placeholder="Start Date"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
+          <input
+            v-model="orderFilters.end_date"
+            type="date"
+            placeholder="End Date"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          />
           <select
             v-model="orderFilters.status"
             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -402,6 +429,13 @@
             class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >
             Refresh
+          </button>
+          <button
+            @click="exportOrders"
+            :disabled="exporting"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {{ exporting ? 'Exporting...' : 'Export Excel' }}
           </button>
         </div>
 
@@ -425,8 +459,14 @@
                   {{ order.order_number }}
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm font-medium text-gray-900">{{ order.booking?.booking_number }}</div>
-                  <div class="text-sm text-gray-500">{{ order.booking?.guest?.name }}</div>
+                  <template v-if="order.booking_id">
+                    <div class="text-sm font-medium text-gray-900">{{ order.booking?.booking_number }}</div>
+                    <div class="text-sm text-gray-500">{{ order.booking?.guest?.name }}</div>
+                  </template>
+                  <template v-else>
+                    <div class="text-sm font-medium text-gray-900">{{ order.hall_booking?.booking_number }}</div>
+                    <div class="text-sm text-gray-500">{{ order.hall_booking?.customer_name }}</div>
+                  </template>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
                   {{ order.order_items?.length || 0 }} items
@@ -600,7 +640,7 @@
 <script setup>
 import { ref, reactive, onMounted, watch, computed } from 'vue'
 import LayoutMain from '../components/LayoutMain.vue'
-import { menuItemApi, restaurantOrderApi, bookingApi } from '../api'
+import { menuItemApi, restaurantOrderApi, bookingApi, hallBookingApi } from '../api'
 
 const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
 
@@ -632,6 +672,7 @@ const menuCategoryFilter = ref('')
 const selectedBooking = ref(null)
 const orderForm = reactive({
   booking_id: '',
+  booking_type: 'room', // 'room' or 'hall'
   items: [],
   notes: ''
 })
@@ -641,8 +682,11 @@ const submitting = ref(false)
 const orders = ref({ data: [], meta: null })
 const orderFilters = reactive({
   search: '',
-  status: ''
+  status: '',
+  start_date: '',
+  end_date: ''
 })
+const exporting = ref(false)
 
 // Computed
 const filteredMenuItems = computed(() => {
@@ -758,16 +802,27 @@ const deleteMenuItem = async (item) => {
 // Orders
 const loadBookings = async () => {
   try {
-    console.log('Loading all bookings for debug...')
-    const allBookings = await bookingApi.getBookings({})
-    console.log('All bookings:', allBookings.length, allBookings.map(b => ({ id: b.id, number: b.booking_number, status: b.status })))
+    const allBookings = []
     
-    console.log('Loading bookings with status: checked_in')
-    const response = await bookingApi.getBookings({ status: 'checked_in' })
-    console.log('Checked-in bookings raw response:', response)
-    // bookingApi.getBookings() already returns response.data which is array
-    bookings.value = response || []
-    console.log('Checked-in bookings loaded:', bookings.value.length, bookings.value)
+    // Load room bookings with checked_in status
+    const roomBookings = await bookingApi.getBookings({ status: 'checked_in' })
+    const roomBookingsWithType = (roomBookings || []).map(b => ({
+      ...b,
+      type: 'room'
+    }))
+    allBookings.push(...roomBookingsWithType)
+    
+    // Load hall bookings with confirmed status
+    const hallBookings = await hallBookingApi.getHallBookings({ status: 'confirmed' })
+    const hallBookingsData = hallBookings.data || hallBookings || []
+    const hallBookingsWithType = hallBookingsData.map(b => ({
+      ...b,
+      type: 'hall'
+    }))
+    allBookings.push(...hallBookingsWithType)
+    
+    bookings.value = allBookings
+    console.log('All bookings loaded:', allBookings.length, allBookings)
   } catch (error) {
     console.error('Failed to load bookings:', error, error.response)
     alert('Failed to load bookings: ' + (error.response?.data?.message || error.message))
@@ -794,11 +849,21 @@ const loadBookingDetails = async () => {
     return
   }
   try {
-    console.log('Loading booking details for ID:', orderForm.booking_id)
-    const response = await bookingApi.getBooking(orderForm.booking_id)
-    console.log('Booking details response:', response)
-    // bookingApi.getBooking() already returns response.data which is booking object
-    selectedBooking.value = response
+    // Parse booking_id to get type and id (format: "room-123" or "hall-456")
+    const [type, id] = orderForm.booking_id.split('-')
+    orderForm.booking_type = type
+    
+    let response
+    if (type === 'room') {
+      response = await bookingApi.getBooking(id)
+    } else if (type === 'hall') {
+      response = await hallBookingApi.getHallBooking(id)
+    }
+    
+    selectedBooking.value = {
+      ...response,
+      type: type
+    }
     console.log('Selected booking loaded:', selectedBooking.value)
   } catch (error) {
     console.error('Failed to load booking details:', error, error.response)
@@ -844,6 +909,7 @@ const calculateTotal = () => {
 
 const resetOrderForm = () => {
   orderForm.booking_id = ''
+  orderForm.booking_type = 'room'
   orderForm.items = []
   orderForm.notes = ''
   selectedBooking.value = null
@@ -857,7 +923,19 @@ const submitOrder = async () => {
   }
   try {
     submitting.value = true
-    await restaurantOrderApi.createOrder(orderForm)
+    
+    // Parse booking_id to get actual id (remove type prefix)
+    const [type, id] = orderForm.booking_id.split('-')
+    
+    // Create payload with actual booking id
+    const payload = {
+      booking_id: type === 'room' ? id : null,
+      hall_booking_id: type === 'hall' ? id : null,
+      items: orderForm.items,
+      notes: orderForm.notes
+    }
+    
+    await restaurantOrderApi.createOrder(payload)
     alert('Order created successfully')
     resetOrderForm()
     activeTab.value = 'history'
@@ -900,6 +978,34 @@ const updateOrderStatus = async (orderId, status) => {
     loadOrders()
   } catch (error) {
     alert('Failed to update order status')
+  }
+}
+
+const exportOrders = async () => {
+  exporting.value = true
+  try {
+    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'https://hotel.tazkia.web.id/api'
+    
+    // Build query parameters
+    const params = new URLSearchParams()
+    if (orderFilters.start_date) params.append('start_date', orderFilters.start_date)
+    if (orderFilters.end_date) params.append('end_date', orderFilters.end_date)
+    if (orderFilters.status) params.append('status', orderFilters.status)
+    
+    const url = `${apiUrl}/restaurant-orders/export?${params.toString()}`
+    
+    // Create temporary link and trigger download
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', '')
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  } catch (err) {
+    console.error('Failed to export orders:', err)
+    alert('Failed to export orders')
+  } finally {
+    exporting.value = false
   }
 }
 

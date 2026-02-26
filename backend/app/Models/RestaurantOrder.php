@@ -13,6 +13,7 @@ class RestaurantOrder extends Model
     protected $fillable = [
         'order_number',
         'booking_id',
+        'hall_booking_id',
         'total_amount',
         'status',
         'notes',
@@ -27,6 +28,11 @@ class RestaurantOrder extends Model
     public function booking()
     {
         return $this->belongsTo(Booking::class);
+    }
+
+    public function hallBooking()
+    {
+        return $this->belongsTo(HallBooking::class);
     }
 
     public function createdBy()

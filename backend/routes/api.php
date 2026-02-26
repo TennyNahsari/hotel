@@ -93,6 +93,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Restaurant Management
     Route::apiResource('menu-items', MenuItemController::class);
     Route::get('/bookings/{booking}/restaurant-charges', [RestaurantOrderController::class, 'getBookingCharges']);
+    Route::get('/restaurant-orders/export', [RestaurantOrderController::class, 'export']);
     Route::patch('/restaurant-orders/{restaurantOrder}/status', [RestaurantOrderController::class, 'updateStatus']);
     Route::apiResource('restaurant-orders', RestaurantOrderController::class);
 
