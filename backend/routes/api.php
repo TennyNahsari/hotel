@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\HallController;
 use App\Http\Controllers\Api\HallBookingController;
 use App\Http\Controllers\Api\BreakfastController;
+use App\Http\Controllers\Api\MenuItemController;
+use App\Http\Controllers\Api\RestaurantOrderController;
 
 /*
 |--------------------------------------------------------------------------
@@ -86,4 +88,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/hall-bookings/{hallBooking}/cancel', [HallBookingController::class, 'cancel']);
     Route::post('/hall-bookings/{hallBooking}/complete', [HallBookingController::class, 'complete']);
     Route::apiResource('hall-bookings', HallBookingController::class);
+
+    // Restaurant Management
+    Route::apiResource('menu-items', MenuItemController::class);
+    Route::get('/bookings/{booking}/restaurant-charges', [RestaurantOrderController::class, 'getBookingCharges']);
+    Route::patch('/restaurant-orders/{restaurantOrder}/status', [RestaurantOrderController::class, 'updateStatus']);
+    Route::apiResource('restaurant-orders', RestaurantOrderController::class);
 });

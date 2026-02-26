@@ -378,3 +378,79 @@ export const breakfastApi = {
     return response.data
   },
 }
+
+export const menuItemApi = {
+  async getMenuItems(params = {}) {
+    const response = await api.get('/menu-items', { params })
+    return response.data
+  },
+
+  async getMenuItem(itemId) {
+    const response = await api.get(`/menu-items/${itemId}`)
+    return response.data
+  },
+
+  async createMenuItem(data) {
+    const formData = new FormData()
+    Object.keys(data).forEach(key => {
+      if (data[key] !== null && data[key] !== undefined) {
+        formData.append(key, data[key])
+      }
+    })
+    const response = await api.post('/menu-items', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data
+  },
+
+  async updateMenuItem(itemId, data) {
+    const formData = new FormData()
+    Object.keys(data).forEach(key => {
+      if (data[key] !== null && data[key] !== undefined) {
+        formData.append(key, data[key])
+      }
+    })
+    formData.append('_method', 'PUT')
+    const response = await api.post(`/menu-items/${itemId}`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data
+  },
+
+  async deleteMenuItem(itemId) {
+    const response = await api.delete(`/menu-items/${itemId}`)
+    return response.data
+  },
+}
+
+export const restaurantOrderApi = {
+  async getOrders(params = {}) {
+    const response = await api.get('/restaurant-orders', { params })
+    return response.data
+  },
+
+  async getOrder(orderId) {
+    const response = await api.get(`/restaurant-orders/${orderId}`)
+    return response.data
+  },
+
+  async createOrder(data) {
+    const response = await api.post('/restaurant-orders', data)
+    return response.data
+  },
+
+  async updateOrderStatus(orderId, status) {
+    const response = await api.patch(`/restaurant-orders/${orderId}/status`, { status })
+    return response.data
+  },
+
+  async deleteOrder(orderId) {
+    const response = await api.delete(`/restaurant-orders/${orderId}`)
+    return response.data
+  },
+
+  async getBookingCharges(bookingId) {
+    const response = await api.get(`/bookings/${bookingId}/restaurant-charges`)
+    return response.data
+  },
+}

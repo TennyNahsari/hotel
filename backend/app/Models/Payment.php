@@ -17,6 +17,7 @@ class Payment extends Model
         'payment_type',
         'payment_method',
         'amount',
+        'restaurant_charges',
         'reference_number',
         'notes',
         'processed_by',
@@ -24,6 +25,7 @@ class Payment extends Model
 
     protected $casts = [
         'amount' => 'decimal:2',
+        'restaurant_charges' => 'decimal:2',
     ];
 
     // Relationships

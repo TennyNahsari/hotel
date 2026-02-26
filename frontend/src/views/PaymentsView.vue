@@ -402,6 +402,29 @@
           </div>
 
           <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Restaurant Charges</label>
+            <input
+              v-model.number="formData.restaurant_charges"
+              type="number"
+              step="0.01"
+              min="0"
+              readonly
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 cursor-not-allowed"
+              placeholder="0.00"
+            />
+            <p class="text-xs text-gray-500 mt-1">Auto-filled from restaurant orders</p>
+          </div>
+
+          <div v-if="formData.amount > 0 || formData.restaurant_charges > 0" class="col-span-2 p-3 bg-blue-50 rounded-lg">
+            <div class="flex justify-between items-center">
+              <span class="font-medium text-gray-700">Total Payment:</span>
+              <span class="text-lg font-bold text-blue-600">
+                Rp {{ formatNumber(parseFloat(formData.amount || 0) + parseFloat(formData.restaurant_charges || 0)) }}
+              </span>
+            </div>
+          </div>
+
+          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Reference Number</label>
             <input
               v-model="formData.reference_number"
@@ -582,7 +605,7 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import LayoutMain from '../components/LayoutMain.vue'
-import { paymentApi, bookingApi, hallBookingApi } from '../api'
+import { paymentApi, bookingApi, hallBookingApi, restaurantOrderApi } from '../api'
 import axios from 'axios'
 
 const payments = ref([])
@@ -624,6 +647,7 @@ const formData = ref({
   payment_type: 'full',
   payment_method: 'cash',
   amount: 0,
+  restaurant_charges: 0,
   reference_number: '',
   notes: '',
 })
@@ -739,14 +763,24 @@ function filterBookings() {
   showBookingDropdown.value = true
 }
 
-function selectBooking(booking) {
+async function selectBooking(booking) {
   if (formData.value.booking_type === 'room') {
     formData.value.booking_id = booking.id
     formData.value.hall_booking_id = ''
     bookingSearch.value = `${booking.booking_number} - ${booking.guest?.name}`
+    
+    // Auto-fill restaurant charges for room bookings
+    try {
+      const charges = await restaurantOrderApi.getBookingCharges(booking.id)
+      formData.value.restaurant_charges = parseFloat(charges.restaurant_charges || 0)
+    } catch (error) {
+      console.error('Failed to load restaurant charges:', error)
+      formData.value.restaurant_charges = 0
+    }
   } else {
     formData.value.hall_booking_id = booking.id
     formData.value.booking_id = ''
+    formData.value.restaurant_charges = 0 // Hall bookings don't have restaurant charges
     const guestName = booking.customer_name || booking.guest?.name || 'N/A'
     bookingSearch.value = `${booking.booking_number} - ${guestName}`
   }
@@ -762,10 +796,13 @@ function selectBooking(booking) {
 function openCreateModal() {
   isEditing.value = false
   formData.value = {
+    booking_type: 'room',
     booking_id: '',
+    hall_booking_id: '',
     payment_type: 'full',
     payment_method: 'cash',
     amount: 0,
+    restaurant_charges: 0,
     reference_number: '',
     notes: '',
   }
@@ -896,6 +933,10 @@ function formatCurrency(amount) {
     currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(amount)
+}
+
+function formatNumber(value) {
+  return new Intl.NumberFormat('id-ID').format(value)
 }
 
 function formatDate(date) {
