@@ -83,6 +83,11 @@
           </button>
         </div>
 
+        <!-- Debug info -->
+        <div class="mb-2 text-sm text-gray-600" v-if="menuItems">
+          Total items: {{ menuItems.data?.length || 0 }} | Meta: {{ menuItems.meta ? 'exists' : 'null' }}
+        </div>
+
         <!-- Menu Items Table -->
         <div class="bg-white rounded-lg shadow overflow-hidden">
           <table class="min-w-full divide-y divide-gray-200">
@@ -97,6 +102,11 @@
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-if="!menuItems.data || menuItems.data.length === 0">
+                <td colspan="6" class="px-6 py-8 text-center text-gray-500">
+                  No menu items found. Click "Add Menu Item" to create one.
+                </td>
+              </tr>
               <tr v-for="item in menuItems.data" :key="item.id">
                 <td class="px-6 py-4 whitespace-nowrap">
                   <img 
@@ -575,7 +585,12 @@ const orderFilters = reactive({
 // Load menu items
 const loadMenuItems = async (url = null) => {
   try {
-    const params = { ...filters }
+    const params = {}
+    // Only include filter params if they have values
+    if (filters.search) params.search = filters.search
+    if (filters.category) params.category = filters.category
+    if (filters.is_available !== '') params.is_available = filters.is_available
+    
     if (url) {
       const urlObj = new URL(url)
       const page = urlObj.searchParams.get('page')
@@ -585,10 +600,10 @@ const loadMenuItems = async (url = null) => {
     const response = await menuItemApi.getMenuItems(params)
     console.log('Menu items response:', response)
     menuItems.value = response
-    console.log('Menu items loaded:', menuItems.value?.data?.length || 0)
+    console.log('Menu items loaded:', menuItems.value?.data?.length || 0, menuItems.value)
   } catch (error) {
-    console.error('Failed to load menu items:', error)
-    alert('Failed to load menu items')
+    console.error('Failed to load menu items:', error, error.response)
+    alert('Failed to load menu items: ' + (error.response?.data?.message || error.message))
   }
 }
 
@@ -863,11 +878,36 @@ const getCategoryBadgeClass = (category) => {
 }
 
 // Initialize
-onMounted(() => {
+onMounted(async () => {
   console.log('RestaurantView mounted, initializing...')
-  loadMenuItems()
-  loadBookings()
-  loadAvailableMenuItems()
-  loadOrders()
+  try {
+    await loadMenuItems()
+    console.log('Menu items initialization complete')
+  } catch (error) {
+    console.error('Menu items initialization failed:', error)
+  }
+  
+  try {
+    await loadBookings()
+    console.log('Bookings initialization complete')
+  } catch (error) {
+    console.error('Bookings initialization failed:', error)
+  }
+  
+  try {
+    await loadAvailableMenuItems()
+    console.log('Available menu items initialization complete')
+  } catch (error) {
+    console.error('Available menu items initialization failed:', error)
+  }
+  
+  try {
+    await loadOrders()
+    console.log('Orders initialization complete')
+  } catch (error) {
+    console.error('Orders initialization failed:', error)
+  }
+  
+  console.log('All initialization complete')
 })
 </script>
