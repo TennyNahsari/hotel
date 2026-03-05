@@ -26,8 +26,33 @@
     >
       <div class="flex flex-col h-full">
         <!-- Logo -->
-        <div class="flex items-center justify-center h-16 bg-blue-600 text-white font-bold text-xl">
-          HotelOne
+        <div class="flex items-center justify-between h-16 bg-blue-600 px-4">
+          <span class="text-white font-bold text-xl">HotelOne</span>
+          <!-- Language Switcher -->
+          <div class="flex items-center space-x-1">
+            <button
+              @click="changeLanguage('en')"
+              :class="[
+                'px-2 py-1 text-xs font-medium rounded transition-colors',
+                currentLocale === 'en' 
+                  ? 'bg-white text-blue-600' 
+                  : 'text-white hover:bg-blue-700'
+              ]"
+            >
+              EN
+            </button>
+            <button
+              @click="changeLanguage('id')"
+              :class="[
+                'px-2 py-1 text-xs font-medium rounded transition-colors',
+                currentLocale === 'id' 
+                  ? 'bg-white text-blue-600' 
+                  : 'text-white hover:bg-blue-700'
+              ]"
+            >
+              ID
+            </button>
+          </div>
         </div>
 
         <!-- Navigation -->
@@ -41,7 +66,7 @@
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
             </svg>
-            Dashboard
+            {{ $t('nav.dashboard') }}
           </router-link>
 
           <!-- Guests -->
@@ -53,7 +78,7 @@
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            Guests
+            {{ $t('nav.guests') }}
           </router-link>
 
           <!-- Room Management -->
@@ -67,7 +92,7 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
-                Room Management
+                {{ $t('nav.roomManagement') }}
               </div>
               <svg
                 :class="{ 'transform rotate-180': roomMenuOpen }"
@@ -89,7 +114,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Rooms
+                {{ $t('nav.rooms') }}
               </router-link>
               
               <router-link
@@ -100,7 +125,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Room Types
+                {{ $t('nav.roomTypes') }}
               </router-link>
 
               <router-link
@@ -111,7 +136,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Room Bookings
+                {{ $t('nav.roomBookings') }}
               </router-link>
             </div>
           </div>
@@ -127,7 +152,7 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
-                Hall Management
+                {{ $t('nav.hallManagement') }}
               </div>
               <svg
                 :class="{ 'transform rotate-180': hallMenuOpen }"
@@ -149,7 +174,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Halls
+                {{ $t('nav.halls') }}
               </router-link>
               
               <router-link
@@ -160,7 +185,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Hall Bookings
+                {{ $t('nav.hallBookings') }}
               </router-link>
             </div>
           </div>
@@ -176,7 +201,7 @@
                 <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
-                Services
+                {{ $t('nav.services') }}
               </div>
               <svg
                 class="w-4 h-4 transition-transform"
@@ -198,7 +223,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Breakfast
+                {{ $t('nav.breakfast') }}
               </router-link>
               
               <router-link
@@ -209,7 +234,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Restaurant & Cafe
+                {{ $t('nav.restaurant') }}
               </router-link>
               
               <router-link
@@ -220,7 +245,7 @@
                 <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                Laundry
+                {{ $t('nav.laundry') }}
               </router-link>
             </div>
           </div>
@@ -234,7 +259,7 @@
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
             </svg>
-            Housekeeping
+            {{ $t('nav.housekeeping') }}
           </router-link>
 
           <!-- Payments -->
@@ -246,7 +271,7 @@
             <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
-            Payments
+            {{ $t('nav.payments') }}
           </router-link>
         </nav>
 
@@ -274,7 +299,7 @@
             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Logout
+            {{ $t('nav.logout') }}
           </button>
         </div>
       </div>
@@ -293,10 +318,14 @@
 import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const { locale } = useI18n()
+
+const currentLocale = computed(() => locale.value)
 
 const sidebarOpen = ref(false)
 const roomMenuOpen = ref(true) // Default open
@@ -328,5 +357,10 @@ const userInitials = computed(() => {
 async function handleLogout() {
   await authStore.logout()
   router.push({ name: 'login' })
+}
+
+function changeLanguage(lang) {
+  locale.value = lang
+  localStorage.setItem('locale', lang)
 }
 </script>

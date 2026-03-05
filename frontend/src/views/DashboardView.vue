@@ -3,14 +3,14 @@
     <div class="space-y-6">
       <!-- Header -->
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p class="text-gray-600 mt-1 text-sm sm:text-base">Welcome back! Here's what's happening today.</p>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('dashboard.title') }}</h1>
+        <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('dashboard.subtitle') }}</p>
       </div>
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="text-gray-500 mt-2">Loading dashboard...</p>
+        <p class="text-gray-500 mt-2">{{ $t('dashboard.loading') }}</p>
       </div>
 
       <!-- Stats Cards -->
@@ -26,7 +26,7 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Available Rooms</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate">{{ $t('dashboard.availableRooms') }}</dt>
                   <dd class="text-2xl font-semibold text-gray-900">
                     {{ dashboard.rooms?.available || 0 }}/{{ dashboard.rooms?.total || 0 }}
                   </dd>
@@ -45,7 +45,7 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Today's Check-ins</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate">{{ $t('dashboard.todayCheckIns') }}</dt>
                   <dd class="text-2xl font-semibold text-gray-900">{{ dashboard.bookings?.today_check_ins || 0 }}</dd>
                 </dl>
               </div>
@@ -62,7 +62,7 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Today's Check-outs</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate">{{ $t('dashboard.todayCheckOuts') }}</dt>
                   <dd class="text-2xl font-semibold text-gray-900">{{ dashboard.bookings?.today_check_outs || 0 }}</dd>
                 </dl>
               </div>
@@ -79,7 +79,7 @@
               </div>
               <div class="ml-5 w-0 flex-1">
                 <dl>
-                  <dt class="text-sm font-medium text-gray-500 truncate">Today's Full Payments</dt>
+                  <dt class="text-sm font-medium text-gray-500 truncate">{{ $t('dashboard.todayRevenue') }}</dt>
                   <dd class="text-2xl font-semibold text-gray-900">
                     {{ formatCurrency(dashboard.revenue?.today_full_payments || 0) }}
                   </dd>
@@ -93,25 +93,25 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <!-- Occupied Rooms -->
           <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm font-medium text-gray-500">Occupied Rooms</div>
+            <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.occupiedRooms') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">{{ dashboard.rooms?.occupied || 0 }}</div>
           </div>
 
           <!-- Pending Bookings -->
           <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm font-medium text-gray-500">Pending Bookings</div>
+            <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.pendingBookings') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">{{ dashboard.bookings?.pending || 0 }}</div>
           </div>
 
           <!-- Pending Tasks -->
           <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm font-medium text-gray-500">Pending Tasks</div>
+            <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.pendingTasks') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">{{ dashboard.housekeeping?.pending || 0 }}</div>
           </div>
 
           <!-- Month Revenue -->
           <div class="bg-white rounded-lg shadow p-6">
-            <div class="text-sm font-medium text-gray-500">Month Full Payments</div>
+            <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.monthRevenue') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">
               {{ formatCurrency(dashboard.revenue?.month_full_payments || 0) }}
             </div>
@@ -120,74 +120,74 @@
 
         <!-- Payment Report Section -->
         <div class="bg-white rounded-lg shadow p-4 md:p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">Today's Payment Report</h2>
+          <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('dashboard.paymentReport') }}</h2>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
             <!-- Full Payments Today -->
             <div class="bg-green-50 rounded-lg p-4 border border-green-200">
-              <div class="text-xs font-medium text-green-600 uppercase">Full Payment</div>
+              <div class="text-xs font-medium text-green-600 uppercase">{{ $t('dashboard.fullPayment') }}</div>
               <div class="mt-2 text-xl font-bold text-green-700">
                 {{ formatCurrency(dashboard.revenue?.today_full_payments || 0) }}
               </div>
               <div class="text-xs text-green-600 mt-1">
-                {{ dashboard.payments?.today_by_type?.full?.count || 0 }} transactions
+                {{ dashboard.payments?.today_by_type?.full?.count || 0 }} {{ $t('dashboard.transactions') }}
               </div>
             </div>
 
             <!-- Deposit Today -->
             <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
-              <div class="text-xs font-medium text-blue-600 uppercase">Deposit</div>
+              <div class="text-xs font-medium text-blue-600 uppercase">{{ $t('dashboard.deposit') }}</div>
               <div class="mt-2 text-xl font-bold text-blue-700">
                 {{ formatCurrency(dashboard.payments?.today_by_type?.deposit?.total || 0) }}
               </div>
               <div class="text-xs text-blue-600 mt-1">
-                {{ dashboard.payments?.today_by_type?.deposit?.count || 0 }} transactions
+                {{ dashboard.payments?.today_by_type?.deposit?.count || 0 }} {{ $t('dashboard.transactions') }}
               </div>
             </div>
 
             <!-- Partial Today -->
             <div class="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
-              <div class="text-xs font-medium text-yellow-600 uppercase">Partial</div>
+              <div class="text-xs font-medium text-yellow-600 uppercase">{{ $t('dashboard.partial') }}</div>
               <div class="mt-2 text-xl font-bold text-yellow-700">
                 {{ formatCurrency(dashboard.payments?.today_by_type?.partial?.total || 0) }}
               </div>
               <div class="text-xs text-yellow-600 mt-1">
-                {{ dashboard.payments?.today_by_type?.partial?.count || 0 }} transactions
+                {{ dashboard.payments?.today_by_type?.partial?.count || 0 }} {{ $t('dashboard.transactions') }}
               </div>
             </div>
 
             <!-- Refund Today -->
             <div class="bg-red-50 rounded-lg p-4 border border-red-200">
-              <div class="text-xs font-medium text-red-600 uppercase">Refund</div>
+              <div class="text-xs font-medium text-red-600 uppercase">{{ $t('dashboard.refund') }}</div>
               <div class="mt-2 text-xl font-bold text-red-700">
                 {{ formatCurrency(dashboard.payments?.today_by_type?.refund?.total || 0) }}
               </div>
               <div class="text-xs text-red-600 mt-1">
-                {{ dashboard.payments?.today_by_type?.refund?.count || 0 }} transactions
+                {{ dashboard.payments?.today_by_type?.refund?.count || 0 }} {{ $t('dashboard.transactions') }}
               </div>
             </div>
 
             <!-- Total Today -->
             <div class="bg-purple-50 rounded-lg p-4 border border-purple-200">
-              <div class="text-xs font-medium text-purple-600 uppercase">Total Today</div>
+              <div class="text-xs font-medium text-purple-600 uppercase">{{ $t('dashboard.totalToday') }}</div>
               <div class="mt-2 text-xl font-bold text-purple-700">
                 {{ formatCurrency(dashboard.revenue?.today_all_payments || 0) }}
               </div>
-              <div class="text-xs text-purple-600 mt-1">All payments</div>
+              <div class="text-xs text-purple-600 mt-1">{{ $t('dashboard.allPayments') }}</div>
             </div>
           </div>
 
           <!-- Monthly Summary -->
           <div class="mt-6 pt-6 border-t border-gray-200">
-            <h3 class="text-sm font-semibold text-gray-700 mb-3">This Month Summary</h3>
+            <h3 class="text-sm font-semibold text-gray-700 mb-3">{{ $t('dashboard.monthSummary') }}</h3>
             <div class="grid grid-cols-2 gap-4">
               <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-sm text-gray-600">Full Payments (Month)</div>
+                <div class="text-sm text-gray-600">{{ $t('dashboard.fullPaymentsMonth') }}</div>
                 <div class="text-2xl font-bold text-gray-900 mt-1">
                   {{ formatCurrency(dashboard.revenue?.month_full_payments || 0) }}
                 </div>
               </div>
               <div class="bg-gray-50 rounded-lg p-4">
-                <div class="text-sm text-gray-600">All Payments (Month)</div>
+                <div class="text-sm text-gray-600">{{ $t('dashboard.allPaymentsMonth') }}</div>
                 <div class="text-2xl font-bold text-gray-900 mt-1">
                   {{ formatCurrency(dashboard.revenue?.month_all_payments || 0) }}
                 </div>
@@ -199,11 +199,11 @@
         <!-- Recent Bookings -->
         <div class="bg-white rounded-lg shadow">
           <div class="px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-900">Recent Bookings</h2>
+            <h2 class="text-lg font-semibold text-gray-900">{{ $t('dashboard.recentBookings') }}</h2>
           </div>
           <div v-if="!dashboard.recent_bookings || dashboard.recent_bookings.length === 0" class="p-6">
             <div class="text-center text-gray-500 py-8">
-              <p>No recent bookings</p>
+              <p>{{ $t('dashboard.noRecentBookings') }}</p>
             </div>
           </div>
           <div v-else>
@@ -233,11 +233,11 @@
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Guest</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Room</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Check-in</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Check-out</th>
-                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.guest') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.room') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.checkIn') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.checkOut') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.status') }}</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -274,10 +274,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { dashboardApi } from '../api'
 import axios from 'axios'
 
+const { t } = useI18n()
 const dashboard = ref({})
 const loading = ref(false)
 
@@ -336,11 +338,11 @@ function getStatusBadgeClass(status) {
 
 function getStatusLabel(status) {
   const labels = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    checked_in: 'Checked In',
-    checked_out: 'Checked Out',
-    cancelled: 'Cancelled',
+    pending: t('dashboard.pending'),
+    confirmed: t('dashboard.confirmed'),
+    checked_in: t('dashboard.checkedIn'),
+    checked_out: t('dashboard.checkedOut'),
+    cancelled: t('dashboard.cancelled'),
   }
   return labels[status] || status
 }
