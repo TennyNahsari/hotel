@@ -4,14 +4,14 @@
       <!-- Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Payments & Billing</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage payment transactions and print invoices</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('payments.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('payments.subtitle') }}</p>
         </div>
         <button
           @click="openCreateModal"
           class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + New Payment
+          + {{ $t('payments.newPayment') }}
         </button>
       </div>
 
@@ -19,7 +19,7 @@
       <div class="bg-white rounded-lg shadow p-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date From</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentDateFrom') }}</label>
             <input
               v-model="filters.start_date"
               @change="loadPayments"
@@ -28,7 +28,7 @@
             />
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date To</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentDateTo') }}</label>
             <input
               v-model="filters.end_date"
               @change="loadPayments"
@@ -37,42 +37,42 @@
             />
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentType') }}</label>
             <select
               v-model="filters.payment_type"
               @change="loadPayments"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Types</option>
-              <option value="deposit">Deposit</option>
-              <option value="partial">Partial</option>
-              <option value="full">Full Payment</option>
-              <option value="refund">Refund</option>
-              <option value="extra_charge">Extra Charge</option>
+              <option value="">{{ $t('payments.allTypes') }}</option>
+              <option value="deposit">{{ $t('payments.deposit') }}</option>
+              <option value="partial">{{ $t('payments.partial') }}</option>
+              <option value="full">{{ $t('payments.full') }}</option>
+              <option value="refund">{{ $t('payments.refund') }}</option>
+              <option value="extra_charge">{{ $t('payments.extraCharge') }}</option>
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentMethod') }}</label>
             <select
               v-model="filters.payment_method"
               @change="loadPayments"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Methods</option>
-              <option value="cash">Cash</option>
-              <option value="transfer">Transfer</option>
-              <option value="qris">QRIS</option>
-              <option value="card">Card</option>
-              <option value="other">Other</option>
+              <option value="">{{ $t('payments.allMethods') }}</option>
+              <option value="cash">{{ $t('payments.cash') }}</option>
+              <option value="transfer">{{ $t('payments.transfer') }}</option>
+              <option value="qris">{{ $t('payments.qris') }}</option>
+              <option value="card">{{ $t('payments.card') }}</option>
+              <option value="other">{{ $t('payments.other') }}</option>
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.search') }}</label>
             <input
               v-model="filters.search"
               @input="loadPayments"
               type="text"
-              placeholder="Payment number..."
+              :placeholder="$t('payments.searchPlaceholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
@@ -83,7 +83,7 @@
             :disabled="exporting"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ exporting ? 'Exporting...' : '📊 Export Excel' }}
+            {{ exporting ? $t('payments.exporting') : '📊 ' + $t('payments.exportExcel') }}
           </button>
         </div>
       </div>
@@ -92,11 +92,11 @@
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div v-if="loading" class="text-center py-12">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p class="text-gray-500 mt-2">Loading payments...</p>
+          <p class="text-gray-500 mt-2">{{ $t('payments.loading') }}</p>
         </div>
 
         <div v-else-if="payments.length === 0" class="text-center py-12">
-          <p class="text-gray-500">No payments found</p>
+          <p class="text-gray-500">{{ $t('payments.noPayments') }}</p>
         </div>
 
         <div v-else>
@@ -130,19 +130,19 @@
                     @click="printInvoice(payment)"
                     class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
                   >
-                    Print
+                    {{ $t('payments.print') }}
                   </button>
                   <button
                     @click="openEditModal(payment)"
                     class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
                   >
-                    Edit
+                    {{ $t('payments.edit') }}
                   </button>
                   <button
                     @click="confirmDelete(payment)"
                     class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                   >
-                    Delete
+                    {{ $t('payments.delete') }}
                   </button>
                 </div>
               </div>
@@ -178,22 +178,22 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment Number
+                  {{ $t('payments.paymentNumber') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Booking / Guest
+                  {{ $t('payments.booking') }} / {{ $t('payments.guest') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type / Method
+                  {{ $t('payments.type') }} / {{ $t('payments.method') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Amount
+                  {{ $t('payments.amount') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date
+                  {{ $t('payments.date') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {{ $t('payments.actions') }}
                 </th>
               </tr>
             </thead>
@@ -229,19 +229,19 @@
                       @click="printInvoice(payment)"
                       class="text-xs px-2 py-1 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
                     >
-                      Print
+                      {{ $t('payments.print') }}
                     </button>
                     <button
                       @click="openEditModal(payment)"
                       class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
                     >
-                      Edit
+                      {{ $t('payments.edit') }}
                     </button>
                     <button
                       @click="confirmDelete(payment)"
                       class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                     >
-                      Delete
+                      {{ $t('payments.delete') }}
                     </button>
                   </div>
                 </td>
@@ -286,12 +286,12 @@
     >
       <div class="bg-white rounded-lg max-w-md w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Payment' : 'New Payment' }}
+          {{ isEditing ? $t('payments.editPayment') : $t('payments.createPayment') }}
         </h2>
 
         <form @submit.prevent="savePayment" class="space-y-4">
           <div v-if="!isEditing">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Booking Type *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('payments.bookingType') }} *</label>
             <div class="grid grid-cols-2 gap-2 mb-4">
               <button
                 type="button"
@@ -303,7 +303,7 @@
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 ]"
               >
-                Room Booking
+                {{ $t('payments.roomBooking') }}
               </button>
               <button
                 type="button"
@@ -315,14 +315,14 @@
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 ]"
               >
-                Hall Booking
+                {{ $t('payments.hallBooking') }}
               </button>
             </div>
           </div>
 
           <div v-if="!isEditing">
             <label class="block text-sm font-medium text-gray-700 mb-1">
-              {{ formData.booking_type === 'room' ? 'Room Booking *' : 'Hall Booking *' }}
+              {{ formData.booking_type === 'room' ? $t('payments.selectBooking') + ' *' : $t('payments.selectHallBooking') + ' *' }}
             </label>
             <div class="relative">
               <input
@@ -359,37 +359,37 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Type *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentType') }} *</label>
             <select
               v-model="formData.payment_type"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="deposit">Deposit</option>
-              <option value="partial">Partial Payment</option>
-              <option value="full">Full Payment</option>
-              <option value="refund">Refund</option>
-              <option value="extra_charge">Extra Charge</option>
+              <option value="deposit">{{ $t('payments.deposit') }}</option>
+              <option value="partial">{{ $t('payments.partial') }}</option>
+              <option value="full">{{ $t('payments.full') }}</option>
+              <option value="refund">{{ $t('payments.refund') }}</option>
+              <option value="extra_charge">{{ $t('payments.extraCharge') }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentMethod') }} *</label>
             <select
               v-model="formData.payment_method"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="cash">Cash</option>
-              <option value="transfer">Transfer</option>
-              <option value="qris">QRIS</option>
-              <option value="card">Card</option>
-              <option value="other">Other</option>
+              <option value="cash">{{ $t('payments.cash') }}</option>
+              <option value="transfer">{{ $t('payments.transfer') }}</option>
+              <option value="qris">{{ $t('payments.qris') }}</option>
+              <option value="card">{{ $t('payments.card') }}</option>
+              <option value="other">{{ $t('payments.other') }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Amount *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ formData.booking_type === 'room' ? $t('payments.roomAmount') : $t('payments.hallAmount') }} *</label>
             <input
               v-model.number="formData.amount"
               type="number"
@@ -402,7 +402,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Restaurant Charges</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.restaurantCharges') }}</label>
             <input
               v-model.number="formData.restaurant_charges"
               type="number"
@@ -416,7 +416,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Laundry Charges</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.laundryCharges') }}</label>
             <input
               v-model.number="formData.laundry_charges"
               type="number"
@@ -432,20 +432,20 @@
           <div v-if="formData.amount > 0 || formData.restaurant_charges > 0 || formData.laundry_charges > 0" class="col-span-2 p-3 bg-blue-50 rounded-lg">
             <div class="space-y-1">
               <div class="flex justify-between items-center text-sm">
-                <span class="text-gray-600">Room Amount:</span>
+                <span class="text-gray-600">{{ formData.booking_type === 'room' ? $t('payments.roomAmount') : $t('payments.hallAmount') }}:</span>
                 <span class="text-gray-900">Rp {{ formatNumber(parseFloat(formData.amount || 0)) }}</span>
               </div>
               <div v-if="formData.restaurant_charges > 0" class="flex justify-between items-center text-sm">
-                <span class="text-gray-600">Restaurant Charges:</span>
+                <span class="text-gray-600">{{ $t('payments.restaurantCharges') }}:</span>
                 <span class="text-gray-900">Rp {{ formatNumber(parseFloat(formData.restaurant_charges || 0)) }}</span>
               </div>
               <div v-if="formData.laundry_charges > 0" class="flex justify-between items-center text-sm">
-                <span class="text-gray-600">Laundry Charges:</span>
+                <span class="text-gray-600">{{ $t('payments.laundryCharges') }}:</span>
                 <span class="text-gray-900">Rp {{ formatNumber(parseFloat(formData.laundry_charges || 0)) }}</span>
               </div>
               <div class="border-t border-blue-200 pt-1 mt-1"></div>
               <div class="flex justify-between items-center">
-                <span class="font-medium text-gray-700">Total Payment:</span>
+                <span class="font-medium text-gray-700">{{ $t('payments.totalAmount') }}:</span>
                 <span class="text-lg font-bold text-blue-600">
                   Rp {{ formatNumber(parseFloat(formData.amount || 0) + parseFloat(formData.restaurant_charges || 0) + parseFloat(formData.laundry_charges || 0)) }}
                 </span>
@@ -454,7 +454,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Reference Number</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.referenceNumber') }}</label>
             <input
               v-model="formData.reference_number"
               type="text"
@@ -464,7 +464,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.notes') }}</label>
             <textarea
               v-model="formData.notes"
               rows="3"
@@ -483,14 +483,14 @@
               @click="closeModal"
               class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('payments.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving"
               class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update' : 'Create') }}
+              {{ saving ? $t('payments.saving') : (isEditing ? $t('payments.save') : $t('payments.save')) }}
             </button>
           </div>
         </form>
@@ -504,23 +504,23 @@
       @click.self="showDeleteConfirm = false"
     >
       <div class="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Delete Payment?</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('payments.delete') }}?</h2>
         <p class="text-gray-600 mb-6">
-          Are you sure you want to delete payment <strong>{{ paymentToDelete?.payment_number }}</strong>?
+          {{ $t('payments.confirmDelete') }}
         </p>
         <div class="flex gap-3">
           <button
             @click="showDeleteConfirm = false"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {{ $t('payments.cancel') }}
           </button>
           <button
             @click="handleDelete"
             :disabled="deleting"
             class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {{ deleting ? 'Deleting...' : 'Delete' }}
+            {{ deleting ? $t('payments.saving') : $t('payments.delete') }}
           </button>
         </div>
       </div>
@@ -532,21 +532,21 @@
         <div class="border-2 border-gray-800 p-8">
           <!-- Header -->
           <div class="text-center mb-8">
-            <h1 class="text-4xl font-bold text-gray-900">INVOICE</h1>
+            <h1 class="text-4xl font-bold text-gray-900">{{ $t('payments.invoice').toUpperCase() }}</h1>
             <p class="text-gray-600 mt-2">Payment Receipt</p>
           </div>
 
           <!-- Company & Customer Info -->
           <div class="grid grid-cols-2 gap-8 mb-8">
             <div>
-              <h3 class="font-bold text-gray-900 mb-2">From:</h3>
+              <h3 class="font-bold text-gray-900 mb-2">{{ $t('payments.from') }}:</h3>
               <p class="text-gray-700 font-semibold">Your Hotel Name</p>
               <p class="text-gray-600">Jl. Hotel Address</p>
               <p class="text-gray-600">City, Province 12345</p>
               <p class="text-gray-600">Phone: (021) 1234-5678</p>
             </div>
             <div>
-              <h3 class="font-bold text-gray-900 mb-2">To:</h3>
+              <h3 class="font-bold text-gray-900 mb-2">{{ $t('payments.to') }}:</h3>
               <template v-if="selectedPayment.booking_id">
                 <p class="text-gray-700 font-semibold">{{ selectedPayment.booking?.guest?.name }}</p>
                 <p class="text-gray-600">{{ selectedPayment.booking?.guest?.email }}</p>
@@ -592,15 +592,15 @@
           <table class="w-full mb-8">
             <thead>
               <tr class="border-b-2 border-gray-800">
-                <th class="text-left py-2 px-4">Description</th>
-                <th class="text-right py-2 px-4">Amount</th>
+                <th class="text-left py-2 px-4">{{ $t('payments.description') }}</th>
+                <th class="text-right py-2 px-4">{{ $t('payments.amount') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr class="border-b border-gray-300">
                 <td class="py-3 px-4">
                   <p class="font-medium">{{ getPaymentTypeLabel(selectedPayment.payment_type) }}</p>
-                  <p class="text-sm text-gray-600">Payment Method: {{ getPaymentMethodLabel(selectedPayment.payment_method) }}</p>
+                  <p class="text-sm text-gray-600">{{ $t('payments.paymentMethod') }}: {{ getPaymentMethodLabel(selectedPayment.payment_method) }}</p>
                   <p v-if="selectedPayment.reference_number" class="text-sm text-gray-600">
                     Ref: {{ selectedPayment.reference_number }}
                   </p>
@@ -609,18 +609,18 @@
               </tr>
               <tr v-if="selectedPayment.restaurant_charges > 0" class="border-b border-gray-300">
                 <td class="py-3 px-4">
-                  <p class="font-medium">Restaurant Charges</p>
+                  <p class="font-medium">{{ $t('payments.restaurantCharges') }}</p>
                 </td>
                 <td class="py-3 px-4 text-right font-bold">{{ formatCurrency(selectedPayment.restaurant_charges) }}</td>
               </tr>
               <tr v-if="selectedPayment.laundry_charges > 0" class="border-b border-gray-300">
                 <td class="py-3 px-4">
-                  <p class="font-medium">Laundry Charges</p>
+                  <p class="font-medium">{{ $t('payments.laundryCharges') }}</p>
                 </td>
                 <td class="py-3 px-4 text-right font-bold">{{ formatCurrency(selectedPayment.laundry_charges) }}</td>
               </tr>
               <tr class="border-t-2 border-gray-800">
-                <td class="py-3 px-4 text-right font-bold">TOTAL PAID</td>
+                <td class="py-3 px-4 text-right font-bold">{{ $t('payments.total').toUpperCase() }}</td>
                 <td class="py-3 px-4 text-right font-bold text-xl">{{ formatCurrency(getPaymentTotal(selectedPayment)) }}</td>
               </tr>
             </tbody>
@@ -628,7 +628,7 @@
 
           <!-- Notes -->
           <div v-if="selectedPayment.notes" class="mb-8">
-            <h3 class="font-bold text-gray-900 mb-2">Notes:</h3>
+            <h3 class="font-bold text-gray-900 mb-2">{{ $t('payments.notes') }}:</h3>
             <p class="text-gray-600">{{ selectedPayment.notes }}</p>
           </div>
 
@@ -645,9 +645,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { paymentApi, bookingApi, hallBookingApi, restaurantOrderApi, laundryOrderApi } from '../api'
 import axios from 'axios'
+
+const { t } = useI18n()
 
 const payments = ref([])
 const bookings = ref([])
@@ -1022,11 +1025,11 @@ function getPaymentTypeBadgeClass(type) {
 
 function getPaymentTypeLabel(type) {
   const labels = {
-    deposit: 'Deposit',
-    partial: 'Partial',
-    full: 'Full Payment',
-    refund: 'Refund',
-    extra_charge: 'Extra Charge',
+    deposit: t('payments.deposit'),
+    partial: t('payments.partial'),
+    full: t('payments.full'),
+    refund: t('payments.refund'),
+    extra_charge: t('payments.extraCharge'),
   }
   return labels[type] || type
 }
@@ -1044,22 +1047,22 @@ function getPaymentMethodBadgeClass(method) {
 
 function getPaymentMethodLabel(method) {
   const labels = {
-    cash: 'Cash',
-    transfer: 'Bank Transfer',
-    qris: 'QRIS',
-    card: 'Card',
-    other: 'Other',
+    cash: t('payments.cash'),
+    transfer: t('payments.transfer'),
+    qris: t('payments.qris'),
+    card: t('payments.card'),
+    other: t('payments.other'),
   }
   return labels[method] || method
 }
 
 function getStatusLabel(status) {
   const labels = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    checked_in: 'Checked In',
-    checked_out: 'Checked Out',
-    cancelled: 'Cancelled',
+    pending: t('dashboard.pending'),
+    confirmed: t('dashboard.confirmed'),
+    checked_in: t('dashboard.checkedIn'),
+    checked_out: t('dashboard.checkedOut'),
+    cancelled: t('dashboard.cancelled'),
   }
   return labels[status] || status
 }

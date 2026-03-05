@@ -4,14 +4,14 @@
       <!-- Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Guests</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage hotel guests</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('guests.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('guests.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
           class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + Add Guest
+          + {{ $t('guests.addGuest') }}
         </button>
       </div>
 
@@ -21,7 +21,7 @@
           v-model="searchQuery"
           @input="loadGuests"
           type="text"
-          placeholder="Search by name, email, phone, or ID number..."
+          :placeholder="$t('guests.searchPlaceholder')"
           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         />
         <div>
@@ -30,7 +30,7 @@
             :disabled="exporting"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ exporting ? 'Exporting...' : '📊 Export Excel' }}
+            {{ exporting ? $t('guests.exporting') : '📊 ' + $t('guests.exportExcel') }}
           </button>
         </div>
       </div>
@@ -39,11 +39,11 @@
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div v-if="loading" class="text-center py-12">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p class="text-gray-500 mt-2">Loading guests...</p>
+          <p class="text-gray-500 mt-2">{{ $t('guests.loading') }}</p>
         </div>
 
         <div v-else-if="guests.length === 0" class="text-center py-12">
-          <p class="text-gray-500">No guests found</p>
+          <p class="text-gray-500">{{ $t('guests.noGuests') }}</p>
         </div>
 
         <div v-else>
@@ -67,13 +67,13 @@
                     @click="openEditModal(guest)"
                     class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
                   >
-                    Edit
+                    {{ $t('guests.edit') }}
                   </button>
                   <button
                     @click="confirmDelete(guest)"
                     class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                   >
-                    Delete
+                    {{ $t('guests.delete') }}
                   </button>
                 </div>
               </div>
@@ -85,22 +85,22 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Name
+                {{ $t('guests.name') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Contact
+                {{ $t('guests.contact') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                ID Card
+                {{ $t('guests.idCard') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Nationality
+                {{ $t('guests.nationality') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Bookings
+                {{ $t('guests.bookings') }}
               </th>
               <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Actions
+                {{ $t('guests.actions') }}
               </th>
             </tr>
           </thead>
@@ -109,7 +109,7 @@
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ guest.name }}</div>
                 <div v-if="guest.birth_date" class="text-sm text-gray-500">
-                  Born: {{ formatDate(guest.birth_date) }}
+                  {{ $t('guests.born') }}: {{ formatDate(guest.birth_date) }}
                 </div>
               </td>
               <td class="px-6 py-4">
@@ -128,9 +128,9 @@
                 <div class="text-sm text-gray-900">{{ guest.nationality || '-' }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ guest.bookings_count || 0 }} booking(s)</div>
+                <div class="text-sm text-gray-900">{{ guest.bookings_count || 0 }} {{ $t('guests.bookingCount') }}</div>
                 <div v-if="guest.is_repeat_guest" class="text-xs text-green-600">
-                  Repeat Guest
+                  {{ $t('guests.repeatGuest') }}
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -138,16 +138,16 @@
                   <button
                     @click="openEditModal(guest)"
                     class="text-blue-600 hover:text-blue-900"
-                    title="Edit"
+                    :title="$t('guests.edit')"
                   >
-                    Edit
+                    {{ $t('guests.edit') }}
                   </button>
                   <button
                     @click="confirmDelete(guest)"
                     class="text-red-600 hover:text-red-900"
-                    title="Delete"
+                    :title="$t('guests.delete')"
                   >
-                    Delete
+                    {{ $t('guests.delete') }}
                   </button>
                 </div>
               </td>
@@ -166,13 +166,13 @@
     >
       <div class="bg-white rounded-lg max-w-2xl w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Guest' : 'Add New Guest' }}
+          {{ isEditing ? $t('guests.editGuest') : $t('guests.addNewGuest') }}
         </h2>
 
         <form @submit.prevent="saveGuest" class="space-y-4">
           <!-- Name -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.fullName') }} *</label>
             <input
               v-model="formData.name"
               type="text"
@@ -185,7 +185,7 @@
           <!-- Contact -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.phone') }} *</label>
               <input
                 v-model="formData.phone"
                 type="tel"
@@ -195,7 +195,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.email') }}</label>
               <input
                 v-model="formData.email"
                 type="email"
@@ -208,20 +208,20 @@
           <!-- ID Card -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">ID Card Type</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.idCardType') }}</label>
               <select
                 v-model="formData.id_card_type"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
-                <option value="">Select type</option>
-                <option value="ktp">KTP</option>
-                <option value="passport">Passport</option>
-                <option value="sim">SIM</option>
-                <option value="other">Other</option>
+                <option value="">{{ $t('guests.selectType') }}</option>
+                <option value="ktp">{{ $t('guests.ktp') }}</option>
+                <option value="passport">{{ $t('guests.passport') }}</option>
+                <option value="sim">{{ $t('guests.sim') }}</option>
+                <option value="other">{{ $t('guests.other') }}</option>
               </select>
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">ID Card Number</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.idCardNumber') }}</label>
               <input
                 v-model="formData.id_card_number"
                 type="text"
@@ -234,7 +234,7 @@
           <!-- Nationality & Birth Date -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.nationality') }}</label>
               <input
                 v-model="formData.nationality"
                 type="text"
@@ -243,7 +243,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Birth Date</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.birthDate') }}</label>
               <input
                 v-model="formData.birth_date"
                 type="date"
@@ -254,7 +254,7 @@
 
           <!-- Address -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Address</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('guests.address') }}</label>
             <textarea
               v-model="formData.address"
               rows="3"
@@ -274,21 +274,21 @@
               @click="confirmDelete(formData)"
               class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              Delete
+              {{ $t('guests.delete') }}
             </button>
             <button
               type="button"
               @click="closeModal"
               class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('guests.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving"
               class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update' : 'Create') }}
+              {{ saving ? $t('guests.saving') : $t('guests.save') }}
             </button>
           </div>
         </form>
@@ -302,24 +302,23 @@
       @click.self="showDeleteConfirm = false"
     >
       <div class="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Delete Guest?</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('guests.delete') }}?</h2>
         <p class="text-gray-600 mb-6">
-          Are you sure you want to delete <strong>{{ guestToDelete?.name }}</strong>?
-          This action cannot be undone.
+          {{ $t('guests.confirmDelete') }}
         </p>
         <div class="flex gap-3">
           <button
             @click="showDeleteConfirm = false"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {{ $t('guests.cancel') }}
           </button>
           <button
             @click="handleDelete"
             :disabled="deleting"
             class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {{ deleting ? 'Deleting...' : 'Delete' }}
+            {{ deleting ? $t('guests.saving') : $t('guests.delete') }}
           </button>
         </div>
       </div>
@@ -329,10 +328,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { guestApi } from '../api'
 import axios from 'axios'
 
+const { t } = useI18n()
 const guests = ref([])
 const loading = ref(false)
 const showModal = ref(false)
@@ -466,10 +467,10 @@ async function handleDelete() {
 
 function getIdTypeLabel(type) {
   const labels = {
-    ktp: 'KTP',
-    passport: 'Passport',
-    sim: 'SIM',
-    other: 'Other'
+    ktp: t('guests.ktp'),
+    passport: t('guests.passport'),
+    sim: t('guests.sim'),
+    other: t('guests.other')
   }
   return labels[type] || type
 }

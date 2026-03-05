@@ -4,37 +4,37 @@
       <!-- Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Housekeeping</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage room cleaning and maintenance tasks</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('housekeeping.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('housekeeping.subtitle') }}</p>
         </div>
         <button
           @click="openCreateModal"
           class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + New Task
+          + {{ $t('housekeeping.newTask') }}
         </button>
       </div>
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="bg-white rounded-lg shadow p-4">
-          <div class="text-sm text-gray-500">Total Tasks</div>
+          <div class="text-sm text-gray-500">{{ $t('housekeeping.totalTasks') }}</div>
           <div class="text-2xl font-bold text-gray-900">{{ statistics.total || 0 }}</div>
         </div>
         <div class="bg-yellow-50 rounded-lg shadow p-4">
-          <div class="text-sm text-yellow-600">Pending</div>
+          <div class="text-sm text-yellow-600">{{ $t('housekeeping.pending') }}</div>
           <div class="text-2xl font-bold text-yellow-700">{{ statistics.pending || 0 }}</div>
         </div>
         <div class="bg-blue-50 rounded-lg shadow p-4">
-          <div class="text-sm text-blue-600">In Progress</div>
+          <div class="text-sm text-blue-600">{{ $t('housekeeping.inProgress') }}</div>
           <div class="text-2xl font-bold text-blue-700">{{ statistics.in_progress || 0 }}</div>
         </div>
         <div class="bg-green-50 rounded-lg shadow p-4">
-          <div class="text-sm text-green-600">Completed Today</div>
+          <div class="text-sm text-green-600">{{ $t('housekeeping.completedToday') }}</div>
           <div class="text-2xl font-bold text-green-700">{{ statistics.completed_today || 0 }}</div>
         </div>
         <div class="bg-red-50 rounded-lg shadow p-4">
-          <div class="text-sm text-red-600">High Priority</div>
+          <div class="text-sm text-red-600">{{ $t('housekeeping.highPriority') }}</div>
           <div class="text-2xl font-bold text-red-700">{{ statistics.high_priority || 0 }}</div>
         </div>
       </div>
@@ -43,40 +43,40 @@
       <div class="bg-white rounded-lg shadow p-4">
         <div class="flex flex-col md:flex-row gap-4">
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.status') }}</label>
             <select
               v-model="filters.status"
               @change="loadTasks"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="in_progress">In Progress</option>
-              <option value="completed">Completed</option>
+              <option value="">{{ $t('housekeeping.allStatus') }}</option>
+              <option value="pending">{{ $t('housekeeping.pending') }}</option>
+              <option value="in_progress">{{ $t('housekeeping.inProgress') }}</option>
+              <option value="completed">{{ $t('housekeeping.completed') }}</option>
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.priority') }}</label>
             <select
               v-model="filters.priority"
               @change="loadTasks"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Priorities</option>
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-              <option value="urgent">Urgent</option>
+              <option value="">{{ $t('housekeeping.allPriorities') }}</option>
+              <option value="low">{{ $t('housekeeping.low') }}</option>
+              <option value="normal">{{ $t('housekeeping.normal') }}</option>
+              <option value="high">{{ $t('housekeeping.high') }}</option>
+              <option value="urgent">{{ $t('housekeeping.urgent') }}</option>
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Assigned To</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.assignedTo') }}</label>
             <select
               v-model="filters.assigned_to"
               @change="loadTasks"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Staff</option>
+              <option value="">{{ $t('housekeeping.allStaff') }}</option>
               <option v-for="user in users" :key="user.id" :value="user.id">
                 {{ user.name }}
               </option>
@@ -89,11 +89,11 @@
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div v-if="loading" class="text-center py-12">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p class="text-gray-500 mt-2">Loading tasks...</p>
+          <p class="text-gray-500 mt-2">{{ $t('housekeeping.loading') }}</p>
         </div>
 
         <div v-else-if="tasks.length === 0" class="text-center py-12">
-          <p class="text-gray-500">No housekeeping tasks found</p>
+          <p class="text-gray-500">{{ $t('housekeeping.noTasks') }}</p>
         </div>
 
         <div v-else>
@@ -123,7 +123,7 @@
                   </span>
                 </div>
                 <div class="text-sm text-gray-600">
-                  {{ task.assigned_user?.name || 'Unassigned' }}
+                  {{ task.assigned_user?.name || $t('housekeeping.unassigned') }}
                 </div>
                 <div class="flex flex-wrap gap-2 mt-3">
                   <button
@@ -131,28 +131,28 @@
                     @click="updateStatus(task.id, 'in_progress')"
                     class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                   >
-                    Start
+                    {{ $t('housekeeping.start') }}
                   </button>
                   <button
                     v-if="task.status === 'in_progress'"
                     @click="updateStatus(task.id, 'completed')"
                     class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
                   >
-                    Complete
+                    {{ $t('housekeeping.complete') }}
                   </button>
                   <button
                     v-if="task.status !== 'completed'"
                     @click="openEditModal(task)"
                     class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
                   >
-                    Edit
+                    {{ $t('housekeeping.edit') }}
                   </button>
                   <button
                     v-if="task.status === 'pending'"
                     @click="confirmDelete(task)"
                     class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                   >
-                    Delete
+                    {{ $t('housekeeping.delete') }}
                   </button>
                 </div>
               </div>
@@ -211,7 +211,7 @@
                     {{ task.hall ? task.hall.name : task.room?.room_number }}
                   </div>
                   <div class="text-sm text-gray-500">
-                    {{ task.hall ? `${task.hall.hall_type} - Floor ${task.hall.floor}` : task.room?.room_type?.name }}
+                    {{ task.hall ? `${task.hall.hall_type} - ${$t('housekeeping.floor')} ${task.hall.floor}` : task.room?.room_type?.name }}
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -225,7 +225,7 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ task.assigned_user?.name || 'Unassigned' }}</div>
+                  <div class="text-sm text-gray-900">{{ task.assigned_user?.name || $t('housekeeping.unassigned') }}</div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="mb-2">
@@ -239,28 +239,28 @@
                       @click="updateStatus(task.id, 'in_progress')"
                       class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                     >
-                      Start
+                      {{ $t('housekeeping.start') }}
                     </button>
                     <button
                       v-if="task.status === 'in_progress'"
                       @click="updateStatus(task.id, 'completed')"
                       class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
                     >
-                      Complete
+                      {{ $t('housekeeping.complete') }}
                     </button>
                     <button
                       v-if="task.status !== 'completed'"
                       @click="openEditModal(task)"
                       class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
                     >
-                      Edit
+                      {{ $t('housekeeping.edit') }}
                     </button>
                     <button
                       v-if="task.status === 'pending'"
                       @click="confirmDelete(task)"
                       class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                     >
-                      Delete
+                      {{ $t('housekeeping.delete') }}
                     </button>
                   </div>
                 </td>
@@ -305,13 +305,13 @@
     >
       <div class="bg-white rounded-lg max-w-md w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Task' : 'New Housekeeping Task' }}
+          {{ isEditing ? $t('housekeeping.editTask') : $t('housekeeping.createTask') }}
         </h2>
 
         <form @submit.prevent="saveTask" class="space-y-4">
           <!-- Location Type Selector -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Location Type *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.locationType') }} *</label>
             <div class="grid grid-cols-2 gap-2">
               <button
                 type="button"
@@ -323,7 +323,7 @@
                     : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
                 ]"
               >
-                Room
+                {{ $t('housekeeping.room') }}
               </button>
               <button
                 type="button"
@@ -335,20 +335,20 @@
                     : 'border-gray-300 bg-white text-gray-700 hover:border-gray-400'
                 ]"
               >
-                Hall
+                {{ $t('housekeeping.hall') }}
               </button>
             </div>
           </div>
 
           <!-- Room Selection (shown when location_type is 'room') -->
           <div v-if="formData.location_type === 'room'">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Room *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.room') }} *</label>
             <select
               v-model="formData.room_id"
               :required="formData.location_type === 'room'"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select room</option>
+              <option value="">{{ $t('housekeeping.selectRoom') }}</option>
               <option v-for="room in (rooms || [])" :key="room.id" :value="room.id">
                 {{ room.room_number }} - {{ room.room_type?.name }}
               </option>
@@ -357,55 +357,55 @@
 
           <!-- Hall Selection (shown when location_type is 'hall') -->
           <div v-else>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Hall *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.hall') }} *</label>
             <select
               v-model="formData.hall_id"
               :required="formData.location_type === 'hall'"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select hall</option>
+              <option value="">{{ $t('housekeeping.selectHall') }}</option>
               <option v-for="hall in (halls || [])" :key="hall.id" :value="hall.id">
-                {{ hall?.name }} - {{ hall?.hall_type }} (Floor {{ hall?.floor }})
+                {{ hall?.name }} - {{ hall?.hall_type }} ({{ $t('housekeeping.floor') }} {{ hall?.floor }})
               </option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Task Type *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.taskType') }} *</label>
             <select
               v-model="formData.task_type"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="cleaning">Cleaning</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="inspection">Inspection</option>
+              <option value="cleaning">{{ $t('housekeeping.cleaning') }}</option>
+              <option value="maintenance">{{ $t('housekeeping.maintenance') }}</option>
+              <option value="inspection">{{ $t('housekeeping.inspection') }}</option>
               <option value="deep_clean">Deep Clean</option>
               <option value="hall_cleaning">Hall Cleaning</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Priority *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.priority') }} *</label>
             <select
               v-model="formData.priority"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="low">Low</option>
-              <option value="normal">Normal</option>
-              <option value="high">High</option>
-              <option value="urgent">Urgent</option>
+              <option value="low">{{ $t('housekeeping.low') }}</option>
+              <option value="normal">{{ $t('housekeeping.normal') }}</option>
+              <option value="high">{{ $t('housekeeping.high') }}</option>
+              <option value="urgent">{{ $t('housekeeping.urgent') }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Assign To</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.assignTo') }}</label>
             <select
               v-model="formData.assigned_to"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Unassigned</option>
+              <option value="">{{ $t('housekeeping.selectStaff') }}</option>
               <option v-for="user in users" :key="user.id" :value="user.id">
                 {{ user.name }}
               </option>
@@ -413,7 +413,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.notes') }}</label>
             <textarea
               v-model="formData.notes"
               rows="3"
@@ -432,14 +432,14 @@
               @click="closeModal"
               class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('housekeeping.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving"
               class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update' : 'Create') }}
+              {{ saving ? $t('housekeeping.saving') : $t('housekeeping.save') }}
             </button>
           </div>
         </form>
@@ -453,23 +453,23 @@
       @click.self="showDeleteConfirm = false"
     >
       <div class="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Delete Task?</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('housekeeping.delete') }}?</h2>
         <p class="text-gray-600 mb-6">
-          Are you sure you want to delete this housekeeping task for room <strong>{{ taskToDelete?.room?.room_number }}</strong>?
+          {{ $t('housekeeping.confirmDelete') }}
         </p>
         <div class="flex gap-3">
           <button
             @click="showDeleteConfirm = false"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {{ $t('housekeeping.cancel') }}
           </button>
           <button
             @click="handleDelete"
             :disabled="deleting"
             class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {{ deleting ? 'Deleting...' : 'Delete' }}
+            {{ deleting ? $t('housekeeping.saving') : $t('housekeeping.delete') }}
           </button>
         </div>
       </div>
@@ -479,10 +479,12 @@
 
 <script setup>
 import { ref, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { housekeepingApi, roomApi, hallApi, userApi } from '../api'
 import axios from 'axios'
 
+const { t } = useI18n()
 const tasks = ref([])
 const rooms = ref([])
 const halls = ref([])
@@ -725,9 +727,9 @@ function getStatusBadgeClass(status) {
 
 function getStatusLabel(status) {
   const labels = {
-    pending: 'Pending',
-    in_progress: 'In Progress',
-    completed: 'Completed',
+    pending: t('housekeeping.pending'),
+    in_progress: t('housekeeping.inProgress'),
+    completed: t('housekeeping.completed'),
   }
   return labels[status] || status
 }
@@ -744,10 +746,10 @@ function getPriorityBadgeClass(priority) {
 
 function getPriorityLabel(priority) {
   const labels = {
-    low: 'Low',
-    normal: 'Normal',
-    high: 'High',
-    urgent: 'Urgent',
+    low: t('housekeeping.low'),
+    normal: t('housekeeping.normal'),
+    high: t('housekeeping.high'),
+    urgent: t('housekeeping.urgent'),
   }
   return labels[priority] || priority
 }
@@ -765,11 +767,12 @@ function getTaskTypeBadgeClass(type) {
 
 function getTaskTypeLabel(type) {
   const labels = {
-    cleaning: 'Cleaning',
-    maintenance: 'Maintenance',
-    inspection: 'Inspection',
+    cleaning: t('housekeeping.cleaning'),
+    maintenance: t('housekeeping.maintenance'),
+    inspection: t('housekeeping.inspection'),
     deep_clean: 'Deep Clean',
     hall_cleaning: 'Hall Cleaning',
+    setup: t('housekeeping.setup'),
   }
   return labels[type] || type
 }
