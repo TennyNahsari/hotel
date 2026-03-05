@@ -3,30 +3,30 @@
     <div class="space-y-6">
       <!-- Header with Stats -->
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Room Management</h1>
-        <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage hotel rooms and availability</p>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('rooms.title') }}</h1>
+        <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('rooms.subtitle') }}</p>
       </div>
 
       <!-- Statistics Cards -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
         <div class="bg-white rounded-lg shadow p-4">
-          <div class="text-sm text-gray-500">Total Rooms</div>
+          <div class="text-sm text-gray-500">{{ $t('rooms.totalRooms') }}</div>
           <div class="text-2xl font-bold text-gray-900">{{ statistics.total_rooms || 0 }}</div>
         </div>
         <div class="bg-green-50 rounded-lg shadow p-4">
-          <div class="text-sm text-green-600">Available</div>
+          <div class="text-sm text-green-600">{{ $t('rooms.available') }}</div>
           <div class="text-2xl font-bold text-green-700">{{ statistics.available || 0 }}</div>
         </div>
         <div class="bg-blue-50 rounded-lg shadow p-4">
-          <div class="text-sm text-blue-600">Occupied</div>
+          <div class="text-sm text-blue-600">{{ $t('rooms.occupied') }}</div>
           <div class="text-2xl font-bold text-blue-700">{{ statistics.occupied || 0 }}</div>
         </div>
         <div class="bg-yellow-50 rounded-lg shadow p-4">
-          <div class="text-sm text-yellow-600">Need Cleaning</div>
+          <div class="text-sm text-yellow-600">{{ $t('rooms.needCleaning') }}</div>
           <div class="text-2xl font-bold text-yellow-700">{{ statistics.dirty || 0 }}</div>
         </div>
         <div class="bg-purple-50 rounded-lg shadow p-4">
-          <div class="text-sm text-purple-600">Occupancy Rate</div>
+          <div class="text-sm text-purple-600">{{ $t('rooms.occupancyRate') }}</div>
           <div class="text-2xl font-bold text-purple-700">{{ statistics.occupancy_rate || 0 }}%</div>
         </div>
       </div>
@@ -36,30 +36,30 @@
         <div class="flex flex-col md:flex-row gap-4 items-end">
           <!-- Status Filter -->
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByStatus') }}</label>
             <select 
               v-model="filters.status" 
               @change="loadRooms"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Status</option>
-              <option value="available">Available</option>
-              <option value="occupied">Occupied</option>
-              <option value="dirty">Dirty</option>
-              <option value="cleaning">Cleaning</option>
-              <option value="out_of_order">Out of Order</option>
+              <option value="">{{ $t('rooms.allStatus') }}</option>
+              <option value="available">{{ $t('rooms.available') }}</option>
+              <option value="occupied">{{ $t('rooms.occupied') }}</option>
+              <option value="dirty">{{ $t('rooms.dirty') }}</option>
+              <option value="cleaning">{{ $t('rooms.cleaning') }}</option>
+              <option value="out_of_order">{{ $t('rooms.outOfOrder') }}</option>
             </select>
           </div>
 
           <!-- Room Type Filter -->
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Type</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByType') }}</label>
             <select 
               v-model="filters.room_type_id" 
               @change="loadRooms"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Types</option>
+              <option value="">{{ $t('rooms.allTypes') }}</option>
               <option v-for="type in roomTypes" :key="type.id" :value="type.id">
                 {{ type.name }}
               </option>
@@ -68,16 +68,16 @@
 
           <!-- Floor Filter -->
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Filter by Floor</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByFloor') }}</label>
             <select 
               v-model="filters.floor" 
               @change="loadRooms"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Floors</option>
-              <option value="1">Floor 1</option>
-              <option value="2">Floor 2</option>
-              <option value="3">Floor 3</option>
+              <option value="">{{ $t('rooms.allFloors') }}</option>
+              <option value="1">{{ $t('rooms.floor1') }}</option>
+              <option value="2">{{ $t('rooms.floor2') }}</option>
+              <option value="3">{{ $t('rooms.floor3') }}</option>
             </select>
           </div>
 
@@ -89,7 +89,7 @@
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            Export Excel
+            {{ $t('rooms.exportExcel') }}
           </button>
 
           <!-- Add Room Button -->
@@ -97,7 +97,7 @@
             @click="openAddModal"
             class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
           >
-            + Add Room
+            + {{ $t('rooms.addRoom') }}
           </button>
         </div>
       </div>
@@ -105,11 +105,11 @@
       <!-- Rooms Grid -->
       <div v-if="loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="text-gray-500 mt-2">Loading rooms...</p>
+        <p class="text-gray-500 mt-2">{{ $t('rooms.loading') }}</p>
       </div>
 
       <div v-else-if="rooms.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
-        <p class="text-gray-500">No rooms found</p>
+        <p class="text-gray-500">{{ $t('rooms.noRooms') }}</p>
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -139,19 +139,19 @@
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
-              Capacity: {{ room.room_type?.capacity }} guests
+              {{ $t('rooms.capacity') }}: {{ room.room_type?.capacity }} {{ $t('rooms.guests') }}
             </div>
             <div class="flex items-center text-gray-600">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
               </svg>
-              Floor {{ room.floor || 'N/A' }}
+              {{ $t('rooms.floor') }} {{ room.floor || 'N/A' }}
             </div>
             <div class="flex items-center text-gray-600">
               <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              {{ formatCurrency(room.room_type?.base_price) }} / night
+              {{ formatCurrency(room.room_type?.base_price) }} {{ $t('rooms.perNight') }}
             </div>
           </div>
 
@@ -162,14 +162,14 @@
               @click.stop="updateStatus(room.id, 'available')"
               class="flex-1 px-3 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
             >
-              Set Available
+              {{ $t('rooms.setAvailable') }}
             </button>
             <button
               v-if="room.status !== 'out_of_order'"
               @click.stop="updateStatus(room.id, 'out_of_order')"
               class="flex-1 px-3 py-1 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
             >
-              Out of Order
+              {{ $t('rooms.outOfOrder') }}
             </button>
           </div>
         </div>
@@ -184,29 +184,29 @@
     >
       <div class="bg-white rounded-lg max-w-md w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Room' : 'Add New Room' }}
+          {{ isEditing ? $t('rooms.editRoom') : $t('rooms.addNewRoom') }}
         </h2>
 
         <form @submit.prevent="saveRoom" class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Room Number *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.roomNumber') }} *</label>
             <input
               v-model="formData.room_number"
               type="text"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g., 101"
+              :placeholder="$t('rooms.roomNumberPlaceholder')"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Room Type *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.roomType') }} *</label>
             <select
               v-model="formData.room_type_id"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select type</option>
+              <option value="">{{ $t('rooms.selectType') }}</option>
               <option v-for="type in roomTypes" :key="type.id" :value="type.id">
                 {{ type.name }} - {{ formatCurrency(type.base_price) }}
               </option>
@@ -214,40 +214,40 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.floor') }}</label>
             <select
               v-model="formData.floor"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select floor</option>
-              <option value="1">Floor 1</option>
-              <option value="2">Floor 2</option>
-              <option value="3">Floor 3</option>
-              <option value="4">Floor 4</option>
+              <option value="">{{ $t('rooms.selectFloor') }}</option>
+              <option value="1">{{ $t('rooms.floor1') }}</option>
+              <option value="2">{{ $t('rooms.floor2') }}</option>
+              <option value="3">{{ $t('rooms.floor3') }}</option>
+              <option value="4">{{ $t('rooms.floor4') }}</option>
             </select>
           </div>
 
           <div v-if="isEditing">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.status') }}</label>
             <select
               v-model="formData.status"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="available">Available</option>
-              <option value="occupied">Occupied</option>
-              <option value="dirty">Dirty</option>
-              <option value="cleaning">Cleaning</option>
-              <option value="out_of_order">Out of Order</option>
+              <option value="available">{{ $t('rooms.available') }}</option>
+              <option value="occupied">{{ $t('rooms.occupied') }}</option>
+              <option value="dirty">{{ $t('rooms.dirty') }}</option>
+              <option value="cleaning">{{ $t('rooms.cleaning') }}</option>
+              <option value="out_of_order">{{ $t('rooms.outOfOrder') }}</option>
             </select>
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.notes') }}</label>
             <textarea
               v-model="formData.notes"
               rows="3"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Any special notes about this room"
+              :placeholder="$t('rooms.notesPlaceholder')"
             ></textarea>
           </div>
 
@@ -262,21 +262,21 @@
               @click="confirmDelete"
               class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
-              Delete
+              {{ $t('rooms.delete') }}
             </button>
             <button
               type="button"
               @click="closeModal"
               class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('rooms.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving"
               class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update' : 'Create') }}
+              {{ saving ? $t('rooms.saving') : (isEditing ? $t('rooms.update') : $t('rooms.create')) }}
             </button>
           </div>
         </form>
@@ -290,11 +290,11 @@
       @click.self="cancelDelete"
     >
       <div class="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Delete Room?</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('rooms.deleteRoom') }}</h2>
         
         <p class="text-gray-600 mb-6">
-          Are you sure you want to delete room <strong>{{ roomToDelete?.room_number }}</strong>?
-          This action cannot be undone.
+          {{ $t('rooms.confirmDelete') }} <strong>{{ roomToDelete?.room_number }}</strong>?
+          {{ $t('rooms.cannotUndo') }}
         </p>
 
         <div class="flex gap-3">
@@ -303,14 +303,14 @@
             @click="cancelDelete"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {{ $t('rooms.cancel') }}
           </button>
           <button
             @click="deleteRoom"
             :disabled="deleting"
             class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {{ deleting ? 'Deleting...' : 'Delete' }}
+            {{ deleting ? $t('rooms.deleting') : $t('rooms.delete') }}
           </button>
         </div>
       </div>
@@ -320,9 +320,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { roomApi } from '../api'
 import axios from 'axios'
+
+const { t } = useI18n()
 
 const rooms = ref([])
 const roomTypes = ref([])
@@ -503,11 +506,11 @@ function getStatusBadgeClass(status) {
 
 function getStatusLabel(status) {
   const labels = {
-    available: 'Available',
-    occupied: 'Occupied',
-    dirty: 'Dirty',
-    cleaning: 'Cleaning',
-    out_of_order: 'Out of Order',
+    available: t('rooms.available'),
+    occupied: t('rooms.occupied'),
+    dirty: t('rooms.dirty'),
+    cleaning: t('rooms.cleaning'),
+    out_of_order: t('rooms.outOfOrder'),
   }
   return labels[status] || status
 }
