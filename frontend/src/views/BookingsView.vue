@@ -4,14 +4,14 @@
       <!-- Header -->
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Bookings</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage hotel reservations</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('bookings.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('bookings.subtitle') }}</p>
         </div>
         <button
           @click="openCreateModal"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + New Booking
+          + {{ $t('bookings.newBooking') }}
         </button>
       </div>
 
@@ -19,32 +19,32 @@
       <div class="bg-white rounded-lg shadow p-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           <div class="lg:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.search') }}</label>
             <input
               v-model="filters.search"
               @input="loadBookings"
               type="text"
-              placeholder="Booking number or guest name..."
+              :placeholder="$t('bookings.searchPlaceholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.status') }}</label>
             <select
               v-model="filters.status"
               @change="loadBookings"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="checked_in">Checked In</option>
-              <option value="checked_out">Checked Out</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="">{{ $t('bookings.allStatus') }}</option>
+              <option value="pending">{{ $t('bookings.pending') }}</option>
+              <option value="confirmed">{{ $t('bookings.confirmed') }}</option>
+              <option value="checked_in">{{ $t('bookings.checkedIn') }}</option>
+              <option value="checked_out">{{ $t('bookings.checkedOut') }}</option>
+              <option value="cancelled">{{ $t('bookings.cancelled') }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Check-In From</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.checkInFrom') }}</label>
             <input
               v-model="filters.start_date"
               @change="loadBookings"
@@ -53,7 +53,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Check-In To</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.checkInTo') }}</label>
             <input
               v-model="filters.end_date"
               @change="loadBookings"
@@ -75,7 +75,7 @@
             <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
-            {{ exporting ? 'Exporting...' : 'Export Excel' }}
+            {{ exporting ? $t('bookings.exporting') : $t('bookings.exportExcel') }}
           </button>
         </div>
       </div>
@@ -84,11 +84,11 @@
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div v-if="loading" class="text-center py-12">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p class="text-gray-500 mt-2">Loading bookings...</p>
+          <p class="text-gray-500 mt-2">{{ $t('bookings.loading') }}</p>
         </div>
 
         <div v-else-if="bookings.length === 0" class="text-center py-12">
-          <p class="text-gray-500">No bookings found</p>
+          <p class="text-gray-500">{{ $t('bookings.noBookings') }}</p>
         </div>
 
         <div v-else>
@@ -107,51 +107,51 @@
                 </div>
                 <div class="text-sm text-gray-600 space-y-1">
                   <div>{{ formatDate(booking.check_in_date) }} - {{ formatDate(booking.check_out_date) }}</div>
-                  <div>{{ booking.nights }} night(s) • {{ booking.adults }} adult(s)</div>
+                  <div>{{ booking.nights }} {{ $t('bookings.nights') }} • {{ booking.adults }} {{ $t('bookings.adults') }}</div>
                   <div class="font-semibold text-gray-900">{{ formatCurrency(booking.subtotal) }}</div>
                 </div>
                 <div class="flex flex-wrap gap-2">
                   <button
                     v-if="booking.status === 'pending'"
-                    @click="confirmBooking(booking.id)"
+                    @click="handleConfirm(booking.id)"
                     class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                   >
-                    Confirm
+                    {{ $t('bookings.confirmAction') }}
                   </button>
                   <button
                     v-if="booking.status === 'confirmed'"
-                    @click="checkIn(booking.id)"
+                    @click="handleCheckIn(booking.id)"
                     class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
                   >
-                    Check In
+                    {{ $t('bookings.checkInAction') }}
                   </button>
                   <button
                     v-if="booking.status === 'checked_in'"
-                    @click="checkOut(booking.id)"
+                    @click="handleCheckOut(booking.id)"
                     class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                   >
-                    Check Out
+                    {{ $t('bookings.checkOutAction') }}
                   </button>
                   <button
                     v-if="['pending', 'confirmed'].includes(booking.status)"
                     @click="openEditModal(booking)"
                     class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
                   >
-                    Edit
+                    {{ $t('bookings.editAction') }}
                   </button>
                   <button
                     v-if="['pending', 'confirmed'].includes(booking.status)"
-                    @click="cancelBooking(booking.id)"
+                    @click="confirmCancel(booking)"
                     class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
                   >
-                    Cancel
+                    {{ $t('bookings.cancelAction') }}
                   </button>
                   <button
                     v-if="['cancelled', 'checked_out'].includes(booking.status)"
-                    @click="confirmDelete(booking)"
+                    @click="confirmDeleteBooking(booking)"
                     class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
                   >
-                    Delete
+                    {{ $t('bookings.deleteAction') }}
                   </button>
                 </div>
               </div>
@@ -163,22 +163,22 @@
           <thead class="bg-gray-50">
             <tr>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Booking
+                {{ $t('bookings.booking') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Guest
+                {{ $t('bookings.guest') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Check In / Out
+                {{ $t('bookings.checkInOut') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Rooms
+                {{ $t('bookings.rooms') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Total
+                {{ $t('bookings.total') }}
               </th>
               <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Status & Actions
+                {{ $t('bookings.statusActions') }}
               </th>
             </tr>
           </thead>
@@ -186,7 +186,7 @@
             <tr v-for="booking in bookings" :key="booking.id" class="hover:bg-gray-50">
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ booking.booking_number }}</div>
-                <div class="text-sm text-gray-500">{{ booking.nights }} night(s)</div>
+                <div class="text-sm text-gray-500">{{ booking.nights }} {{ $t('bookings.nights') }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">
@@ -204,12 +204,12 @@
                     {{ room.room_number }}<span v-if="idx < booking.rooms.length - 1">, </span>
                   </span>
                 </div>
-                <div class="text-sm text-gray-500">{{ booking.adults }} adult(s), {{ booking.children }} child(ren)</div>
+                <div class="text-sm text-gray-500">{{ booking.adults }} {{ $t('bookings.adults') }}, {{ booking.children }} {{ $t('bookings.children') }}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
                 <div v-if="booking.deposit_amount > 0" class="text-sm text-gray-500">
-                  Deposit: {{ formatCurrency(booking.deposit_amount) }}
+                  {{ $t('bookings.deposit') }}: {{ formatCurrency(booking.deposit_amount) }}
                 </div>
               </td>
               <td class="px-6 py-4">
@@ -223,56 +223,56 @@
                     v-if="booking.status === 'pending'"
                     @click="handleConfirm(booking.id)"
                     class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                    title="Confirm Booking"
+                    :title="$t('bookings.confirmAction')"
                   >
-                    Confirm
+                    {{ $t('bookings.confirmAction') }}
                   </button>
                   <button
                     v-if="booking.status === 'confirmed'"
                     @click="handleCheckIn(booking.id)"
                     class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
-                    title="Check In"
+                    :title="$t('bookings.checkInAction')"
                   >
-                    Check In
+                    {{ $t('bookings.checkInAction') }}
                   </button>
                   <button
                     v-if="booking.status === 'checked_in'"
                     @click="handleCheckOut(booking.id)"
                     class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                    title="Check Out"
+                    :title="$t('bookings.checkOutAction')"
                   >
-                    Check Out
+                    {{ $t('bookings.checkOutAction') }}
                   </button>
                   <button
                     v-if="booking.status === 'pending'"
                     @click="openEditModal(booking)"
                     class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
-                    title="Edit"
+                    :title="$t('bookings.editAction')"
                   >
-                    Edit
+                    {{ $t('bookings.editAction') }}
                   </button>
                   <button
                     v-if="['pending', 'confirmed'].includes(booking.status)"
                     @click="confirmCancel(booking)"
                     class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
-                    title="Cancel"
+                    :title="$t('bookings.cancelAction')"
                   >
-                    Cancel
+                    {{ $t('bookings.cancelAction') }}
                   </button>
                   <button
                     v-if="['pending', 'cancelled'].includes(booking.status)"
                     @click="confirmDeleteBooking(booking)"
                     class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-                    title="Delete"
+                    :title="$t('bookings.deleteAction')"
                   >
-                    Delete
+                    {{ $t('bookings.deleteAction') }}
                   </button>
                   <button
                     @click="viewBooking(booking)"
                     class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-                    title="View Details"
+                    :title="$t('bookings.viewAction')"
                   >
-                    View
+                    {{ $t('bookings.viewAction') }}
                   </button>
                 </div>
               </td>
@@ -291,19 +291,19 @@
     >
       <div class="bg-white rounded-lg max-w-2xl w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Booking' : 'New Booking' }}
+          {{ isEditing ? $t('bookings.editBooking') : $t('bookings.createBooking') }}
         </h2>
 
         <form @submit.prevent="saveBooking" class="space-y-4">
           <!-- Guest Selection -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Guest *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.guestLabel') }}</label>
             <select
               v-model="formData.guest_id"
               required
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">Select guest</option>
+              <option value="">{{ $t('bookings.guestPlaceholder') }}</option>
               <option v-for="guest in guests" :key="guest.id" :value="guest.id">
                 {{ guest.name }} - {{ guest.email || guest.phone }}
               </option>
@@ -313,7 +313,7 @@
           <!-- Dates -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Check In *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.checkInLabel') }}</label>
               <input
                 v-model="formData.check_in_date"
                 type="date"
@@ -324,7 +324,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Check Out *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.checkOutLabel') }}</label>
               <input
                 v-model="formData.check_out_date"
                 type="date"
@@ -339,7 +339,7 @@
           <!-- Guests Count -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Adults *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.adultsLabel') }}</label>
               <input
                 v-model.number="formData.adults"
                 type="number"
@@ -349,7 +349,7 @@
               />
             </div>
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Children</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.childrenLabel') }}</label>
               <input
                 v-model.number="formData.children"
                 type="number"
@@ -361,7 +361,7 @@
 
           <!-- Available Rooms -->
           <div v-if="availableRooms.length > 0">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Select Rooms *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('bookings.selectRoomsLabel') }}</label>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-40 overflow-y-auto border border-gray-300 rounded-lg p-2">
               <label
                 v-for="room in availableRooms"
@@ -376,23 +376,23 @@
                 />
                 <span class="text-sm">
                   {{ room.room_number }} - {{ room.room_type?.name }}
-                  ({{ formatCurrency(room.room_type?.base_price) }}/night)
+                  ({{ formatCurrency(room.room_type?.base_price) }}/{{ $t('bookings.roomNight') }})
                 </span>
               </label>
             </div>
           </div>
           <div v-else-if="formData.check_in_date && formData.check_out_date" class="text-sm text-amber-600">
-            No rooms available for selected dates
+            {{ $t('bookings.noRoomsAvailable') }}
           </div>
 
           <!-- Notes -->
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Special Requests</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.specialRequests') }}</label>
             <textarea
               v-model="formData.special_requests"
               rows="2"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Any special requests from guest"
+              :placeholder="$t('bookings.specialRequestsPlaceholder')"
             ></textarea>
           </div>
 
@@ -406,14 +406,14 @@
               @click="closeModal"
               class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('bookings.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving || formData.room_ids.length === 0"
               class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update Booking' : 'Create Booking') }}
+              {{ saving ? $t('bookings.saving') : (isEditing ? $t('bookings.updateBooking') : $t('bookings.createBooking')) }}
             </button>
           </div>
         </form>
@@ -427,24 +427,24 @@
       @click.self="showCancelConfirm = false"
     >
       <div class="bg-white rounded-lg max-w-md w-full p-4 md:p-6">
-        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">Cancel Booking?</h2>
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">{{ $t('bookings.cancelBookingTitle') }}</h2>
         <p class="text-gray-600 mb-6 text-sm md:text-base">
-          Are you sure you want to cancel booking <strong>{{ bookingToCancel?.booking_number }}</strong>?
-          The booking status will be changed to cancelled.
+          {{ $t('bookings.cancelBookingMessage') }} <strong>{{ bookingToCancel?.booking_number }}</strong>?
+          {{ $t('bookings.cancelBookingInfo') }}
         </p>
         <div class="flex gap-3">
           <button
             @click="showCancelConfirm = false"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            No, Keep It
+            {{ $t('bookings.noKeepIt') }}
           </button>
           <button
             @click="handleCancel"
             :disabled="cancelling"
             class="flex-1 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
           >
-            {{ cancelling ? 'Cancelling...' : 'Yes, Cancel' }}
+            {{ cancelling ? $t('bookings.cancelling') : $t('bookings.yesCancelIt') }}
           </button>
         </div>
       </div>
@@ -457,24 +457,24 @@
       @click.self="showDeleteConfirm = false"
     >
       <div class="bg-white rounded-lg max-w-md w-full p-4 md:p-6">
-        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">Delete Booking?</h2>
+        <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">{{ $t('bookings.deleteBookingTitle') }}</h2>
         <p class="text-gray-600 mb-6 text-sm md:text-base">
-          Are you sure you want to permanently delete booking <strong>{{ bookingToDelete?.booking_number }}</strong>?
-          This action cannot be undone.
+          {{ $t('bookings.deleteBookingMessage') }} <strong>{{ bookingToDelete?.booking_number }}</strong>?
+          {{ $t('bookings.deleteCannotUndo') }}
         </p>
         <div class="flex gap-3">
           <button
             @click="showDeleteConfirm = false"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {{ $t('bookings.cancel') }}
           </button>
           <button
             @click="handleDeleteBooking"
             :disabled="deleting"
             class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {{ deleting ? 'Deleting...' : 'Delete' }}
+            {{ deleting ? $t('bookings.deleting') : $t('bookings.deleteAction') }}
           </button>
         </div>
       </div>
@@ -484,9 +484,12 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { bookingApi, guestApi, roomApi } from '../api'
 import axios from 'axios'
+
+const { t } = useI18n()
 
 const bookings = ref([])
 const guests = ref([])
@@ -611,7 +614,7 @@ async function exportBookings() {
     window.URL.revokeObjectURL(downloadUrl)
   } catch (err) {
     console.error('Failed to export bookings:', err)
-    alert('Failed to export bookings. Please try again.')
+    alert(t('bookings.exportFailed'))
   } finally {
     exporting.value = false
   }
@@ -667,7 +670,7 @@ async function saveBooking() {
     closeModal()
     await loadBookings()
   } catch (err) {
-    error.value = err.response?.data?.message || 'Failed to save booking'
+    error.value = err.response?.data?.message || t('bookings.saveFailed')
   } finally {
     saving.value = false
   }
@@ -678,7 +681,7 @@ async function handleConfirm(bookingId) {
     await bookingApi.confirm(bookingId)
     await loadBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Failed to confirm booking')
+    alert(err.response?.data?.message || t('bookings.confirmFailed'))
   }
 }
 
@@ -687,7 +690,7 @@ async function handleCheckIn(bookingId) {
     await bookingApi.checkIn(bookingId)
     await loadBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Failed to check in')
+    alert(err.response?.data?.message || t('bookings.checkInFailed'))
   }
 }
 
@@ -696,7 +699,7 @@ async function handleCheckOut(bookingId) {
     await bookingApi.checkOut(bookingId)
     await loadBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Failed to check out')
+    alert(err.response?.data?.message || t('bookings.checkOutFailed'))
   }
 }
 
@@ -715,7 +718,7 @@ async function handleCancel() {
     bookingToCancel.value = null
     await loadBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Failed to cancel booking')
+    alert(err.response?.data?.message || t('bookings.cancelFailed'))
   } finally {
     cancelling.value = false
   }
@@ -736,14 +739,14 @@ async function handleDeleteBooking() {
     bookingToDelete.value = null
     await loadBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Failed to delete booking')
+    alert(err.response?.data?.message || t('bookings.deleteFailed'))
   } finally {
     deleting.value = false
   }
 }
 
 function viewBooking(booking) {
-  alert(`Booking Details:\n\nBooking #: ${booking.booking_number}\nGuest: ${booking.guest?.name}\nStatus: ${getStatusLabel(booking.status)}`)
+  alert(`${t('bookings.bookingDetails')}:\n\n${t('bookings.booking')} #: ${booking.booking_number}\n${t('bookings.guest')}: ${booking.guest?.name}\n${t('bookings.status')}: ${getStatusLabel(booking.status)}`)
 }
 
 function getStatusBadgeClass(status) {
@@ -759,11 +762,11 @@ function getStatusBadgeClass(status) {
 
 function getStatusLabel(status) {
   const labels = {
-    pending: 'Pending',
-    confirmed: 'Confirmed',
-    checked_in: 'Checked In',
-    checked_out: 'Checked Out',
-    cancelled: 'Cancelled',
+    pending: t('bookings.pending'),
+    confirmed: t('bookings.confirmed'),
+    checked_in: t('bookings.checkedIn'),
+    checked_out: t('bookings.checkedOut'),
+    cancelled: t('bookings.cancelled'),
   }
   return labels[status] || status
 }

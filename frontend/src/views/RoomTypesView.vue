@@ -4,25 +4,25 @@
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Room Types Management</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage room types and pricing</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('roomTypes.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('roomTypes.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
           class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + Add Room Type
+          + {{ $t('roomTypes.addRoomType') }}
         </button>
       </div>
 
       <!-- Room Types Table -->
       <div v-if="loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="text-gray-500 mt-2">Loading room types...</p>
+        <p class="text-gray-500 mt-2">{{ $t('roomTypes.loading') }}</p>
       </div>
 
       <div v-else-if="roomTypes.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
-        <p class="text-gray-500">No room types found</p>
+        <p class="text-gray-500">{{ $t('roomTypes.noRoomTypes') }}</p>
       </div>
 
       <div v-else class="bg-white rounded-lg shadow overflow-hidden">
@@ -31,22 +31,22 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  {{ $t('roomTypes.name') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
+                  {{ $t('roomTypes.description') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Capacity
+                  {{ $t('roomTypes.capacity') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price per Night
+                  {{ $t('roomTypes.pricePerNight') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Rooms
+                  {{ $t('roomTypes.rooms') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {{ $t('roomTypes.actions') }}
                 </th>
               </tr>
             </thead>
@@ -61,26 +61,26 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ roomType.capacity }} guests</div>
+                  <div class="text-sm text-gray-900">{{ roomType.capacity }} {{ $t('roomTypes.guests') }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(roomType.base_price) }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-500">{{ roomType.rooms_count || 0 }} rooms</div>
+                  <div class="text-sm text-gray-500">{{ roomType.rooms_count || 0 }} {{ $t('roomTypes.roomsCount') }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <button
                     @click="openEditModal(roomType)"
                     class="text-blue-600 hover:text-blue-900 mr-4"
                   >
-                    Edit
+                    {{ $t('roomTypes.edit') }}
                   </button>
                   <button
                     @click="confirmDelete(roomType)"
                     class="text-red-600 hover:text-red-900"
                   >
-                    Delete
+                    {{ $t('roomTypes.delete') }}
                   </button>
                 </td>
               </tr>
@@ -98,34 +98,34 @@
     >
       <div class="bg-white rounded-lg max-w-2xl w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Room Type' : 'Add New Room Type' }}
+          {{ isEditing ? $t('roomTypes.editRoomType') : $t('roomTypes.addNewRoomType') }}
         </h2>
 
         <form @submit.prevent="saveRoomType" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('roomTypes.nameLabel') }}</label>
               <input
                 v-model="formData.name"
                 type="text"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="e.g., Deluxe Room"
+                :placeholder="$t('roomTypes.namePlaceholder')"
               />
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('roomTypes.descriptionLabel') }}</label>
               <textarea
                 v-model="formData.description"
                 rows="3"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Describe the room type..."
+                :placeholder="$t('roomTypes.descriptionPlaceholder')"
               ></textarea>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Price per Night *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('roomTypes.priceLabel') }}</label>
               <input
                 v-model.number="formData.base_price"
                 type="number"
@@ -133,38 +133,38 @@
                 step="1000"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="500000"
+                :placeholder="$t('roomTypes.pricePlaceholder')"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Capacity (Guests) *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('roomTypes.capacityLabel') }}</label>
               <input
                 v-model.number="formData.capacity"
                 type="number"
                 min="1"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                placeholder="2"
+                :placeholder="$t('roomTypes.capacityPlaceholder')"
               />
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Facilities</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('roomTypes.facilities') }}</label>
               <div class="space-y-2">
                 <div v-for="(facility, index) in formData.facilities" :key="index" class="flex gap-2">
                   <input
                     v-model="formData.facilities[index]"
                     type="text"
                     class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="e.g., King Size Bed, AC, TV"
+                    :placeholder="$t('roomTypes.facilityPlaceholder')"
                   />
                   <button
                     type="button"
                     @click="removeFacility(index)"
                     class="px-3 py-2 bg-red-100 text-red-700 rounded-lg hover:bg-red-200"
                   >
-                    Remove
+                    {{ $t('roomTypes.removeFacility') }}
                   </button>
                 </div>
                 <button
@@ -172,7 +172,7 @@
                   @click="addFacility"
                   class="text-sm text-blue-600 hover:text-blue-700"
                 >
-                  + Add Facility
+                  + {{ $t('roomTypes.addFacility') }}
                 </button>
               </div>
             </div>
@@ -188,14 +188,14 @@
               @click="closeModal"
               class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('roomTypes.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving"
               class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update' : 'Create') }}
+              {{ saving ? $t('roomTypes.saving') : (isEditing ? $t('roomTypes.update') : $t('roomTypes.create')) }}
             </button>
           </div>
         </form>
@@ -209,12 +209,12 @@
       @click.self="cancelDelete"
     >
       <div class="bg-white rounded-lg max-w-md w-full p-6">
-        <h2 class="text-2xl font-bold text-gray-900 mb-4">Delete Room Type?</h2>
+        <h2 class="text-2xl font-bold text-gray-900 mb-4">{{ $t('roomTypes.deleteRoomType') }}</h2>
         
         <p class="text-gray-600 mb-6">
-          Are you sure you want to delete room type <strong>{{ roomTypeToDelete?.name }}</strong>?
+          {{ $t('roomTypes.deleteConfirm') }} <strong>{{ roomTypeToDelete?.name }}</strong>?
           <span v-if="roomTypeToDelete?.rooms_count > 0" class="block mt-2 text-red-600 font-semibold">
-            Warning: This room type has {{ roomTypeToDelete.rooms_count }} active room(s).
+            {{ $t('roomTypes.deleteWarning') }} {{ roomTypeToDelete.rooms_count }} {{ $t('roomTypes.activeRooms') }}
           </span>
         </p>
 
@@ -224,14 +224,14 @@
             @click="cancelDelete"
             class="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
-            Cancel
+            {{ $t('roomTypes.cancel') }}
           </button>
           <button
             @click="deleteRoomType"
             :disabled="deleting"
             class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50"
           >
-            {{ deleting ? 'Deleting...' : 'Delete' }}
+            {{ deleting ? $t('roomTypes.deleting') : $t('roomTypes.delete') }}
           </button>
         </div>
       </div>
@@ -241,9 +241,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { roomTypeApi } from '../api'
 import axios from 'axios'
+
+const { t } = useI18n()
 
 const roomTypes = ref([])
 const loading = ref(false)
@@ -341,7 +344,7 @@ async function deleteRoomType() {
     await loadRoomTypes()
   } catch (err) {
     console.error('Failed to delete room type:', err)
-    const message = err.response?.data?.message || 'Failed to delete room type.'
+    const message = err.response?.data?.message || t('roomTypes.errorOccurred')
     alert(message)
   } finally {
     deleting.value = false
