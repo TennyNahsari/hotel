@@ -4,8 +4,8 @@
       <!-- Header -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Breakfast Distribution</h1>
-          <p class="text-gray-600 mt-1">Today's breakfast for checked-in guests</p>
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ $t('breakfast.title') }}</h1>
+          <p class="text-gray-600 mt-1">{{ $t('breakfast.subtitle') }}</p>
         </div>
       </div>
 
@@ -14,7 +14,7 @@
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Total Guests</p>
+              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.totalGuests') }}</p>
               <p class="text-2xl font-bold text-gray-900 mt-1">{{ statistics.total_bookings || 0 }}</p>
             </div>
             <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -28,7 +28,7 @@
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Total Portions</p>
+              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.totalPortions') }}</p>
               <p class="text-2xl font-bold text-gray-900 mt-1">{{ statistics.total_portions || 0 }}</p>
             </div>
             <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
@@ -42,7 +42,7 @@
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Distributed</p>
+              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.distributed') }}</p>
               <p class="text-2xl font-bold text-green-600 mt-1">{{ statistics.taken_portions || 0 }}</p>
             </div>
             <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -56,7 +56,7 @@
         <div class="bg-white rounded-lg shadow p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">Remaining</p>
+              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.remaining') }}</p>
               <p class="text-2xl font-bold text-orange-600 mt-1">{{ statistics.remaining_portions || 0 }}</p>
             </div>
             <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
@@ -72,26 +72,26 @@
       <div class="bg-white rounded-lg shadow p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('breakfast.search') }}</label>
             <input
               v-model="filters.search"
               @input="loadBookings"
               type="text"
-              placeholder="Guest name or room number..."
+              :placeholder="$t('breakfast.searchPlaceholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('breakfast.status') }}</label>
             <select
               v-model="filters.breakfast_status"
               @change="loadBookings"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
-              <option value="">All Status</option>
-              <option value="not_taken">Not Taken</option>
-              <option value="taken">Taken</option>
+              <option value="">{{ $t('breakfast.allStatus') }}</option>
+              <option value="not_taken">{{ $t('breakfast.notTaken') }}</option>
+              <option value="taken">{{ $t('breakfast.taken') }}</option>
             </select>
           </div>
 
@@ -100,7 +100,7 @@
               @click="resetFilters"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
             >
-              Reset Filters
+              {{ $t('breakfast.resetFilters') }}
             </button>
           </div>
         </div>
@@ -110,14 +110,14 @@
       <div class="bg-white rounded-lg shadow overflow-hidden">
         <div v-if="loading" class="p-8 text-center">
           <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p class="text-gray-600 mt-2">Loading bookings...</p>
+          <p class="text-gray-600 mt-2">{{ $t('breakfast.loading') }}</p>
         </div>
 
         <div v-else-if="bookings.length === 0" class="p-8 text-center">
           <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
           </svg>
-          <p class="text-gray-500 mt-4">No bookings found for today</p>
+          <p class="text-gray-500 mt-4">{{ $t('breakfast.noBookings') }}</p>
         </div>
 
         <div v-else>
@@ -140,7 +140,7 @@
                 </div>
                 
                 <div class="bg-blue-50 rounded p-2">
-                  <p class="text-sm text-blue-900 font-medium">Breakfast: 2 Portions</p>
+                  <p class="text-sm text-blue-900 font-medium">{{ $t('breakfast.breakfast') }}: 2 {{ $t('breakfast.portions') }}</p>
                 </div>
 
                 <button
@@ -151,7 +151,7 @@
                     : 'bg-green-100 text-green-700 hover:bg-green-200'"
                   class="w-full px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
                 >
-                  {{ updating === booking.id ? 'Updating...' : (booking.breakfast_status === 'taken' ? 'Mark as Not Taken' : 'Mark as Taken') }}
+                  {{ updating === booking.id ? $t('breakfast.updating') : (booking.breakfast_status === 'taken' ? $t('breakfast.markNotTaken') : $t('breakfast.markTaken')) }}
                 </button>
               </div>
             </div>
@@ -163,22 +163,22 @@
               <thead class="bg-gray-50">
                 <tr>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Guest
+                    {{ $t('breakfast.guest') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Room
+                    {{ $t('breakfast.room') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Room Type
+                    {{ $t('breakfast.roomType') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Breakfast
+                    {{ $t('breakfast.breakfast') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
+                    {{ $t('breakfast.status') }}
                   </th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Action
+                    {{ $t('breakfast.action') }}
                   </th>
                 </tr>
               </thead>
@@ -196,7 +196,7 @@
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="bg-blue-50 inline-block px-3 py-1 rounded-full">
-                      <span class="text-sm font-medium text-blue-900">2 Portions</span>
+                      <span class="text-sm font-medium text-blue-900">2 {{ $t('breakfast.portions') }}</span>
                     </div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -216,7 +216,7 @@
                         : 'bg-green-100 text-green-700 hover:bg-green-200'"
                       class="px-4 py-2 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
                     >
-                      {{ updating === booking.id ? 'Updating...' : (booking.breakfast_status === 'taken' ? 'Mark Not Taken' : 'Mark Taken') }}
+                      {{ updating === booking.id ? $t('breakfast.updating') : (booking.breakfast_status === 'taken' ? $t('breakfast.markNotTaken') : $t('breakfast.markTaken')) }}
                     </button>
                   </td>
                 </tr>
@@ -226,9 +226,9 @@
             <!-- Pagination -->
             <div v-if="pagination.last_page > 1" class="px-6 py-4 flex justify-between items-center border-t">
               <div class="text-sm text-gray-700">
-                Showing {{ (pagination.current_page - 1) * pagination.per_page + 1 }} to 
-                {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }} of 
-                {{ pagination.total }} bookings
+                {{ $t('breakfast.showing') }} {{ (pagination.current_page - 1) * pagination.per_page + 1 }} {{ $t('breakfast.to') }} 
+                {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }} {{ $t('breakfast.of') }} 
+                {{ pagination.total }} {{ $t('breakfast.bookings') }}
               </div>
               <div class="flex gap-2">
                 <button
@@ -236,14 +236,14 @@
                   :disabled="pagination.current_page === 1"
                   class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Previous
+                  {{ $t('breakfast.previous') }}
                 </button>
                 <button
                   @click="changePage(pagination.current_page + 1)"
                   :disabled="pagination.current_page === pagination.last_page"
                   class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Next
+                  {{ $t('breakfast.next') }}
                 </button>
               </div>
             </div>
@@ -256,9 +256,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { breakfastApi } from '../api'
 import axios from 'axios'
+
+const { t } = useI18n()
 
 const bookings = ref([])
 const statistics = ref({})
@@ -340,7 +343,7 @@ async function toggleBreakfastStatus(booking) {
     await loadStatistics()
   } catch (err) {
     console.error('Failed to update breakfast status:', err)
-    alert('Failed to update breakfast status')
+    alert(t('breakfast.updateFailed'))
   } finally {
     updating.value = null
   }
@@ -362,8 +365,8 @@ function resetFilters() {
 
 function getStatusLabel(status) {
   const labels = {
-    'not_taken': 'Not Taken',
-    'taken': 'Taken'
+    'not_taken': t('breakfast.notTaken'),
+    'taken': t('breakfast.taken')
   }
   return labels[status] || status
 }

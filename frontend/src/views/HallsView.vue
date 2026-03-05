@@ -4,14 +4,14 @@
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Halls Management</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage meeting rooms and event halls</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('halls.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('halls.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
           class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + Add Hall
+          + {{ $t('halls.addHall') }}
         </button>
       </div>
 
@@ -19,34 +19,34 @@
       <div class="bg-white rounded-lg shadow p-4">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.search') }}</label>
             <input
               v-model="filters.search"
               type="text"
-              placeholder="Search halls..."
+              :placeholder="$t('halls.searchPlaceholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Hall Type</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.hallType') }}</label>
             <select
               v-model="filters.hall_type"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Types</option>
+              <option value="">{{ $t('halls.allTypes') }}</option>
               <option v-for="type in hallTypes" :key="type" :value="type">{{ type }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.status') }}</label>
             <select
               v-model="filters.status"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Status</option>
-              <option value="available">Available</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="unavailable">Unavailable</option>
+              <option value="">{{ $t('halls.allStatus') }}</option>
+              <option value="available">{{ $t('halls.available') }}</option>
+              <option value="maintenance">{{ $t('halls.maintenance') }}</option>
+              <option value="unavailable">{{ $t('halls.unavailable') }}</option>
             </select>
           </div>
         </div>
@@ -55,11 +55,11 @@
       <!-- Halls Table -->
       <div v-if="loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="text-gray-500 mt-2">Loading halls...</p>
+        <p class="text-gray-500 mt-2">{{ $t('halls.loading') }}</p>
       </div>
 
       <div v-else-if="halls.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
-        <p class="text-gray-500">No halls found</p>
+        <p class="text-gray-500">{{ $t('halls.noHalls') }}</p>
       </div>
 
       <div v-else class="bg-white rounded-lg shadow overflow-hidden">
@@ -68,25 +68,25 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Name
+                  {{ $t('halls.name') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Type
+                  {{ $t('halls.type') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Floor
+                  {{ $t('halls.floor') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Capacity
+                  {{ $t('halls.capacity') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Price/Hour
+                  {{ $t('halls.pricePerHour') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {{ $t('halls.status') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {{ $t('halls.actions') }}
                 </th>
               </tr>
             </thead>
@@ -102,7 +102,7 @@
                   <div class="text-sm text-gray-500">{{ hall.floor || '-' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ hall.capacity }} pax</div>
+                  <div class="text-sm text-gray-900">{{ hall.capacity }} {{ $t('halls.pax') }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(hall.price_per_hour) }}</div>
@@ -124,19 +124,19 @@
                     @click="viewHall(hall)"
                     class="text-gray-600 hover:text-gray-900 mr-3"
                   >
-                    View
+                    {{ $t('halls.view') }}
                   </button>
                   <button
                     @click="openEditModal(hall)"
                     class="text-blue-600 hover:text-blue-900 mr-3"
                   >
-                    Edit
+                    {{ $t('halls.edit') }}
                   </button>
                   <button
                     @click="confirmDelete(hall)"
                     class="text-red-600 hover:text-red-900"
                   >
-                    Delete
+                    {{ $t('halls.delete') }}
                   </button>
                 </td>
               </tr>
@@ -148,7 +148,7 @@
       <!-- Pagination -->
       <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
         <div class="text-sm text-gray-700">
-          Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} halls
+          {{ $t('halls.showing') }} {{ pagination.from }} {{ $t('halls.to') }} {{ pagination.to }} {{ $t('halls.of') }} {{ pagination.total }} {{ $t('halls.halls') }}
         </div>
         <div class="flex gap-2">
           <button
@@ -156,14 +156,14 @@
             :disabled="pagination.current_page === 1"
             class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Previous
+            {{ $t('halls.previous') }}
           </button>
           <button
             @click="changePage(pagination.current_page + 1)"
             :disabled="pagination.current_page === pagination.last_page"
             class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Next
+            {{ $t('halls.next') }}
           </button>
         </div>
       </div>
@@ -177,46 +177,46 @@
     >
       <div class="bg-white rounded-lg max-w-3xl w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Hall' : 'Add New Hall' }}
+          {{ isEditing ? $t('halls.editHall') : $t('halls.addNewHall') }}
         </h2>
 
         <form @submit.prevent="saveHall" class="space-y-4">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.name') }} *</label>
               <input
                 v-model="formData.name"
                 type="text"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., Ballroom A"
+                :placeholder="$t('halls.namePlaceholder')"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Hall Type *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.hallType') }} *</label>
               <select
                 v-model="formData.hall_type"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
-                <option value="">Select Type</option>
+                <option value="">{{ $t('halls.selectType') }}</option>
                 <option v-for="type in hallTypes" :key="type" :value="type">{{ type }}</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Floor</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.floor') }}</label>
               <input
                 v-model="formData.floor"
                 type="text"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="e.g., 2nd Floor"
+                :placeholder="$t('halls.floorPlaceholder')"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Capacity (Persons) *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.capacityPersons') }} *</label>
               <input
                 v-model.number="formData.capacity"
                 type="number"
@@ -228,7 +228,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Area (sqm)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.areaSqm') }}</label>
               <input
                 v-model.number="formData.area_sqm"
                 type="number"
@@ -240,7 +240,7 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Price per Hour *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.pricePerHour') }} *</label>
               <input
                 v-model.number="formData.price_per_hour"
                 type="number"
@@ -253,20 +253,20 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.status') }} *</label>
               <select
                 v-model="formData.status"
                 required
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
-                <option value="available">Available</option>
-                <option value="maintenance">Maintenance</option>
-                <option value="unavailable">Unavailable</option>
+                <option value="available">{{ $t('halls.available') }}</option>
+                <option value="maintenance">{{ $t('halls.maintenance') }}</option>
+                <option value="unavailable">{{ $t('halls.unavailable') }}</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Image URL</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.imageUrl') }}</label>
               <input
                 v-model="formData.image_url"
                 type="url"
@@ -276,24 +276,24 @@
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.description') }}</label>
               <textarea
                 v-model="formData.description"
                 rows="3"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                placeholder="Describe the hall..."
+                :placeholder="$t('halls.descriptionPlaceholder')"
               ></textarea>
             </div>
 
             <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">Facilities (JSON)</label>
+              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.facilities') }}</label>
               <textarea
                 v-model="formData.facilities"
                 rows="4"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 font-mono text-sm"
                 placeholder='{"av_equipment":["Projector","Screen"],"furniture":["Tables","Chairs"],"tech":["WiFi","AC"]}'
               ></textarea>
-              <p class="text-xs text-gray-500 mt-1">Enter valid JSON format for facilities</p>
+              <p class="text-xs text-gray-500 mt-1">{{ $t('halls.facilitiesHint') }}</p>
             </div>
           </div>
 
@@ -303,14 +303,14 @@
               @click="closeModal"
               class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('halls.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update' : 'Create') }}
+              {{ saving ? $t('halls.saving') : (isEditing ? $t('halls.update') : $t('halls.create')) }}
             </button>
           </div>
         </form>
@@ -331,38 +331,38 @@
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-4">
             <div>
-              <p class="text-sm text-gray-500">Type</p>
+              <p class="text-sm text-gray-500">{{ $t('halls.type') }}</p>
               <p class="font-medium">{{ viewData.hall_type }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Floor</p>
+              <p class="text-sm text-gray-500">{{ $t('halls.floor') }}</p>
               <p class="font-medium">{{ viewData.floor || '-' }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Capacity</p>
-              <p class="font-medium">{{ viewData.capacity }} persons</p>
+              <p class="text-sm text-gray-500">{{ $t('halls.capacity') }}</p>
+              <p class="font-medium">{{ viewData.capacity }} {{ $t('halls.persons') }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Area</p>
-              <p class="font-medium">{{ viewData.area_sqm ? viewData.area_sqm + ' sqm' : '-' }}</p>
+              <p class="text-sm text-gray-500">{{ $t('halls.area') }}</p>
+              <p class="font-medium">{{ viewData.area_sqm ? viewData.area_sqm + ' ' + $t('halls.sqm') : '-' }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Price per Hour</p>
+              <p class="text-sm text-gray-500">{{ $t('halls.pricePerHour') }}</p>
               <p class="font-medium text-lg">{{ formatCurrency(viewData.price_per_hour) }}</p>
             </div>
             <div>
-              <p class="text-sm text-gray-500">Status</p>
+              <p class="text-sm text-gray-500">{{ $t('halls.status') }}</p>
               <p class="font-medium capitalize">{{ viewData.status }}</p>
             </div>
           </div>
 
           <div v-if="viewData.description">
-            <p class="text-sm text-gray-500">Description</p>
+            <p class="text-sm text-gray-500">{{ $t('halls.description') }}</p>
             <p class="text-gray-700">{{ viewData.description }}</p>
           </div>
 
           <div v-if="viewData.facilities">
-            <p class="text-sm text-gray-500 mb-2">Facilities</p>
+            <p class="text-sm text-gray-500 mb-2">{{ $t('halls.facilities') }}</p>
             <div class="bg-gray-50 p-4 rounded-lg">
               <div v-if="parsedFacilities" class="space-y-3">
                 <div v-for="(items, category) in parsedFacilities" :key="category">
@@ -372,7 +372,7 @@
                   </ul>
                 </div>
               </div>
-              <p v-else class="text-sm text-gray-500">No facilities listed</p>
+              <p v-else class="text-sm text-gray-500">{{ $t('halls.noFacilities') }}</p>
             </div>
           </div>
         </div>
@@ -382,7 +382,7 @@
             @click="closeViewModal"
             class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
-            Close
+            {{ $t('halls.close') }}
           </button>
         </div>
       </div>
@@ -393,10 +393,12 @@
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { hallApi } from '@/api'
 import LayoutMain from '@/components/LayoutMain.vue'
 
 const router = useRouter()
+const { t } = useI18n()
 
 const halls = ref([])
 const hallTypes = ref([])
@@ -634,7 +636,7 @@ const saveHall = async () => {
 
 // Confirm delete
 const confirmDelete = (hall) => {
-  if (confirm(`Are you sure you want to delete "${hall.name}"?`)) {
+  if (confirm(`${t('halls.confirmDelete')} "${hall.name}"?`)) {
     deleteHall(hall.id)
   }
 }

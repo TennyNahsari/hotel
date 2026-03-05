@@ -4,14 +4,14 @@
       <!-- Header -->
       <div class="flex justify-between items-center">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Hall Bookings</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">Manage hall reservations and events</p>
+          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('hallBookings.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('hallBookings.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
           class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
-          + New Booking
+          + {{ $t('hallBookings.newBooking') }}
         </button>
       </div>
 
@@ -19,39 +19,39 @@
       <div class="bg-white rounded-lg shadow p-4">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.search') }}</label>
             <input
               v-model="filters.search"
               type="text"
-              placeholder="Search bookings..."
+              :placeholder="$t('hallBookings.searchPlaceholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Hall</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.hall') }}</label>
             <select
               v-model="filters.hall_id"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Halls</option>
+              <option value="">{{ $t('hallBookings.allHalls') }}</option>
               <option v-for="hall in availableHalls" :key="hall.id" :value="hall.id">{{ hall.name }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.status') }}</label>
             <select
               v-model="filters.status"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
             >
-              <option value="">All Status</option>
-              <option value="pending">Pending</option>
-              <option value="confirmed">Confirmed</option>
-              <option value="completed">Completed</option>
-              <option value="cancelled">Cancelled</option>
+              <option value="">{{ $t('hallBookings.allStatus') }}</option>
+              <option value="pending">{{ $t('hallBookings.pending') }}</option>
+              <option value="confirmed">{{ $t('hallBookings.confirmed') }}</option>
+              <option value="completed">{{ $t('hallBookings.completed') }}</option>
+              <option value="cancelled">{{ $t('hallBookings.cancelled') }}</option>
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Event Date</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.eventDate') }}</label>
             <input
               v-model="filters.event_date"
               type="date"
@@ -64,11 +64,11 @@
       <!-- Bookings Table -->
       <div v-if="loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <p class="text-gray-500 mt-2">Loading bookings...</p>
+        <p class="text-gray-500 mt-2">{{ $t('hallBookings.loading') }}</p>
       </div>
 
       <div v-else-if="bookings.length === 0" class="bg-white rounded-lg shadow p-12 text-center">
-        <p class="text-gray-500">No bookings found</p>
+        <p class="text-gray-500">{{ $t('hallBookings.noBookings') }}</p>
       </div>
 
       <div v-else class="bg-white rounded-lg shadow overflow-hidden">
@@ -77,28 +77,28 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Booking #
+                  {{ $t('hallBookings.bookingNumber') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hall
+                  {{ $t('hallBookings.hall') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Event Name
+                  {{ $t('hallBookings.eventName') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Customer
+                  {{ $t('hallBookings.customer') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Date & Time
+                  {{ $t('hallBookings.dateTime') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total
+                  {{ $t('hallBookings.total') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
+                  {{ $t('hallBookings.status') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {{ $t('hallBookings.actions') }}
                 </th>
               </tr>
             </thead>
@@ -123,7 +123,7 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
-                  <div class="text-xs text-gray-500">{{ booking.duration_hours}} hrs</div>
+                  <div class="text-xs text-gray-500">{{ booking.duration_hours}} {{ $t('hallBookings.hrs') }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span
@@ -144,32 +144,32 @@
                       v-if="booking.status === 'pending'"
                       @click="confirmBooking(booking)"
                       class="text-green-600 hover:text-green-900"
-                      title="Confirm"
+                      :title="$t('hallBookings.confirm')"
                     >
-                      Confirm
+                      {{ $t('hallBookings.confirm') }}
                     </button>
                     <button
                       v-if="booking.status === 'confirmed'"
                       @click="completeBooking(booking)"
                       class="text-blue-600 hover:text-blue-900"
-                      title="Complete"
+                      :title="$t('hallBookings.complete')"
                     >
-                      Complete
+                      {{ $t('hallBookings.complete') }}
                     </button>
                     <button
                       v-if="['pending', 'confirmed'].includes(booking.status)"
                       @click="cancelBooking(booking)"
                       class="text-red-600 hover:text-red-900"
-                      title="Cancel"
+                      :title="$t('hallBookings.cancel')"
                     >
-                      Cancel
+                      {{ $t('hallBookings.cancel') }}
                     </button>
                     <button
                       @click="viewBooking(booking)"
                       class="text-gray-600 hover:text-gray-900"
-                      title="View"
+                      :title="$t('hallBookings.view')"
                     >
-                      View
+                      {{ $t('hallBookings.view') }}
                     </button>
                   </div>
                 </td>
@@ -182,7 +182,7 @@
       <!-- Pagination -->
       <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
         <div class="text-sm text-gray-700">
-          Showing {{ pagination.from }} to {{ pagination.to }} of {{ pagination.total }} bookings
+          {{ $t('hallBookings.showing') }} {{ pagination.from }} {{ $t('hallBookings.to') }} {{ pagination.to }} {{ $t('hallBookings.of') }} {{ pagination.total }} {{ $t('hallBookings.bookings') }}
         </div>
         <div class="flex gap-2">
           <button
@@ -190,14 +190,14 @@
             :disabled="pagination.current_page === 1"
             class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
           >
-            Previous
+            {{ $t('hallBookings.previous') }}
           </button>
           <button
             @click="changePage(pagination.current_page + 1)"
             :disabled="pagination.current_page === pagination.last_page"
             class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50"
           >
-            Next
+            {{ $t('hallBookings.next') }}
           </button>
         </div>
       </div>
@@ -211,23 +211,23 @@
     >
       <div class="bg-white rounded-lg max-w-4xl w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          {{ isEditing ? 'Edit Booking' : 'New Hall Booking' }}
+          {{ isEditing ? $t('hallBookings.editBooking') : $t('hallBookings.newHallBooking') }}
         </h2>
 
         <form @submit.prevent="saveBooking" class="space-y-6">
           <!-- Hall Selection -->
           <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-3">Hall & Schedule</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">{{ $t('hallBookings.hallSchedule') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Hall *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.hall') }} *</label>
                 <select
                   v-model="formData.hallId"
                   required
                   @change="onHallChange"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="">Select Hall</option>
+                  <option value="">{{ $t('hallBookings.selectHall') }}</option>
                   <option v-for="hall in availableHalls" :key="hall.id" :value="hall.id">
                     {{ hall.name }} ({{ hall.capacity }} pax - {{ formatCurrency(hall.price_per_hour) }}/hr)
                   </option>
@@ -235,7 +235,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Event Date *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.eventDate') }} *</label>
                 <input
                   v-model="formData.event_date"
                   type="date"
@@ -246,7 +246,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Start Time *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.startTime') }} *</label>
                 <input
                   v-model="formData.start_time"
                   type="time"
@@ -257,7 +257,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">End Time *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.endTime') }} *</label>
                 <input
                   v-model="formData.end_time"
                   type="time"
@@ -269,8 +269,8 @@
 
               <div class="md:col-span-2 bg-blue-50 p-3 rounded-lg" v-if="selectedHall && calculatedDuration">
                 <div class="text-sm text-gray-700">
-                  <strong>Duration:</strong> {{ calculatedDuration }} hours | 
-                  <strong>Total:</strong> {{ formatCurrency(calculatedTotal) }}
+                  <strong>{{ $t('hallBookings.duration') }}:</strong> {{ calculatedDuration }} {{ $t('hallBookings.hours') }} | 
+                  <strong>{{ $t('hallBookings.total') }}:</strong> {{ formatCurrency(calculatedTotal) }}
                 </div>
               </div>
             </div>
@@ -278,10 +278,10 @@
 
           <!-- Customer Information -->
           <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-3">Customer Information</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">{{ $t('hallBookings.customerInformation') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Customer Name *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.customerName') }} *</label>
                 <input
                   v-model="formData.customer_name"
                   type="text"
@@ -291,7 +291,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.email') }} *</label>
                 <input
                   v-model="formData.customer_email"
                   type="email"
@@ -301,7 +301,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.phone') }} *</label>
                 <input
                   v-model="formData.customer_phone"
                   type="tel"
@@ -311,7 +311,7 @@
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.company') }}</label>
                 <input
                   v-model="formData.customer_company"
                   type="text"
@@ -323,21 +323,21 @@
 
           <!-- Event Details -->
           <div>
-            <h3 class="text-lg font-semibold text-gray-900 mb-3">Event Details</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-3">{{ $t('hallBookings.eventDetails') }}</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Event Name *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.eventName') }} *</label>
                 <input
                   v-model="formData.event_name"
                   type="text"
                   required
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="e.g., Annual Meeting 2026"
+                  :placeholder="$t('hallBookings.eventNamePlaceholder')"
                 />
               </div>
 
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Number of Attendees *</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.attendees') }} *</label>
                 <input
                   v-model.number="formData.attendees"
                   type="number"
@@ -347,27 +347,27 @@
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                 />
                 <p v-if="selectedHall" class="text-xs text-gray-500 mt-1">
-                  Max capacity: {{ selectedHall.capacity }} persons
+                  {{ $t('hallBookings.maxCapacity') }}: {{ selectedHall.capacity }} {{ $t('hallBookings.persons') }}
                 </p>
               </div>
 
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Special Requests</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.specialRequests') }}</label>
                 <textarea
                   v-model="formData.special_requests"
                   rows="3"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Any special requirements..."
+                  :placeholder="$t('hallBookings.specialRequestsPlaceholder')"
                 ></textarea>
               </div>
 
               <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Internal Notes</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.internalNotes') }}</label>
                 <textarea
                   v-model="formData.notes"
                   rows="2"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                  placeholder="Internal staff notes..."
+                  :placeholder="$t('hallBookings.internalNotesPlaceholder')"
                 ></textarea>
               </div>
             </div>
@@ -379,14 +379,14 @@
               @click="closeModal"
               class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              Cancel
+              {{ $t('hallBookings.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="saving"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {{ saving ? 'Saving...' : (isEditing ? 'Update' : 'Create Booking') }}
+              {{ saving ? $t('hallBookings.saving') : (isEditing ? $t('hallBookings.update') : $t('hallBookings.createBooking')) }}
             </button>
           </div>
         </form>
@@ -401,63 +401,63 @@
     >
       <div class="bg-white rounded-lg max-w-3xl w-full p-4 md:p-6 my-8 max-h-[90vh] overflow-y-auto">
         <h2 class="text-xl md:text-2xl font-bold text-gray-900 mb-4">
-          Booking Details: {{ viewData.booking_number }}
+          {{ $t('hallBookings.bookingDetails') }}: {{ viewData.booking_number }}
         </h2>
 
         <div class="space-y-6">
           <div>
-            <h3 class="font-semibold text-gray-900 mb-2">Hall Information</h3>
+            <h3 class="font-semibold text-gray-900 mb-2">{{ $t('hallBookings.hallInformation') }}</h3>
             <div class="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p class="text-gray-500">Hall</p>
+                <p class="text-gray-500">{{ $t('hallBookings.hall') }}</p>
                 <p class="font-medium">{{ viewData.hall?.name }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Event Date</p>
+                <p class="text-gray-500">{{ $t('hallBookings.eventDate') }}</p>
                 <p class="font-medium">{{ formatDate(viewData.event_date) }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Time</p>
-                <p class="font-medium">{{ viewData.start_time }} - {{ viewData.end_time }} ({{ viewData.duration_hours }} hrs)</p>
+                <p class="text-gray-500">{{ $t('hallBookings.time') }}</p>
+                <p class="font-medium">{{ viewData.start_time }} - {{ viewData.end_time }} ({{ viewData.duration_hours }} {{ $t('hallBookings.hrs') }})</p>
               </div>
               <div>
-                <p class="text-gray-500">Status</p>
+                <p class="text-gray-500">{{ $t('hallBookings.status') }}</p>
                 <p class="font-medium capitalize">{{ viewData.status }}</p>
               </div>
             </div>
           </div>
 
           <div>
-            <h3 class="font-semibold text-gray-900 mb-2">Event Details</h3>
+            <h3 class="font-semibold text-gray-900 mb-2">{{ $t('hallBookings.eventDetails') }}</h3>
             <div class="grid grid-cols-2 gap-3 text-sm">
               <div class="col-span-2">
-                <p class="text-gray-500">Event Name</p>
+                <p class="text-gray-500">{{ $t('hallBookings.eventName') }}</p>
                 <p class="font-medium">{{ viewData.event_name }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Attendees</p>
-                <p class="font-medium">{{ viewData.attendees }} persons</p>
+                <p class="text-gray-500">{{ $t('hallBookings.attendees') }}</p>
+                <p class="font-medium">{{ viewData.attendees }} {{ $t('hallBookings.persons') }}</p>
               </div>
             </div>
           </div>
 
           <div>
-            <h3 class="font-semibold text-gray-900 mb-2">Customer Information</h3>
+            <h3 class="font-semibold text-gray-900 mb-2">{{ $t('hallBookings.customerInformation') }}</h3>
             <div class="grid grid-cols-2 gap-3 text-sm">
               <div>
-                <p class="text-gray-500">Name</p>
+                <p class="text-gray-500">{{ $t('hallBookings.name') }}</p>
                 <p class="font-medium">{{ viewData.customer_name }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Email</p>
+                <p class="text-gray-500">{{ $t('hallBookings.email') }}</p>
                 <p class="font-medium">{{ viewData.customer_email }}</p>
               </div>
               <div>
-                <p class="text-gray-500">Phone</p>
+                <p class="text-gray-500">{{ $t('hallBookings.phone') }}</p>
                 <p class="font-medium">{{ viewData.customer_phone }}</p>
               </div>
               <div v-if="viewData.customer_company">
-                <p class="text-gray-500">Company</p>
+                <p class="text-gray-500">{{ $t('hallBookings.company') }}</p>
                 <p class="font-medium">{{ viewData.customer_company }}</p>
               </div>
             </div>
@@ -465,18 +465,18 @@
 
           <div class="bg-gray-50 p-4 rounded-lg">
             <div class="flex justify-between items-center text-lg">
-              <span class="font-semibold">Total Amount</span>
+              <span class="font-semibold">{{ $t('hallBookings.totalAmount') }}</span>
               <span class="font-bold text-blue-600">{{ formatCurrency(viewData.total_amount) }}</span>
             </div>
           </div>
 
           <div v-if="viewData.special_requests">
-            <h3 class="font-semibold text-gray-900 mb-2">Special Requests</h3>
+            <h3 class="font-semibold text-gray-900 mb-2">{{ $t('hallBookings.specialRequests') }}</h3>
             <p class="text-gray-700 text-sm">{{ viewData.special_requests }}</p>
           </div>
 
           <div v-if="viewData.notes">
-            <h3 class="font-semibold text-gray-900 mb-2">Internal Notes</h3>
+            <h3 class="font-semibold text-gray-900 mb-2">{{ $t('hallBookings.internalNotes') }}</h3>
             <p class="text-gray-700 text-sm">{{ viewData.notes }}</p>
           </div>
         </div>
@@ -486,7 +486,7 @@
             @click="closeViewModal"
             class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
           >
-            Close
+            {{ $t('hallBookings.close') }}
           </button>
         </div>
       </div>
@@ -496,8 +496,11 @@
 
 <script setup>
 import { ref, computed, onMounted, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { hallApi, hallBookingApi } from '@/api'
 import LayoutMain from '@/components/LayoutMain.vue'
+
+const { t } = useI18n()
 
 const bookings = ref([])
 const availableHalls = ref([])
@@ -700,42 +703,42 @@ const saveBooking = async () => {
 
 // Confirm booking
 const confirmBooking = async (booking) => {
-  if (confirm(`Confirm booking ${booking.booking_number}?`)) {
+  if (confirm(`${t('hallBookings.confirmBooking')} ${booking.booking_number}?`)) {
     try {
       await hallBookingApi.confirmHallBooking(booking.id)
-      alert('Booking confirmed successfully')
+      alert(t('hallBookings.bookingConfirmedSuccess'))
       fetchBookings(pagination.value.current_page)
     } catch (error) {
       console.error('Error confirming booking:', error)
-      alert('Failed to confirm booking')
+      alert(t('hallBookings.bookingConfirmFailed'))
     }
   }
 }
 
 // Complete booking
 const completeBooking = async (booking) => {
-  if (confirm(`Mark booking ${booking.booking_number} as completed?`)) {
+  if (confirm(`${t('hallBookings.completeBooking')} ${booking.booking_number}?`)) {
     try {
       await hallBookingApi.completeHallBooking(booking.id)
-      alert('Booking completed successfully')
+      alert(t('hallBookings.bookingCompletedSuccess'))
       fetchBookings(pagination.value.current_page)
     } catch (error) {
       console.error('Error completing booking:', error)
-      alert('Failed to complete booking')
+      alert(t('hallBookings.bookingCompleteFailed'))
     }
   }
 }
 
 // Cancel booking
 const cancelBooking = async (booking) => {
-  if (confirm(`Cancel booking ${booking.booking_number}?`)) {
+  if (confirm(`${t('hallBookings.cancelBooking')} ${booking.booking_number}?`)) {
     try {
       await hallBookingApi.cancelHallBooking(booking.id)
-      alert('Booking cancelled successfully')
+      alert(t('hallBookings.bookingCancelledSuccess'))
       fetchBookings(pagination.value.current_page)
     } catch (error) {
       console.error('Error cancelling booking:', error)
-      alert('Failed to cancel booking')
+      alert(t('hallBookings.bookingCancelFailed'))
     }
   }
 }

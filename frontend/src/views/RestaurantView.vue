@@ -3,8 +3,8 @@
     <div class="p-6">
       <!-- Header -->
       <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">Restaurant & Cafe</h1>
-        <p class="text-gray-600">Manage menu items and create orders</p>
+        <h1 class="text-2xl font-bold text-gray-900">{{ $t('restaurant.title') }}</h1>
+        <p class="text-gray-600">{{ $t('restaurant.subtitle') }}</p>
       </div>
 
       <!-- Tabs -->
@@ -19,7 +19,7 @@
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             ]"
           >
-            Menu Items
+            {{ $t('restaurant.menuItems') }}
           </button>
           <button
             @click="activeTab = 'orders'"
@@ -30,7 +30,7 @@
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             ]"
           >
-            Create Order
+            {{ $t('restaurant.createOrder') }}
           </button>
           <button
             @click="activeTab = 'history'"
@@ -41,7 +41,7 @@
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
             ]"
           >
-            Order History
+            {{ $t('restaurant.orderHistory') }}
           </button>
         </nav>
       </div>
@@ -54,33 +54,33 @@
             <input
               v-model="filters.search"
               type="text"
-              placeholder="Search menu..."
+              :placeholder="$t('restaurant.searchMenu')"
               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <select
               v-model="filters.category"
               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">All Categories</option>
-              <option value="food">Food</option>
-              <option value="beverage">Beverage</option>
-              <option value="snack">Snack</option>
-              <option value="package">Package</option>
+              <option value="">{{ $t('restaurant.allCategories') }}</option>
+              <option value="food">{{ $t('restaurant.food') }}</option>
+              <option value="beverage">{{ $t('restaurant.beverage') }}</option>
+              <option value="snack">{{ $t('restaurant.snack') }}</option>
+              <option value="package">{{ $t('restaurant.package') }}</option>
             </select>
             <select
               v-model="filters.is_available"
               class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="">All Status</option>
-              <option value="1">Available</option>
-              <option value="0">Unavailable</option>
+              <option value="">{{ $t('restaurant.allStatus') }}</option>
+              <option value="1">{{ $t('restaurant.available') }}</option>
+              <option value="0">{{ $t('restaurant.unavailable') }}</option>
             </select>
           </div>
           <button
             @click="openMenuItemModal()"
             class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
           >
-            Add Menu Item
+            {{ $t('restaurant.addMenuItem') }}
           </button>
         </div>
 
@@ -94,18 +94,18 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Photo</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.photo') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.name') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.category') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.price') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.status') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.actions') }}</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-if="!menuItems.data || menuItems.data.length === 0">
                 <td colspan="6" class="px-6 py-8 text-center text-gray-500">
-                  No menu items found. Click "Add Menu Item" to create one.
+                  {{ $t('restaurant.noMenuItems') }}
                 </td>
               </tr>
               <tr v-for="item in menuItems.data" :key="item.id">
@@ -117,7 +117,7 @@
                     class="h-12 w-12 rounded object-cover"
                   />
                   <div v-else class="h-12 w-12 rounded bg-gray-200 flex items-center justify-center">
-                    <span class="text-gray-400 text-xs">No photo</span>
+                    <span class="text-gray-400 text-xs">{{ $t('restaurant.noPhoto') }}</span>
                   </div>
                 </td>
                 <td class="px-6 py-4">
@@ -135,15 +135,15 @@
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span :class="item.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
                         class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full">
-                    {{ item.is_available ? 'Available' : 'Unavailable' }}
+                    {{ item.is_available ? $t('restaurant.available') : $t('restaurant.unavailable') }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                   <button @click="openMenuItemModal(item)" class="text-blue-600 hover:text-blue-900 mr-3">
-                    Edit
+                    {{ $t('restaurant.edit') }}
                   </button>
                   <button @click="deleteMenuItem(item)" class="text-red-600 hover:text-red-900">
-                    Delete
+                    {{ $t('restaurant.delete') }}
                   </button>
                 </td>
               </tr>
@@ -154,7 +154,7 @@
         <!-- Pagination -->
         <div v-if="menuItems.meta" class="mt-4 flex items-center justify-between">
           <div class="text-sm text-gray-700">
-            Showing {{ menuItems.meta.from }} to {{ menuItems.meta.to }} of {{ menuItems.meta.total }} results
+            {{ $t('restaurant.showing') }} {{ menuItems.meta.from }} {{ $t('restaurant.to') }} {{ menuItems.meta.to }} {{ $t('restaurant.of') }} {{ menuItems.meta.total }} {{ $t('restaurant.results') }}
           </div>
           <div class="flex gap-2">
             <button
@@ -178,45 +178,45 @@
         <div class="bg-white rounded-lg shadow p-6">
           <!-- Select Booking -->
           <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Select Booking</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.selectBooking') }}</label>
             <select
               v-model="orderForm.booking_id"
               @change="loadBookingDetails"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               required
             >
-              <option value="">Select a booking...</option>
-              <optgroup v-if="bookings.filter(b => b.type === 'room').length > 0" label="Room Bookings">
+              <option value="">{{ $t('restaurant.selectABooking') }}</option>
+              <optgroup v-if="bookings.filter(b => b.type === 'room').length > 0" :label="$t('restaurant.roomBookings')">
                 <option v-for="booking in bookings.filter(b => b.type === 'room')" :key="'room-' + booking.id" :value="'room-' + booking.id">
-                  {{ booking.booking_number }} - {{ booking.guest?.name }} (Room {{ booking.rooms?.[0]?.room_number }})
+                  {{ booking.booking_number }} - {{ booking.guest?.name }} ({{ $t('restaurant.room') }} {{ booking.rooms?.[0]?.room_number }})
                 </option>
               </optgroup>
-              <optgroup v-if="bookings.filter(b => b.type === 'hall').length > 0" label="Hall Bookings">
+              <optgroup v-if="bookings.filter(b => b.type === 'hall').length > 0" :label="$t('restaurant.hallBookings')">
                 <option v-for="booking in bookings.filter(b => b.type === 'hall')" :key="'hall-' + booking.id" :value="'hall-' + booking.id">
                   {{ booking.booking_number }} - {{ booking.customer_name }} ({{ booking.hall?.name }})
                 </option>
               </optgroup>
             </select>
             <p v-if="bookings.length === 0" class="text-sm text-gray-500 mt-1">
-              No active bookings available.
+              {{ $t('restaurant.noActiveBookings') }}
             </p>
           </div>
 
           <!-- Booking Details (if booking selected) -->
           <div v-if="selectedBooking" class="mb-6 p-4 bg-blue-50 rounded-lg">
-            <h3 class="font-medium text-gray-900 mb-2">Booking Details</h3>
+            <h3 class="font-medium text-gray-900 mb-2">{{ $t('restaurant.bookingDetails') }}</h3>
             <div class="grid grid-cols-2 gap-2 text-sm">
               <template v-if="selectedBooking.type === 'room'">
-                <div><span class="text-gray-600">Guest:</span> {{ selectedBooking.guest?.name }}</div>
-                <div><span class="text-gray-600">Room:</span> {{ selectedBooking.rooms?.[0]?.room_number }}</div>
-                <div><span class="text-gray-600">Check-in:</span> {{ formatDate(selectedBooking.check_in_date) }}</div>
-                <div><span class="text-gray-600">Check-out:</span> {{ formatDate(selectedBooking.check_out_date) }}</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.guest') }}:</span> {{ selectedBooking.guest?.name }}</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.room') }}:</span> {{ selectedBooking.rooms?.[0]?.room_number }}</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.checkIn') }}:</span> {{ formatDate(selectedBooking.check_in_date) }}</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.checkOut') }}:</span> {{ formatDate(selectedBooking.check_out_date) }}</div>
               </template>
               <template v-else>
-                <div><span class="text-gray-600">Customer:</span> {{ selectedBooking.customer_name }}</div>
-                <div><span class="text-gray-600">Hall:</span> {{ selectedBooking.hall?.name }}</div>
-                <div><span class="text-gray-600">Event Date:</span> {{ formatDate(selectedBooking.event_date) }}</div>
-                <div><span class="text-gray-600">Duration:</span> {{ selectedBooking.duration }} hours</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.customer') }}:</span> {{ selectedBooking.customer_name }}</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.hall') }}:</span> {{ selectedBooking.hall?.name }}</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.eventDate') }}:</span> {{ formatDate(selectedBooking.event_date) }}</div>
+                <div><span class="text-gray-600">{{ $t('restaurant.duration') }}:</span> {{ selectedBooking.duration }} {{ $t('restaurant.hours') }}</div>
               </template>
             </div>
           </div>
@@ -224,7 +224,7 @@
           <!-- Menu Items Selection -->
           <div class="mb-6">
             <div class="flex items-center justify-between mb-4">
-              <label class="block text-sm font-medium text-gray-700">Add Items to Order</label>
+              <label class="block text-sm font-medium text-gray-700">{{ $t('restaurant.addItems') }}</label>
               <div class="flex gap-2">
                 <button
                   @click="menuCategoryFilter = ''"
@@ -235,7 +235,7 @@
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   ]"
                 >
-                  All ({{ availableMenuItems.length }})
+                  {{ $t('restaurant.all') }} ({{ availableMenuItems.length }})
                 </button>
                 <button
                   @click="menuCategoryFilter = 'food'"
@@ -246,7 +246,7 @@
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   ]"
                 >
-                  🍽️ Food ({{ availableMenuItems.filter(i => i.category === 'food').length }})
+                  🍽️ {{ $t('restaurant.food') }} ({{ availableMenuItems.filter(i => i.category === 'food').length }})
                 </button>
                 <button
                   @click="menuCategoryFilter = 'beverage'"
@@ -257,7 +257,7 @@
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   ]"
                 >
-                  🥤 Beverage ({{ availableMenuItems.filter(i => i.category === 'beverage').length }})
+                  🥤 {{ $t('restaurant.beverage') }} ({{ availableMenuItems.filter(i => i.category === 'beverage').length }})
                 </button>
                 <button
                   @click="menuCategoryFilter = 'snack'"
@@ -268,7 +268,7 @@
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   ]"
                 >
-                  🍿 Snack ({{ availableMenuItems.filter(i => i.category === 'snack').length }})
+                  🍿 {{ $t('restaurant.snack') }} ({{ availableMenuItems.filter(i => i.category === 'snack').length }})
                 </button>
                 <button
                   @click="menuCategoryFilter = 'package'"
@@ -279,12 +279,12 @@
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                   ]"
                 >
-                  📦 Package ({{ availableMenuItems.filter(i => i.category === 'package').length }})
+                  📦 {{ $t('restaurant.package') }} ({{ availableMenuItems.filter(i => i.category === 'package').length }})
                 </button>
               </div>
             </div>
             <p v-if="availableMenuItems.length === 0" class="text-sm text-gray-500 mb-2">
-              No available menu items. Please add menu items first.
+              {{ $t('restaurant.noAvailableItems') }}
             </p>
             <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-3">
               <div
@@ -299,7 +299,7 @@
                   class="w-full h-24 object-cover rounded mb-2"
                 />
                 <div v-else class="w-full h-24 rounded bg-gray-200 flex items-center justify-center mb-2">
-                  <span class="text-gray-400 text-xs">No photo</span>
+                  <span class="text-gray-400 text-xs">{{ $t('restaurant.noPhoto') }}</span>
                 </div>
                 <h4 class="font-medium text-gray-900 text-sm">{{ item.name }}</h4>
                 <p class="text-xs text-gray-500 mb-2 line-clamp-2">{{ item.description }}</p>
@@ -313,7 +313,7 @@
                   @click="addItemToCart(item)"
                   class="w-full px-2 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-xs font-medium"
                 >
-                  Add to Cart
+                  {{ $t('restaurant.addToCart') }}
                 </button>
               </div>
             </div>
@@ -321,12 +321,12 @@
 
           <!-- Cart -->
           <div v-if="orderForm.items.length > 0" class="mb-6">
-            <h3 class="text-lg font-medium text-gray-900 mb-4">Order Items</h3>
+            <h3 class="text-lg font-medium text-gray-900 mb-4">{{ $t('restaurant.orderItems') }}</h3>
             <div class="bg-gray-50 rounded-lg p-4">
               <div v-for="(cartItem, index) in orderForm.items" :key="index" class="flex items-center justify-between mb-3 last:mb-0">
                 <div class="flex-1">
                   <div class="font-medium text-gray-900">{{ getMenuItemName(cartItem.menu_item_id) }}</div>
-                  <div class="text-sm text-gray-500">Rp {{ formatNumber(cartItem.price) }} each</div>
+                  <div class="text-sm text-gray-500">Rp {{ formatNumber(cartItem.price) }} {{ $t('restaurant.each') }}</div>
                 </div>
                 <div class="flex items-center gap-3">
                   <button
@@ -346,7 +346,7 @@
                     @click="removeItemFromCart(index)"
                     class="ml-2 text-red-600 hover:text-red-800"
                   >
-                    Remove
+                    {{ $t('restaurant.remove') }}
                   </button>
                   <div class="ml-4 font-medium text-gray-900 w-32 text-right">
                     Rp {{ formatNumber(cartItem.price * cartItem.quantity) }}
@@ -355,7 +355,7 @@
               </div>
               <div class="mt-4 pt-4 border-t border-gray-200">
                 <div class="flex justify-between items-center text-lg font-bold">
-                  <span>Total:</span>
+                  <span>{{ $t('restaurant.total') }}:</span>
                   <span class="text-blue-600">Rp {{ formatNumber(calculateTotal()) }}</span>
                 </div>
               </div>
@@ -364,12 +364,12 @@
 
           <!-- Notes -->
           <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Order Notes (Optional)</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.orderNotes') }}</label>
             <textarea
               v-model="orderForm.notes"
               rows="3"
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              placeholder="Special requests or notes..."
+              :placeholder="$t('restaurant.specialRequests')"
             ></textarea>
           </div>
 
@@ -379,14 +379,14 @@
               @click="resetOrderForm"
               class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Reset
+              {{ $t('restaurant.reset') }}
             </button>
             <button
               @click="submitOrder"
               :disabled="!orderForm.booking_id || orderForm.items.length === 0 || submitting"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {{ submitting ? 'Creating...' : 'Create Order' }}
+              {{ submitting ? $t('restaurant.creating') : $t('restaurant.createOrder') }}
             </button>
           </div>
         </div>
@@ -399,43 +399,43 @@
           <input
             v-model="orderFilters.search"
             type="text"
-            placeholder="Search by order number or booking..."
+            :placeholder="$t('restaurant.searchOrder')"
             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <input
             v-model="orderFilters.start_date"
             type="date"
-            placeholder="Start Date"
+            :placeholder="$t('restaurant.startDate')"
             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <input
             v-model="orderFilters.end_date"
             type="date"
-            placeholder="End Date"
+            :placeholder="$t('restaurant.endDate')"
             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
           <select
             v-model="orderFilters.status"
             class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
-            <option value="">All Status</option>
-            <option value="pending">Pending</option>
-            <option value="preparing">Preparing</option>
-            <option value="delivered">Delivered</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="">{{ $t('restaurant.allStatus') }}</option>
+            <option value="pending">{{ $t('restaurant.pending') }}</option>
+            <option value="preparing">{{ $t('restaurant.preparing') }}</option>
+            <option value="delivered">{{ $t('restaurant.delivered') }}</option>
+            <option value="cancelled">{{ $t('restaurant.cancelled') }}</option>
           </select>
           <button
             @click="loadOrders()"
             class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
           >
-            Refresh
+            {{ $t('restaurant.refresh') }}
           </button>
           <button
             @click="exportOrders"
             :disabled="exporting"
             class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {{ exporting ? 'Exporting...' : 'Export Excel' }}
+            {{ exporting ? $t('restaurant.exporting') : $t('restaurant.exportExcel') }}
           </button>
         </div>
 
@@ -444,13 +444,13 @@
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Order #</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Booking</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.orderNumber') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.booking') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.menuItems') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.total') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.status') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.date') }}</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{{ $t('restaurant.actions') }}</th>
               </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -469,7 +469,7 @@
                   </template>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
-                  {{ order.order_items?.length || 0 }} items
+                  {{ order.order_items?.length || 0 }} {{ $t('restaurant.items') }}
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                   Rp {{ formatNumber(order.total_amount) }}
@@ -488,27 +488,27 @@
                     @click="updateOrderStatus(order.id, 'preparing')"
                     class="text-blue-600 hover:text-blue-900 mr-2"
                   >
-                    Prepare
+                    {{ $t('restaurant.prepare') }}
                   </button>
                   <button
                     v-if="order.status === 'preparing'"
                     @click="updateOrderStatus(order.id, 'delivered')"
                     class="text-green-600 hover:text-green-900 mr-2"
                   >
-                    Deliver
+                    {{ $t('restaurant.deliver') }}
                   </button>
                   <button
                     v-if="['pending', 'preparing'].includes(order.status)"
                     @click="updateOrderStatus(order.id, 'cancelled')"
                     class="text-red-600 hover:text-red-900"
                   >
-                    Cancel
+                    {{ $t('restaurant.cancel') }}
                   </button>
                   <button
                     @click="viewOrderDetails(order)"
                     class="text-gray-600 hover:text-gray-900 ml-2"
                   >
-                    View
+                    {{ $t('restaurant.view') }}
                   </button>
                 </td>
               </tr>
@@ -519,7 +519,7 @@
         <!-- Pagination -->
         <div v-if="orders.meta" class="mt-4 flex items-center justify-between">
           <div class="text-sm text-gray-700">
-            Showing {{ orders.meta.from }} to {{ orders.meta.to }} of {{ orders.meta.total }} results
+            {{ $t('restaurant.showing') }} {{ orders.meta.from }} {{ $t('restaurant.to') }} {{ orders.meta.to }} {{ $t('restaurant.of') }} {{ orders.meta.total }} {{ $t('restaurant.results') }}
           </div>
           <div class="flex gap-2">
             <button
@@ -547,11 +547,11 @@
     >
       <div class="bg-white rounded-lg p-6 w-full max-w-md">
         <h2 class="text-xl font-bold text-gray-900 mb-4">
-          {{ editingMenuItem ? 'Edit Menu Item' : 'Add Menu Item' }}
+          {{ editingMenuItem ? $t('restaurant.editMenuItem') : $t('restaurant.addMenuItem') }}
         </h2>
         <form @submit.prevent="saveMenuItem">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Name *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.name') }} *</label>
             <input
               v-model="menuItemForm.name"
               type="text"
@@ -560,20 +560,20 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.category') }} *</label>
             <select
               v-model="menuItemForm.category"
               required
               class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="food">Food</option>
-              <option value="beverage">Beverage</option>
-              <option value="snack">Snack</option>
-              <option value="package">Package</option>
+              <option value="food">{{ $t('restaurant.food') }}</option>
+              <option value="beverage">{{ $t('restaurant.beverage') }}</option>
+              <option value="snack">{{ $t('restaurant.snack') }}</option>
+              <option value="package">{{ $t('restaurant.package') }}</option>
             </select>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Price *</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.price') }} *</label>
             <input
               v-model.number="menuItemForm.price"
               type="number"
@@ -583,7 +583,7 @@
             />
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.description') }}</label>
             <textarea
               v-model="menuItemForm.description"
               rows="3"
@@ -591,7 +591,7 @@
             ></textarea>
           </div>
           <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 mb-2">Photo</label>
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.photo') }}</label>
             <input
               @change="handlePhotoChange"
               type="file"
@@ -612,7 +612,7 @@
                 type="checkbox"
                 class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
-              <span class="ml-2 text-sm text-gray-700">Available</span>
+              <span class="ml-2 text-sm text-gray-700">{{ $t('restaurant.available') }}</span>
             </label>
           </div>
           <div class="flex justify-end gap-3">
@@ -621,14 +621,14 @@
               @click="closeMenuItemModal"
               class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              Cancel
+              {{ $t('breakfast.cancel') }}
             </button>
             <button
               type="submit"
               :disabled="submitting"
               class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
             >
-              {{ submitting ? 'Saving...' : 'Save' }}
+              {{ submitting ? $t('restaurant.saving') : $t('restaurant.save') }}
             </button>
           </div>
         </form>
@@ -639,9 +639,11 @@
 
 <script setup>
 import { ref, reactive, onMounted, watch, computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { menuItemApi, restaurantOrderApi, bookingApi, hallBookingApi } from '../api'
 
+const { t } = useI18n()
 const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
 
 // Tabs
@@ -717,7 +719,7 @@ const loadMenuItems = async (url = null) => {
     console.log('Menu items loaded:', menuItems.value?.data?.length || 0, menuItems.value)
   } catch (error) {
     console.error('Failed to load menu items:', error, error.response)
-    alert('Failed to load menu items: ' + (error.response?.data?.message || error.message))
+    alert(t('restaurant.loadMenuFailed') + ': ' + (error.response?.data?.message || error.message))
   }
 }
 
@@ -774,28 +776,28 @@ const saveMenuItem = async () => {
     submitting.value = true
     if (editingMenuItem.value) {
       await menuItemApi.updateMenuItem(editingMenuItem.value.id, menuItemForm)
-      alert('Menu item updated successfully')
+      alert(t('restaurant.menuItemUpdated'))
     } else {
       await menuItemApi.createMenuItem(menuItemForm)
-      alert('Menu item created successfully')
+      alert(t('restaurant.menuItemCreated'))
     }
     closeMenuItemModal()
     loadMenuItems()
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to save menu item')
+    alert(error.response?.data?.message || t('restaurant.menuItemSaveFailed'))
   } finally {
     submitting.value = false
   }
 }
 
 const deleteMenuItem = async (item) => {
-  if (!confirm(`Delete ${item.name}?`)) return
+  if (!confirm(`${t('restaurant.deleteConfirm')} ${item.name}?`)) return
   try {
     await menuItemApi.deleteMenuItem(item.id)
-    alert('Menu item deleted successfully')
+    alert(t('restaurant.menuItemDeleted'))
     loadMenuItems()
   } catch (error) {
-    alert('Failed to delete menu item')
+    alert(t('restaurant.menuItemDeleteFailed'))
   }
 }
 
@@ -825,7 +827,7 @@ const loadBookings = async () => {
     console.log('All bookings loaded:', allBookings.length, allBookings)
   } catch (error) {
     console.error('Failed to load bookings:', error, error.response)
-    alert('Failed to load bookings: ' + (error.response?.data?.message || error.message))
+    alert(t('restaurant.loadBookingsFailed') + ': ' + (error.response?.data?.message || error.message))
   }
 }
 
@@ -839,7 +841,7 @@ const loadAvailableMenuItems = async () => {
     console.log('Available menu items loaded:', availableMenuItems.value.length, availableMenuItems.value)
   } catch (error) {
     console.error('Failed to load available menu items:', error)
-    alert('Failed to load menu items')
+    alert(t('restaurant.loadMenuFailed'))
   }
 }
 
@@ -867,7 +869,7 @@ const loadBookingDetails = async () => {
     console.log('Selected booking loaded:', selectedBooking.value)
   } catch (error) {
     console.error('Failed to load booking details:', error, error.response)
-    alert('Failed to load booking details: ' + (error.response?.data?.message || error.message))
+    alert(t('restaurant.loadBookingDetailsFailed') + ': ' + (error.response?.data?.message || error.message))
     // Reset selection if error
     orderForm.booking_id = ''
     selectedBooking.value = null
@@ -918,7 +920,7 @@ const resetOrderForm = () => {
 
 const submitOrder = async () => {
   if (!orderForm.booking_id || orderForm.items.length === 0) {
-    alert('Please select a booking and add items to the order')
+    alert(t('restaurant.selectBookingAndItems'))
     return
   }
   try {
@@ -936,12 +938,12 @@ const submitOrder = async () => {
     }
     
     await restaurantOrderApi.createOrder(payload)
-    alert('Order created successfully')
+    alert(t('restaurant.orderCreated'))
     resetOrderForm()
     activeTab.value = 'history'
     loadOrders()
   } catch (error) {
-    alert(error.response?.data?.message || 'Failed to create order')
+    alert(error.response?.data?.message || t('restaurant.orderCreateFailed'))
   } finally {
     submitting.value = false
   }
@@ -962,7 +964,7 @@ const loadOrders = async (url = null) => {
     orders.value = response
   } catch (error) {
     console.error('Failed to load orders:', error)
-    alert('Failed to load orders')
+    alert(t('restaurant.loadOrdersFailed'))
   }
 }
 
@@ -971,13 +973,13 @@ const changeOrderPage = (url) => {
 }
 
 const updateOrderStatus = async (orderId, status) => {
-  if (!confirm(`Change order status to ${status}?`)) return
+  if (!confirm(`${t('restaurant.changeStatus')} ${status}?`)) return
   try {
     await restaurantOrderApi.updateOrderStatus(orderId, status)
-    alert('Order status updated successfully')
+    alert(t('restaurant.orderStatusUpdated'))
     loadOrders()
   } catch (error) {
-    alert('Failed to update order status')
+    alert(t('restaurant.orderStatusUpdateFailed'))
   }
 }
 
@@ -1003,7 +1005,7 @@ const exportOrders = async () => {
     document.body.removeChild(link)
   } catch (err) {
     console.error('Failed to export orders:', err)
-    alert('Failed to export orders')
+    alert(t('restaurant.exportFailed'))
   } finally {
     exporting.value = false
   }

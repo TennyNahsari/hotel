@@ -3,8 +3,8 @@
     <div class="px-4 sm:px-6 lg:px-8">
       <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-          <h1 class="text-2xl font-semibold leading-6 text-gray-900">Laundry Service</h1>
-          <p class="mt-2 text-sm text-gray-700">Manage laundry orders for hotel guests</p>
+          <h1 class="text-2xl font-semibold leading-6 text-gray-900">{{ $t('laundry.title') }}</h1>
+          <p class="mt-2 text-sm text-gray-700">{{ $t('laundry.subtitle') }}</p>
         </div>
       </div>
 
@@ -20,7 +20,7 @@
               'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium'
             ]"
           >
-            Create Order
+            {{ $t('laundry.createOrder') }}
           </button>
           <button
             @click="activeTab = 'history'"
@@ -31,7 +31,7 @@
               'whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium'
             ]"
           >
-            Order History
+            {{ $t('laundry.orderHistory') }}
           </button>
         </nav>
       </div>
@@ -40,18 +40,18 @@
       <div v-show="activeTab === 'create'" class="mt-6">
         <div class="bg-white shadow sm:rounded-lg">
           <div class="px-4 py-5 sm:p-6">
-            <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">New Laundry Order</h3>
+            <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">{{ $t('laundry.newOrder') }}</h3>
             <form @submit.prevent="submitOrder" class="space-y-4">
               <!-- Booking Selection -->
               <div>
-                <label for="booking" class="block text-sm font-medium text-gray-700">Booking</label>
+                <label for="booking" class="block text-sm font-medium text-gray-700">{{ $t('laundry.booking') }}</label>
                 <select
                   id="booking"
                   v-model="orderForm.booking_id"
                   required
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 >
-                  <option value="">Select Booking</option>
+                  <option value="">{{ $t('laundry.selectBooking') }}</option>
                   <option v-for="booking in bookings" :key="booking.id" :value="booking.id">
                     {{ booking.booking_number }} - {{ booking.guest?.full_name }} (Room {{ booking.room?.room_number }})
                   </option>
@@ -60,7 +60,7 @@
 
               <!-- Weight (kg) -->
               <div>
-                <label for="weight" class="block text-sm font-medium text-gray-700">Weight (kg)</label>
+                <label for="weight" class="block text-sm font-medium text-gray-700">{{ $t('laundry.weight') }}</label>
                 <input
                   id="weight"
                   type="number"
@@ -69,13 +69,13 @@
                   step="0.1"
                   required
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="0.0"
+                  :placeholder="$t('laundry.weightPlaceholder')"
                 />
               </div>
 
               <!-- Price per kg -->
               <div>
-                <label for="price_per_kg" class="block text-sm font-medium text-gray-700">Price per kg (Rp)</label>
+                <label for="price_per_kg" class="block text-sm font-medium text-gray-700">{{ $t('laundry.pricePerKg') }}</label>
                 <input
                   id="price_per_kg"
                   type="number"
@@ -84,13 +84,13 @@
                   step="1000"
                   required
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="0"
+                  :placeholder="$t('laundry.pricePlaceholder')"
                 />
               </div>
 
               <!-- Total Amount (calculated) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700">Total Amount</label>
+                <label class="block text-sm font-medium text-gray-700">{{ $t('laundry.totalAmount') }}</label>
                 <div class="mt-1 block w-full rounded-md bg-gray-50 px-3 py-2 text-gray-900 sm:text-sm border border-gray-300">
                   Rp {{ calculatedTotal.toLocaleString('id-ID') }}
                 </div>
@@ -98,13 +98,13 @@
 
               <!-- Notes -->
               <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700">Notes (optional)</label>
+                <label for="notes" class="block text-sm font-medium text-gray-700">{{ $t('laundry.notes') }}</label>
                 <textarea
                   id="notes"
                   v-model="orderForm.notes"
                   rows="3"
                   class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                  placeholder="Additional notes..."
+                  :placeholder="$t('laundry.notesPlaceholder')"
                 ></textarea>
               </div>
 
@@ -115,7 +115,7 @@
                   :disabled="isSubmitting"
                   class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {{ isSubmitting ? 'Creating...' : 'Create Order' }}
+                  {{ isSubmitting ? $t('laundry.creating') : $t('laundry.createOrder') }}
                 </button>
               </div>
             </form>
@@ -130,33 +130,33 @@
           <input
             v-model="historyFilters.search"
             type="text"
-            placeholder="Search by order # or booking #"
+            :placeholder="$t('laundry.searchPlaceholder')"
             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
           <input
             v-model="historyFilters.start_date"
             type="date"
-            placeholder="Start Date"
+            :placeholder="$t('laundry.startDate')"
             class="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
           <input
             v-model="historyFilters.end_date"
             type="date"
-            placeholder="End Date"
+            :placeholder="$t('laundry.endDate')"
             class="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
           <button
             @click="loadOrders"
             class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 whitespace-nowrap"
           >
-            Search
+            {{ $t('laundry.search') }}
           </button>
           <button
             @click="exportOrders"
             :disabled="exporting"
             class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
-            {{ exporting ? 'Exporting...' : 'Export Excel' }}
+            {{ exporting ? $t('laundry.exporting') : $t('laundry.exportExcel') }}
           </button>
         </div>
 
@@ -165,22 +165,22 @@
           <table class="min-w-full divide-y divide-gray-300">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Order #</th>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Booking</th>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Guest</th>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Weight (kg)</th>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Price/kg</th>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Total</th>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Date</th>
-                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Actions</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.orderNumber') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.booking') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.guest') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.weight') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.pricePerKgShort') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.total') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.date') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.actions') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
               <tr v-if="loadingOrders">
-                <td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">Loading...</td>
+                <td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">{{ $t('laundry.loading') }}</td>
               </tr>
               <tr v-else-if="orders.length === 0">
-                <td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">No orders found</td>
+                <td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">{{ $t('laundry.noOrders') }}</td>
               </tr>
               <tr v-else v-for="order in orders" :key="order.id">
                 <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
@@ -209,7 +209,7 @@
                     @click="deleteOrder(order.id)"
                     class="text-red-600 hover:text-red-900"
                   >
-                    Delete
+                    {{ $t('laundry.delete') }}
                   </button>
                 </td>
               </tr>
@@ -224,21 +224,21 @@
                 :disabled="pagination.current_page === 1"
                 class="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Previous
+                {{ $t('laundry.previous') }}
               </button>
               <button
                 @click="changePage(pagination.current_page + 1)"
                 :disabled="pagination.current_page === pagination.last_page"
                 class="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Next
+                {{ $t('laundry.next') }}
               </button>
             </div>
             <div class="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
               <div>
                 <p class="text-sm text-gray-700">
-                  Showing <span class="font-medium">{{ pagination.from }}</span> to <span class="font-medium">{{ pagination.to }}</span> of
-                  <span class="font-medium">{{ pagination.total }}</span> results
+                  {{ $t('laundry.showing') }} <span class="font-medium">{{ pagination.from }}</span> {{ $t('laundry.to') }} <span class="font-medium">{{ pagination.to }}</span> {{ $t('laundry.of') }}
+                  <span class="font-medium">{{ pagination.total }}</span> {{ $t('laundry.results') }}
                 </p>
               </div>
               <div>
@@ -288,9 +288,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { bookingApi, laundryOrderApi } from '../api'
 
+const { t } = useI18n()
 const activeTab = ref('create')
 
 // Create Order Form
@@ -360,21 +362,21 @@ async function loadBookings() {
     bookings.value = response || []
   } catch (error) {
     console.error('Error loading bookings:', error)
-    alert('Failed to load bookings')
+    alert(t('laundry.loadBookingsFailed'))
   }
 }
 
 // Submit order
 async function submitOrder() {
   if (!orderForm.value.booking_id || !orderForm.value.weight_kg || !orderForm.value.price_per_kg) {
-    alert('Please fill in all required fields')
+    alert(t('laundry.requiredFields'))
     return
   }
 
   isSubmitting.value = true
   try {
     await laundryOrderApi.createOrder(orderForm.value)
-    alert('Laundry order created successfully')
+    alert(t('laundry.orderCreated'))
     
     // Reset form
     orderForm.value = {
@@ -389,7 +391,7 @@ async function submitOrder() {
     loadOrders()
   } catch (error) {
     console.error('Error creating order:', error)
-    alert(error.response?.data?.message || 'Failed to create order')
+    alert(error.response?.data?.message || t('laundry.orderCreateFailed'))
   } finally {
     isSubmitting.value = false
   }
@@ -421,7 +423,7 @@ async function loadOrders() {
     }
   } catch (error) {
     console.error('Error loading orders:', error)
-    alert('Failed to load orders')
+    alert(t('laundry.loadOrdersFailed'))
   } finally {
     loadingOrders.value = false
   }
@@ -436,15 +438,15 @@ function changePage(page) {
 
 // Delete order
 async function deleteOrder(orderId) {
-  if (!confirm('Are you sure you want to delete this order?')) return
+  if (!confirm(t('laundry.deleteConfirm'))) return
   
   try {
     await laundryOrderApi.deleteOrder(orderId)
-    alert('Order deleted successfully')
+    alert(t('laundry.orderDeleted'))
     loadOrders()
   } catch (error) {
     console.error('Error deleting order:', error)
-    alert('Failed to delete order')
+    alert(t('laundry.orderDeleteFailed'))
   }
 }
 
@@ -470,7 +472,7 @@ async function exportOrders() {
     document.body.removeChild(link)
   } catch (err) {
     console.error('Failed to export orders:', err)
-    alert('Failed to export orders')
+    alert(t('laundry.exportFailed'))
   } finally {
     exporting.value = false
   }
