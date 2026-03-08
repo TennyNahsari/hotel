@@ -1,10 +1,10 @@
 <template>
   <LayoutMain>
-    <div class="px-4 sm:px-6 lg:px-8">
+    <div class="px-3 sm:px-4 md:px-6 lg:px-8">
       <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
-          <h1 class="text-2xl font-semibold leading-6 text-gray-900">{{ $t('laundry.title') }}</h1>
-          <p class="mt-2 text-sm text-gray-700">{{ $t('laundry.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-semibold leading-6 text-gray-900">{{ $t('laundry.title') }}</h1>
+          <p class="mt-2 text-xs sm:text-sm text-gray-700">{{ $t('laundry.subtitle') }}</p>
         </div>
       </div>
 
@@ -37,14 +37,14 @@
       </div>
 
       <!-- Create Order Tab -->
-      <div v-show="activeTab === 'create'" class="mt-6">
+      <div v-show="activeTab === 'create'" class="mt-4 md:mt-6">
         <div class="bg-white shadow sm:rounded-lg">
-          <div class="px-4 py-5 sm:p-6">
+          <div class="px-3 py-4 sm:px-4 sm:py-5 md:p-6">
             <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">{{ $t('laundry.newOrder') }}</h3>
-            <form @submit.prevent="submitOrder" class="space-y-4">
+            <form @submit.prevent="submitOrder" class="space-y-3 md:space-y-4">
               <!-- Booking Selection -->
               <div>
-                <label for="booking" class="block text-sm font-medium text-gray-700">{{ $t('laundry.booking') }}</label>
+                <label for="booking" class="block text-xs sm:text-sm font-medium text-gray-700">{{ $t('laundry.booking') }}</label>
                 <select
                   id="booking"
                   v-model="orderForm.booking_id"
@@ -60,7 +60,7 @@
 
               <!-- Weight (kg) -->
               <div>
-                <label for="weight" class="block text-sm font-medium text-gray-700">{{ $t('laundry.weight') }}</label>
+                <label for="weight" class="block text-xs sm:text-sm font-medium text-gray-700">{{ $t('laundry.weight') }}</label>
                 <input
                   id="weight"
                   type="number"
@@ -75,7 +75,7 @@
 
               <!-- Price per kg -->
               <div>
-                <label for="price_per_kg" class="block text-sm font-medium text-gray-700">{{ $t('laundry.pricePerKg') }}</label>
+                <label for="price_per_kg" class="block text-xs sm:text-sm font-medium text-gray-700">{{ $t('laundry.pricePerKg') }}</label>
                 <input
                   id="price_per_kg"
                   type="number"
@@ -90,7 +90,7 @@
 
               <!-- Total Amount (calculated) -->
               <div>
-                <label class="block text-sm font-medium text-gray-700">{{ $t('laundry.totalAmount') }}</label>
+                <label class="block text-xs sm:text-sm font-medium text-gray-700">{{ $t('laundry.totalAmount') }}</label>
                 <div class="mt-1 block w-full rounded-md bg-gray-50 px-3 py-2 text-gray-900 sm:text-sm border border-gray-300">
                   Rp {{ calculatedTotal.toLocaleString('id-ID') }}
                 </div>
@@ -98,7 +98,7 @@
 
               <!-- Notes -->
               <div>
-                <label for="notes" class="block text-sm font-medium text-gray-700">{{ $t('laundry.notes') }}</label>
+                <label for="notes" class="block text-xs sm:text-sm font-medium text-gray-700">{{ $t('laundry.notes') }}</label>
                 <textarea
                   id="notes"
                   v-model="orderForm.notes"
@@ -124,9 +124,9 @@
       </div>
 
       <!-- Order History Tab -->
-      <div v-show="activeTab === 'history'" class="mt-6">
+      <div v-show="activeTab === 'history'" class="mt-4 md:mt-6">
         <!-- Filters -->
-        <div class="mb-4 flex flex-col sm:flex-row gap-4">
+        <div class="mb-4 flex flex-col sm:flex-row gap-3 md:gap-4">
           <input
             v-model="historyFilters.search"
             type="text"
@@ -147,21 +147,69 @@
           />
           <button
             @click="loadOrders"
-            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 whitespace-nowrap"
+            class="inline-flex items-center rounded-md bg-white px-3 py-2 text-xs sm:text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 whitespace-nowrap"
           >
             {{ $t('laundry.search') }}
           </button>
           <button
             @click="exportOrders"
             :disabled="exporting"
-            class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+            class="inline-flex items-center rounded-md bg-green-600 px-3 py-2 text-xs sm:text-sm font-semibold text-white shadow-sm hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
             {{ exporting ? $t('laundry.exporting') : $t('laundry.exportExcel') }}
           </button>
         </div>
 
-        <!-- Orders Table -->
-        <div class="bg-white shadow sm:rounded-lg overflow-hidden">
+        <!-- Orders Mobile Card View -->
+        <div class="block md:hidden bg-white shadow sm:rounded-lg overflow-hidden">
+          <div v-if="loadingOrders" class="p-8 text-center text-sm text-gray-500">
+            {{ $t('laundry.loading') }}
+          </div>
+          <div v-else-if="orders.length === 0" class="p-8 text-center text-sm text-gray-500">
+            {{ $t('laundry.noOrders') }}
+          </div>
+          <div v-else>
+            <div v-for="order in orders" :key="order.id" class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
+              <div class="space-y-2">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <div class="font-medium text-gray-900">{{ order.order_number }}</div>
+                    <div class="text-sm text-gray-600">{{ order.booking?.booking_number }}</div>
+                  </div>
+                  <div class="text-right">
+                    <div class="font-semibold text-gray-900">Rp {{ parseFloat(order.total_amount).toLocaleString('id-ID') }}</div>
+                  </div>
+                </div>
+                <div class="text-sm space-y-1">
+                  <div>
+                    <span class="text-gray-500">{{ $t('laundry.guest') }}:</span>
+                    <span class="text-gray-900 ml-1">{{ order.booking?.guest?.full_name }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">{{ $t('laundry.weight') }}:</span>
+                    <span class="text-gray-900 ml-1">{{ order.weight_kg }} kg</span>
+                    <span class="text-gray-500 ml-2">@ Rp {{ parseFloat(order.price_per_kg).toLocaleString('id-ID') }}</span>
+                  </div>
+                  <div>
+                    <span class="text-gray-500">{{ $t('laundry.date') }}:</span>
+                    <span class="text-gray-900 ml-1">{{ new Date(order.created_at).toLocaleDateString('id-ID') }}</span>
+                  </div>
+                </div>
+                <div class="pt-2">
+                  <button
+                    @click="deleteOrder(order.id)"
+                    class="w-full text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >
+                    {{ $t('laundry.delete') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Orders Desktop Table -->
+        <div class="hidden md:block bg-white shadow sm:rounded-lg overflow-hidden">
           <table class="min-w-full divide-y divide-gray-300">
             <thead class="bg-gray-50">
               <tr>

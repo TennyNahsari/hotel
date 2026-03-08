@@ -1,25 +1,25 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('hallBookings.title') }}</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('hallBookings.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('hallBookings.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('hallBookings.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-600 text-white text-sm md:text-base rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           + {{ $t('hallBookings.newBooking') }}
         </button>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-white rounded-lg shadow p-3 md:p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.search') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.search') }}</label>
             <input
               v-model="filters.search"
               type="text"
@@ -28,7 +28,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.hall') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.hall') }}</label>
             <select
               v-model="filters.hall_id"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -38,7 +38,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.status') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.status') }}</label>
             <select
               v-model="filters.status"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -51,7 +51,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.eventDate') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('hallBookings.eventDate') }}</label>
             <input
               v-model="filters.event_date"
               type="date"
@@ -72,7 +72,80 @@
       </div>
 
       <div v-else class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Mobile Card View -->
+        <div class="block md:hidden">
+          <div v-for="booking in bookings" :key="booking.id" class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
+            <div class="space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-gray-900">{{ booking.booking_number }}</div>
+                  <div class="text-sm text-gray-600">{{ booking.hall?.name }}</div>
+                  <div class="text-sm text-gray-600 mt-1">{{ booking.event_name }}</div>
+                </div>
+                <span
+                  :class="{
+                    'bg-yellow-100 text-yellow-800': booking.status === 'pending',
+                    'bg-green-100 text-green-800': booking.status === 'confirmed',
+                    'bg-gray-100 text-gray-800': booking.status === 'completed',
+                    'bg-red-100 text-red-800': booking.status === 'cancelled',
+                  }"
+                  class="px-2 py-1 text-xs font-semibold rounded-full"
+                >
+                  {{ booking.status }}
+                </span>
+              </div>
+              <div class="text-sm space-y-1">
+                <div>
+                  <span class="text-gray-500">{{ $t('hallBookings.customer') }}:</span>
+                  <span class="text-gray-900 ml-1">{{ booking.customer_name }}</span>
+                </div>
+                <div class="text-xs text-gray-500">{{ booking.customer_email }}</div>
+                <div>
+                  <span class="text-gray-500">{{ $t('hallBookings.dateTime') }}:</span>
+                  <span class="text-gray-900 ml-1">{{ formatDate(booking.event_date) }}</span>
+                </div>
+                <div class="text-xs text-gray-500">{{ booking.start_time }} - {{ booking.end_time }}</div>
+                <div>
+                  <span class="text-gray-500">{{ $t('hallBookings.total') }}:</span>
+                  <span class="font-semibold text-gray-900 ml-1">{{ formatCurrency(booking.total_amount) }}</span>
+                  <span class="text-xs text-gray-500 ml-1">({{ booking.duration_hours}} {{ $t('hallBookings.hrs') }})</span>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-2 pt-2">
+                <button
+                  v-if="booking.status === 'pending'"
+                  @click="confirmBooking(booking)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                >
+                  {{ $t('hallBookings.confirm') }}
+                </button>
+                <button
+                  v-if="booking.status === 'confirmed'"
+                  @click="completeBooking(booking)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                >
+                  {{ $t('hallBookings.complete') }}
+                </button>
+                <button
+                  v-if="['pending', 'confirmed'].includes(booking.status)"
+                  @click="cancelBooking(booking)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                >
+                  {{ $t('hallBookings.cancel') }}
+                </button>
+                <button
+                  @click="viewBooking(booking)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                >
+                  {{ $t('hallBookings.view') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -180,8 +253,8 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-        <div class="text-sm text-gray-700">
+      <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="text-xs sm:text-sm text-gray-700">
           {{ $t('hallBookings.showing') }} {{ pagination.from }} {{ $t('hallBookings.to') }} {{ pagination.to }} {{ $t('hallBookings.of') }} {{ pagination.total }} {{ $t('hallBookings.bookings') }}
         </div>
         <div class="flex gap-2">

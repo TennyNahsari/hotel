@@ -1,22 +1,22 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('guests.title') }}</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('guests.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('guests.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('guests.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          class="w-full sm:w-auto px-4 py-2 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           + {{ $t('guests.addGuest') }}
         </button>
       </div>
 
       <!-- Search & Export -->
-      <div class="bg-white rounded-lg shadow p-4 space-y-4">
+      <div class="bg-white rounded-lg shadow p-3 md:p-4 space-y-3 md:space-y-4">
         <input
           v-model="searchQuery"
           @input="loadGuests"
@@ -28,7 +28,7 @@
           <button
             @click="exportGuests"
             :disabled="exporting"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full sm:w-auto px-4 py-2 text-sm md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ exporting ? $t('guests.exporting') : '📊 ' + $t('guests.exportExcel') }}
           </button>
@@ -65,13 +65,13 @@
                 <div class="flex flex-wrap gap-2">
                   <button
                     @click="openEditModal(guest)"
-                    class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
+                    class="flex-1 sm:flex-none text-xs px-3 py-1.5 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200 transition-colors"
                   >
                     {{ $t('guests.edit') }}
                   </button>
                   <button
                     @click="confirmDelete(guest)"
-                    class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                    class="flex-1 sm:flex-none text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
                   >
                     {{ $t('guests.delete') }}
                   </button>
@@ -267,12 +267,12 @@
             <p class="text-sm text-red-800">{{ error }}</p>
           </div>
 
-          <div class="flex gap-3 pt-4">
+          <div class="flex flex-col sm:flex-row gap-3 pt-4">
             <button
               v-if="isEditing"
               type="button"
               @click="confirmDelete(formData)"
-              class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+              class="w-full sm:w-auto order-last sm:order-first px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
             >
               {{ $t('guests.delete') }}
             </button>

@@ -1,15 +1,15 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('roomTypes.title') }}</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('roomTypes.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('roomTypes.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('roomTypes.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          class="w-full sm:w-auto px-4 py-2 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           + {{ $t('roomTypes.addRoomType') }}
         </button>
@@ -26,7 +26,50 @@
       </div>
 
       <div v-else class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Mobile Card View -->
+        <div class="block md:hidden">
+          <div v-for="roomType in roomTypes" :key="roomType.id" class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
+            <div class="space-y-3">
+              <div class="flex justify-between items-start">
+                <div class="flex-1">
+                  <div class="font-medium text-gray-900">{{ roomType.name }}</div>
+                  <div class="text-sm text-gray-500 mt-1">{{ roomType.description || '-' }}</div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span class="text-gray-500">{{ $t('roomTypes.capacity') }}:</span>
+                  <span class="font-medium text-gray-900 ml-1">{{ roomType.capacity }} {{ $t('roomTypes.guests') }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-500">{{ $t('roomTypes.rooms') }}:</span>
+                  <span class="font-medium text-gray-900 ml-1">{{ roomType.rooms_count || 0 }}</span>
+                </div>
+                <div class="col-span-2">
+                  <span class="text-gray-500">{{ $t('roomTypes.pricePerNight') }}:</span>
+                  <span class="font-semibold text-gray-900 ml-1">{{ formatCurrency(roomType.base_price) }}</span>
+                </div>
+              </div>
+              <div class="flex gap-2">
+                <button
+                  @click="openEditModal(roomType)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                >
+                  {{ $t('roomTypes.edit') }}
+                </button>
+                <button
+                  @click="confirmDelete(roomType)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                >
+                  {{ $t('roomTypes.delete') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -86,6 +129,7 @@
               </tr>
             </tbody>
           </table>
+        </div>
         </div>
       </div>
     </div>

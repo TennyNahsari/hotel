@@ -1,19 +1,19 @@
 <template>
   <LayoutMain>
-    <div class="p-6">
+    <div class="p-3 sm:p-4 md:p-6">
       <!-- Header -->
-      <div class="mb-6">
-        <h1 class="text-2xl font-bold text-gray-900">{{ $t('restaurant.title') }}</h1>
-        <p class="text-gray-600">{{ $t('restaurant.subtitle') }}</p>
+      <div class="mb-4 md:mb-6">
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('restaurant.title') }}</h1>
+        <p class="text-gray-600 text-xs sm:text-sm md:text-base">{{ $t('restaurant.subtitle') }}</p>
       </div>
 
       <!-- Tabs -->
-      <div class="border-b border-gray-200 mb-6">
-        <nav class="-mb-px flex space-x-8">
+      <div class="border-b border-gray-200 mb-4 md:mb-6">
+        <nav class="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto">
           <button
             @click="activeTab = 'menu'"
             :class="[
-              'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+              'py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap',
               activeTab === 'menu'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -24,7 +24,7 @@
           <button
             @click="activeTab = 'orders'"
             :class="[
-              'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+              'py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap',
               activeTab === 'orders'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -35,7 +35,7 @@
           <button
             @click="activeTab = 'history'"
             :class="[
-              'py-4 px-1 border-b-2 font-medium text-sm transition-colors',
+              'py-3 sm:py-4 px-1 border-b-2 font-medium text-xs sm:text-sm transition-colors whitespace-nowrap',
               activeTab === 'history'
                 ? 'border-blue-500 text-blue-600'
                 : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
@@ -49,17 +49,17 @@
       <!-- Menu Items Tab -->
       <div v-show="activeTab === 'menu'">
         <!-- Filters and Actions -->
-        <div class="mb-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-          <div class="flex flex-col sm:flex-row gap-4 flex-1">
+        <div class="mb-4 flex flex-col gap-3 md:gap-4">
+          <div class="flex flex-col sm:flex-row gap-3 md:gap-4 flex-1">
             <input
               v-model="filters.search"
               type="text"
               :placeholder="$t('restaurant.searchMenu')"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             />
             <select
               v-model="filters.category"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">{{ $t('restaurant.allCategories') }}</option>
               <option value="food">{{ $t('restaurant.food') }}</option>
@@ -69,7 +69,7 @@
             </select>
             <select
               v-model="filters.is_available"
-              class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              class="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="">{{ $t('restaurant.allStatus') }}</option>
               <option value="1">{{ $t('restaurant.available') }}</option>
@@ -78,19 +78,65 @@
           </div>
           <button
             @click="openMenuItemModal()"
-            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm md:text-base rounded-lg hover:bg-blue-700 transition-colors"
           >
             {{ $t('restaurant.addMenuItem') }}
           </button>
         </div>
 
         <!-- Debug info -->
-        <div class="mb-2 text-sm text-gray-600" v-if="menuItems">
+        <div class="mb-2 text-xs sm:text-sm text-gray-600" v-if="menuItems">
           Total items: {{ menuItems.data?.length || 0 }} | Meta: {{ menuItems.meta ? 'exists' : 'null' }}
         </div>
 
-        <!-- Menu Items Table -->
-        <div class="bg-white rounded-lg shadow overflow-hidden">
+        <!-- Menu Items Mobile Card View -->
+        <div class="block md:hidden bg-white rounded-lg shadow overflow-hidden">
+          <div v-if="!menuItems.data || menuItems.data.length === 0" class="p-8 text-center text-gray-500">
+            {{ $t('restaurant.noMenuItems') }}
+          </div>
+          <div v-else>
+            <div v-for="item in menuItems.data" :key="item.id" class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
+              <div class="space-y-3">
+                <div class="flex gap-3">
+                  <img 
+                    v-if="item.photo" 
+                    :src="`${apiUrl}/storage/${item.photo}`" 
+                    alt="Menu photo"
+                    class="h-16 w-16 rounded object-cover"
+                  />
+                  <div v-else class="h-16 w-16 rounded bg-gray-200 flex items-center justify-center flex-shrink-0">
+                    <span class="text-gray-400 text-xs">{{ $t('restaurant.noPhoto') }}</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="font-medium text-gray-900">{{ item.name }}</div>
+                    <div class="text-sm text-gray-500 line-clamp-2">{{ item.description }}</div>
+                  </div>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span :class="getCategoryBadgeClass(item.category)">
+                    {{ item.category }}
+                  </span>
+                  <span :class="item.is_available ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" 
+                        class="px-2 py-1 text-xs font-semibold rounded-full">
+                    {{ item.is_available ? $t('restaurant.available') : $t('restaurant.unavailable') }}
+                  </span>
+                </div>
+                <div class="font-semibold text-gray-900">Rp {{ formatNumber(item.price) }}</div>
+                <div class="flex gap-2">
+                  <button @click="openMenuItemModal(item)" class="flex-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200">
+                    {{ $t('restaurant.edit') }}
+                  </button>
+                  <button @click="deleteMenuItem(item)" class="flex-1 text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                    {{ $t('restaurant.delete') }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Menu Items Desktop Table -->
+        <div class="hidden md:block bg-white rounded-lg shadow overflow-hidden">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -152,18 +198,18 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="menuItems.meta" class="mt-4 flex items-center justify-between">
-          <div class="text-sm text-gray-700">
+        <div v-if="menuItems.meta" class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div class="text-xs sm:text-sm text-gray-700">
             {{ $t('restaurant.showing') }} {{ menuItems.meta.from }} {{ $t('restaurant.to') }} {{ menuItems.meta.to }} {{ $t('restaurant.of') }} {{ menuItems.meta.total }} {{ $t('restaurant.results') }}
           </div>
-          <div class="flex gap-2">
+          <div class="flex gap-2 overflow-x-auto">
             <button
               v-for="link in menuItems.meta.links"
               :key="link.label"
               @click="changePage(link.url)"
               :disabled="!link.url"
               :class="[
-                'px-3 py-1 rounded',
+                'px-2 sm:px-3 py-1 rounded text-xs sm:text-sm',
                 link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
                 !link.url && 'opacity-50 cursor-not-allowed'
               ]"

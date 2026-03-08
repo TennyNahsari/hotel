@@ -1,42 +1,44 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header with Stats -->
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('rooms.title') }}</h1>
-        <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('rooms.subtitle') }}</p>
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('rooms.title') }}</h1>
+        <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('rooms.subtitle') }}</p>
       </div>
 
       <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="bg-white rounded-lg shadow p-4">
-          <div class="text-sm text-gray-500">{{ $t('rooms.totalRooms') }}</div>
-          <div class="text-2xl font-bold text-gray-900">{{ statistics.total_rooms || 0 }}</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <div class="bg-white rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-gray-500">{{ $t('rooms.totalRooms') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-gray-900">{{ statistics.total_rooms || 0 }}</div>
         </div>
-        <div class="bg-green-50 rounded-lg shadow p-4">
-          <div class="text-sm text-green-600">{{ $t('rooms.available') }}</div>
-          <div class="text-2xl font-bold text-green-700">{{ statistics.available || 0 }}</div>
+        <div class="bg-green-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-green-600">{{ $t('rooms.available') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-green-700">{{ statistics.available || 0 }}</div>
         </div>
-        <div class="bg-blue-50 rounded-lg shadow p-4">
-          <div class="text-sm text-blue-600">{{ $t('rooms.occupied') }}</div>
-          <div class="text-2xl font-bold text-blue-700">{{ statistics.occupied || 0 }}</div>
+        <div class="bg-blue-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-blue-600">{{ $t('rooms.occupied') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-blue-700">{{ statistics.occupied || 0 }}</div>
         </div>
-        <div class="bg-yellow-50 rounded-lg shadow p-4">
-          <div class="text-sm text-yellow-600">{{ $t('rooms.needCleaning') }}</div>
-          <div class="text-2xl font-bold text-yellow-700">{{ statistics.dirty || 0 }}</div>
+        <div class="bg-yellow-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-yellow-600">{{ $t('rooms.needCleaning') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-yellow-700">{{ statistics.dirty || 0 }}</div>
         </div>
-        <div class="bg-purple-50 rounded-lg shadow p-4">
-          <div class="text-sm text-purple-600">{{ $t('rooms.occupancyRate') }}</div>
-          <div class="text-2xl font-bold text-purple-700">{{ statistics.occupancy_rate || 0 }}%</div>
+        <div class="bg-purple-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-purple-600">{{ $t('rooms.occupancyRate') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-purple-700">{{ statistics.occupancy_rate || 0 }}%</div>
         </div>
       </div>
 
       <!-- Filters and Actions -->
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex flex-col md:flex-row gap-4 items-end">
-          <!-- Status Filter -->
-          <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByStatus') }}</label>
+      <div class="bg-white rounded-lg shadow p-3 md:p-4">
+        <div class="flex flex-col gap-3 md:gap-4">
+          <!-- Filters Row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
+            <!-- Status Filter -->
+            <div>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByStatus') }}</label>
             <select 
               v-model="filters.status" 
               @change="loadRooms"
@@ -48,12 +50,11 @@
               <option value="dirty">{{ $t('rooms.dirty') }}</option>
               <option value="cleaning">{{ $t('rooms.cleaning') }}</option>
               <option value="out_of_order">{{ $t('rooms.outOfOrder') }}</option>
-            </select>
-          </div>
+            </div>
 
-          <!-- Room Type Filter -->
-          <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByType') }}</label>
+            <!-- Room Type Filter -->
+            <div>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByType') }}</label>
             <select 
               v-model="filters.room_type_id" 
               @change="loadRooms"
@@ -63,12 +64,11 @@
               <option v-for="type in roomTypes" :key="type.id" :value="type.id">
                 {{ type.name }}
               </option>
-            </select>
-          </div>
+            </div>
 
-          <!-- Floor Filter -->
-          <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByFloor') }}</label>
+            <!-- Floor Filter -->
+            <div>
+              <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByFloor') }}</label>
             <select 
               v-model="filters.floor" 
               @change="loadRooms"
@@ -78,28 +78,29 @@
               <option value="1">{{ $t('rooms.floor1') }}</option>
               <option value="2">{{ $t('rooms.floor2') }}</option>
               <option value="3">{{ $t('rooms.floor3') }}</option>
-            </select>
+            </div>
           </div>
 
-          <!-- Export Button -->
-          <button
-            @click="exportToExcel"
-            class="w-full md:w-auto px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <!-- Action Buttons Row -->
+          <div class="flex flex-col sm:flex-row gap-2 md:gap-3">
+            <!-- Export Button -->
+            <button
+              @click="exportToExcel"
+              class="flex-1 sm:flex-none px-4 py-2 text-sm md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap flex items-center justify-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             {{ $t('rooms.exportExcel') }}
           </button>
 
-          <!-- Add Room Button -->
-          <button
-            @click="openAddModal"
-            class="w-full md:w-auto px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
-          >
+            <!-- Add Room Button -->
+            <button
+              @click="openAddModal"
+              class="flex-1 sm:flex-none px-4 py-2 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+            >
             + {{ $t('rooms.addRoom') }}
-          </button>
-        </div>
+          </button>          </div>        </div>
       </div>
 
       <!-- Rooms Grid -->

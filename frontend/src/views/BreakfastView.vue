@@ -1,66 +1,66 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">{{ $t('breakfast.title') }}</h1>
-          <p class="text-gray-600 mt-1">{{ $t('breakfast.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('breakfast.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('breakfast.subtitle') }}</p>
         </div>
       </div>
 
       <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div class="bg-white rounded-lg shadow p-6">
+      <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.totalGuests') }}</p>
-              <p class="text-2xl font-bold text-gray-900 mt-1">{{ statistics.total_bookings || 0 }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600">{{ $t('breakfast.totalGuests') }}</p>
+              <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{{ statistics.total_bookings || 0 }}</p>
             </div>
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.totalPortions') }}</p>
-              <p class="text-2xl font-bold text-gray-900 mt-1">{{ statistics.total_portions || 0 }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600">{{ $t('breakfast.totalPortions') }}</p>
+              <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-1">{{ statistics.total_portions || 0 }}</p>
             </div>
-            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.distributed') }}</p>
-              <p class="text-2xl font-bold text-green-600 mt-1">{{ statistics.taken_portions || 0 }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600">{{ $t('breakfast.distributed') }}</p>
+              <p class="text-xl sm:text-2xl font-bold text-green-600 mt-1">{{ statistics.taken_portions || 0 }}</p>
             </div>
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
               </svg>
             </div>
           </div>
         </div>
 
-        <div class="bg-white rounded-lg shadow p-6">
+        <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm font-medium text-gray-600">{{ $t('breakfast.remaining') }}</p>
-              <p class="text-2xl font-bold text-orange-600 mt-1">{{ statistics.remaining_portions || 0 }}</p>
+              <p class="text-xs sm:text-sm font-medium text-gray-600">{{ $t('breakfast.remaining') }}</p>
+              <p class="text-xl sm:text-2xl font-bold text-orange-600 mt-1">{{ statistics.remaining_portions || 0 }}</p>
             </div>
-            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="w-10 h-10 sm:w-12 sm:h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+              <svg class="w-5 h-5 sm:w-6 sm:h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -69,10 +69,10 @@
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-lg shadow p-3 md:p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('breakfast.search') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('breakfast.search') }}</label>
             <input
               v-model="filters.search"
               @input="loadBookings"
@@ -83,7 +83,7 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('breakfast.status') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('breakfast.status') }}</label>
             <select
               v-model="filters.breakfast_status"
               @change="loadBookings"
@@ -98,7 +98,7 @@
           <div class="flex items-end">
             <button
               @click="resetFilters"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg text-gray-700 text-sm md:text-base hover:bg-gray-50 transition-colors"
             >
               {{ $t('breakfast.resetFilters') }}
             </button>

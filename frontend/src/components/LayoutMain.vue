@@ -3,10 +3,13 @@
     <!-- Mobile Menu Button -->
     <button
       @click="sidebarOpen = !sidebarOpen"
-      class="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-blue-600 text-white shadow-lg"
+      class="md:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-blue-600 text-white shadow-lg hover:bg-blue-700 transition-colors"
     >
-      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg v-if="!sidebarOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+      <svg v-else class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
       </svg>
     </button>
 
@@ -306,8 +309,8 @@
     </div>
 
     <!-- Main content -->
-    <div class="ml-64">
-      <main class="p-8">
+    <div class="md:ml-64">
+      <main class="p-4 pt-16 md:pt-8 md:p-8">
         <slot />
       </main>
     </div>
@@ -315,7 +318,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useI18n } from 'vue-i18n'
@@ -333,6 +336,11 @@ const hallMenuOpen = ref(true) // Default open
 const servicesOpen = ref(true) // Default open
 
 const user = computed(() => authStore.user)
+
+// Close sidebar on mobile when route changes
+watch(() => route.path, () => {
+  sidebarOpen.value = false
+})
 
 // Check if Room Management menu is active
 const isRoomMenuActive = computed(() => {

@@ -3,8 +3,8 @@
     <div class="space-y-6">
       <!-- Header -->
       <div>
-        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('dashboard.title') }}</h1>
-        <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('dashboard.subtitle') }}</p>
+        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('dashboard.title') }}</h1>
+        <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('dashboard.subtitle') }}</p>
       </div>
 
       <!-- Loading State -->
@@ -15,9 +15,9 @@
 
       <!-- Stats Cards -->
       <div v-else class="space-y-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <!-- Available Rooms -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -36,7 +36,7 @@
           </div>
 
           <!-- Today's Check-ins -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0 bg-green-500 rounded-md p-3">
                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -53,7 +53,7 @@
           </div>
 
           <!-- Today's Check-outs -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0 bg-yellow-500 rounded-md p-3">
                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -70,7 +70,7 @@
           </div>
 
           <!-- Today's Revenue -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="flex items-center">
               <div class="flex-shrink-0 bg-purple-500 rounded-md p-3">
                 <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,27 +90,27 @@
         </div>
 
         <!-- Additional Stats Row -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <!-- Occupied Rooms -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.occupiedRooms') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">{{ dashboard.rooms?.occupied || 0 }}</div>
           </div>
 
           <!-- Pending Bookings -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.pendingBookings') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">{{ dashboard.bookings?.pending || 0 }}</div>
           </div>
 
           <!-- Pending Tasks -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.pendingTasks') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">{{ dashboard.housekeeping?.pending || 0 }}</div>
           </div>
 
           <!-- Month Revenue -->
-          <div class="bg-white rounded-lg shadow p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6">
             <div class="text-sm font-medium text-gray-500">{{ $t('dashboard.monthRevenue') }}</div>
             <div class="mt-1 text-2xl font-semibold text-gray-900">
               {{ formatCurrency(dashboard.revenue?.month_full_payments || 0) }}
@@ -120,8 +120,8 @@
 
         <!-- Payment Report Section -->
         <div class="bg-white rounded-lg shadow p-4 md:p-6">
-          <h2 class="text-lg font-semibold text-gray-900 mb-4">{{ $t('dashboard.paymentReport') }}</h2>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
+          <h2 class="text-base md:text-lg font-semibold text-gray-900 mb-4">{{ $t('dashboard.paymentReport') }}</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3 md:gap-4">
             <!-- Full Payments Today -->
             <div class="bg-green-50 rounded-lg p-4 border border-green-200">
               <div class="text-xs font-medium text-green-600 uppercase">{{ $t('dashboard.fullPayment') }}</div>

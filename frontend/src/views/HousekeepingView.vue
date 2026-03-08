@@ -1,49 +1,49 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('housekeeping.title') }}</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('housekeeping.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('housekeeping.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('housekeeping.subtitle') }}</p>
         </div>
         <button
           @click="openCreateModal"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm md:text-base rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           + {{ $t('housekeeping.newTask') }}
         </button>
       </div>
 
       <!-- Statistics Cards -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-        <div class="bg-white rounded-lg shadow p-4">
-          <div class="text-sm text-gray-500">{{ $t('housekeeping.totalTasks') }}</div>
-          <div class="text-2xl font-bold text-gray-900">{{ statistics.total || 0 }}</div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-4">
+        <div class="bg-white rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-gray-500">{{ $t('housekeeping.totalTasks') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-gray-900">{{ statistics.total || 0 }}</div>
         </div>
-        <div class="bg-yellow-50 rounded-lg shadow p-4">
-          <div class="text-sm text-yellow-600">{{ $t('housekeeping.pending') }}</div>
-          <div class="text-2xl font-bold text-yellow-700">{{ statistics.pending || 0 }}</div>
+        <div class="bg-yellow-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-yellow-600">{{ $t('housekeeping.pending') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-yellow-700">{{ statistics.pending || 0 }}</div>
         </div>
-        <div class="bg-blue-50 rounded-lg shadow p-4">
-          <div class="text-sm text-blue-600">{{ $t('housekeeping.inProgress') }}</div>
-          <div class="text-2xl font-bold text-blue-700">{{ statistics.in_progress || 0 }}</div>
+        <div class="bg-blue-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-blue-600">{{ $t('housekeeping.inProgress') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-blue-700">{{ statistics.in_progress || 0 }}</div>
         </div>
-        <div class="bg-green-50 rounded-lg shadow p-4">
-          <div class="text-sm text-green-600">{{ $t('housekeeping.completedToday') }}</div>
-          <div class="text-2xl font-bold text-green-700">{{ statistics.completed_today || 0 }}</div>
+        <div class="bg-green-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-green-600">{{ $t('housekeeping.completedToday') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-green-700">{{ statistics.completed_today || 0 }}</div>
         </div>
-        <div class="bg-red-50 rounded-lg shadow p-4">
-          <div class="text-sm text-red-600">{{ $t('housekeeping.highPriority') }}</div>
-          <div class="text-2xl font-bold text-red-700">{{ statistics.high_priority || 0 }}</div>
+        <div class="bg-red-50 rounded-lg shadow p-3 md:p-4">
+          <div class="text-xs sm:text-sm text-red-600">{{ $t('housekeeping.highPriority') }}</div>
+          <div class="text-xl sm:text-2xl font-bold text-red-700">{{ statistics.high_priority || 0 }}</div>
         </div>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="flex flex-col md:flex-row gap-4">
+      <div class="bg-white rounded-lg shadow p-3 md:p-4">
+        <div class="flex flex-col md:flex-row gap-3 md:gap-4">
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.status') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.status') }}</label>
             <select
               v-model="filters.status"
               @change="loadTasks"
@@ -56,7 +56,7 @@
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.priority') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.priority') }}</label>
             <select
               v-model="filters.priority"
               @change="loadTasks"
@@ -70,7 +70,7 @@
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.assignedTo') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.assignedTo') }}</label>
             <select
               v-model="filters.assigned_to"
               @change="loadTasks"

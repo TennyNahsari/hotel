@@ -1,25 +1,25 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header -->
-      <div class="flex justify-between items-center">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('halls.title') }}</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('halls.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('halls.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('halls.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
-          class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-600 text-white text-sm md:text-base rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           + {{ $t('halls.addHall') }}
         </button>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white rounded-lg shadow p-3 md:p-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.search') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('halls.search') }}</label>
             <input
               v-model="filters.search"
               type="text"
@@ -28,7 +28,7 @@
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.hallType') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('halls.hallType') }}</label>
             <select
               v-model="filters.hall_type"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -38,7 +38,7 @@
             </select>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.status') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('halls.status') }}</label>
             <select
               v-model="filters.status"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
@@ -63,7 +63,66 @@
       </div>
 
       <div v-else class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="overflow-x-auto">
+        <!-- Mobile Card View -->
+        <div class="block md:hidden">
+          <div v-for="hall in halls" :key="hall.id" class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
+            <div class="space-y-3">
+              <div class="flex justify-between items-start">
+                <div>
+                  <div class="font-medium text-gray-900">{{ hall.name }}</div>
+                  <div class="text-sm text-gray-600">{{ hall.hall_type }}</div>
+                </div>
+                <span
+                  :class="{
+                    'bg-green-100 text-green-800': hall.status === 'available',
+                    'bg-yellow-100 text-yellow-800': hall.status === 'maintenance',
+                    'bg-red-100 text-red-800': hall.status === 'unavailable',
+                  }"
+                  class="px-2 py-1 text-xs font-semibold rounded-full"
+                >
+                  {{ hall.status }}
+                </span>
+              </div>
+              <div class="grid grid-cols-2 gap-2 text-sm">
+                <div>
+                  <span class="text-gray-500">{{ $t('halls.floor') }}:</span>
+                  <span class="text-gray-900 ml-1">{{ hall.floor || '-' }}</span>
+                </div>
+                <div>
+                  <span class="text-gray-500">{{ $t('halls.capacity') }}:</span>
+                  <span class="text-gray-900 ml-1">{{ hall.capacity }} {{ $t('halls.pax') }}</span>
+                </div>
+              </div>
+              <div class="text-sm">
+                <span class="text-gray-500">{{ $t('halls.pricePerHour') }}:</span>
+                <span class="font-semibold text-gray-900 ml-1">{{ formatCurrency(hall.price_per_hour) }}</span>
+              </div>
+              <div class="flex flex-wrap gap-2 pt-2">
+                <button
+                  @click="viewHall(hall)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                >
+                  {{ $t('halls.view') }}
+                </button>
+                <button
+                  @click="openEditModal(hall)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                >
+                  {{ $t('halls.edit') }}
+                </button>
+                <button
+                  @click="confirmDelete(hall)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                >
+                  {{ $t('halls.delete') }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Desktop Table View -->
+        <div class="hidden md:block overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
               <tr>
@@ -146,8 +205,8 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-4 flex justify-between items-center">
-        <div class="text-sm text-gray-700">
+      <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+        <div class="text-xs sm:text-sm text-gray-700">
           {{ $t('halls.showing') }} {{ pagination.from }} {{ $t('halls.to') }} {{ pagination.to }} {{ $t('halls.of') }} {{ pagination.total }} {{ $t('halls.halls') }}
         </div>
         <div class="flex gap-2">

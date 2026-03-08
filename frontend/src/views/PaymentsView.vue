@@ -1,25 +1,25 @@
 <template>
   <LayoutMain>
-    <div class="space-y-6">
+    <div class="space-y-4 md:space-y-6">
       <!-- Header -->
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">{{ $t('payments.title') }}</h1>
-          <p class="text-gray-600 mt-1 text-sm sm:text-base">{{ $t('payments.subtitle') }}</p>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('payments.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('payments.subtitle') }}</p>
         </div>
         <button
           @click="openCreateModal"
-          class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          class="w-full sm:w-auto px-4 py-2 bg-blue-600 text-white text-sm md:text-base rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
         >
           + {{ $t('payments.newPayment') }}
         </button>
       </div>
 
       <!-- Filters -->
-      <div class="bg-white rounded-lg shadow p-4">
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div class="bg-white rounded-lg shadow p-3 md:p-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 md:gap-4">
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentDateFrom') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentDateFrom') }}</label>
             <input
               v-model="filters.start_date"
               @change="loadPayments"
@@ -28,7 +28,7 @@
             />
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentDateTo') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentDateTo') }}</label>
             <input
               v-model="filters.end_date"
               @change="loadPayments"
@@ -37,7 +37,7 @@
             />
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentType') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentType') }}</label>
             <select
               v-model="filters.payment_type"
               @change="loadPayments"
@@ -52,7 +52,7 @@
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentMethod') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('payments.paymentMethod') }}</label>
             <select
               v-model="filters.payment_method"
               @change="loadPayments"
@@ -67,7 +67,7 @@
             </select>
           </div>
           <div class="flex-1">
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('payments.search') }}</label>
+            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('payments.search') }}</label>
             <input
               v-model="filters.search"
               @input="loadPayments"
@@ -77,11 +77,11 @@
             />
           </div>
         </div>
-        <div class="mt-4">
+        <div class="mt-3 md:mt-4">
           <button
             @click="exportPayments"
             :disabled="exporting"
-            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="w-full sm:w-auto px-4 py-2 bg-green-600 text-white text-sm md:text-base rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ exporting ? $t('payments.exporting') : '📊 ' + $t('payments.exportExcel') }}
           </button>
