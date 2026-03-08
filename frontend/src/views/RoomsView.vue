@@ -50,6 +50,7 @@
               <option value="dirty">{{ $t('rooms.dirty') }}</option>
               <option value="cleaning">{{ $t('rooms.cleaning') }}</option>
               <option value="out_of_order">{{ $t('rooms.outOfOrder') }}</option>
+            </select>
             </div>
 
             <!-- Room Type Filter -->
@@ -64,6 +65,7 @@
               <option v-for="type in roomTypes" :key="type.id" :value="type.id">
                 {{ type.name }}
               </option>
+            </select>
             </div>
 
             <!-- Floor Filter -->
@@ -78,6 +80,7 @@
               <option value="1">{{ $t('rooms.floor1') }}</option>
               <option value="2">{{ $t('rooms.floor2') }}</option>
               <option value="3">{{ $t('rooms.floor3') }}</option>
+            </select>
             </div>
           </div>
 
@@ -89,10 +92,10 @@
               class="flex-1 sm:flex-none px-4 py-2 text-sm md:text-base bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors whitespace-nowrap flex items-center justify-center gap-2"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-            </svg>
-            {{ $t('rooms.exportExcel') }}
-          </button>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              {{ $t('rooms.exportExcel') }}
+            </button>
 
             <!-- Add Room Button -->
             <button
