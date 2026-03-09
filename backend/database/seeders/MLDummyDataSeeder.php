@@ -110,7 +110,9 @@ class MLDummyDataSeeder extends Seeder
                 DB::table('booking_rooms')->insert([
                     'booking_id' => $bookingId,
                     'room_id' => $roomId,
-                    'price_per_night' => $basePrice,
+                    'room_rate' => $basePrice,
+                    'nights' => $nights,
+                    'subtotal' => $totalAmount,
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
