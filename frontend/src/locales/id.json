@@ -687,6 +687,10 @@
     "cancelFailed": "Gagal membatalkan pemesanan",
     "deleteFailed": "Gagal menghapus pemesanan",
     "saveFailed": "Gagal menyimpan pemesanan",
-    "bookingDetails": "Detail Pemesanan"
+    "bookingDetails": "Detail Pemesanan",
+    "showing": "Menampilkan",
+    "to": "hingga",
+    "of": "dari",
+    "results": "hasil"
   }
 }

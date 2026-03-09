@@ -22,7 +22,7 @@
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.search') }}</label>
             <input
               v-model="filters.search"
-              @input="loadBookings"
+              @input="handleFilterChange"
               type="text"
               :placeholder="$t('bookings.searchPlaceholder')"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
@@ -32,7 +32,7 @@
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.status') }}</label>
             <select
               v-model="filters.status"
-              @change="loadBookings"
+              @change="handleFilterChange"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{{ $t('bookings.allStatus') }}</option>
@@ -47,7 +47,7 @@
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.checkInFrom') }}</label>
             <input
               v-model="filters.start_date"
-              @change="loadBookings"
+              @change="handleFilterChange"
               type="date"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -56,7 +56,7 @@
             <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('bookings.checkInTo') }}</label>
             <input
               v-model="filters.end_date"
-              @change="loadBookings"
+              @change="handleFilterChange"
               type="date"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
@@ -280,6 +280,68 @@
           </tbody>
         </table>
         </div>
+
+        <!-- Pagination -->
+        <div v-if="pagination.last_page > 1" class="px-4 py-3 border-t border-gray-200 sm:px-6">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-sm text-gray-700">
+              {{ $t('bookings.showing') }}
+              <span class="font-medium">{{ (pagination.current_page - 1) * pagination.per_page + 1 }}</span>
+              {{ $t('bookings.to') }}
+              <span class="font-medium">{{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}</span>
+              {{ $t('bookings.of') }}
+              <span class="font-medium">{{ pagination.total }}</span>
+              {{ $t('bookings.results') }}
+            </div>
+            <div class="flex gap-1">
+              <button
+                @click="changePage(1)"
+                :disabled="pagination.current_page === 1"
+                class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                ««
+              </button>
+              <button
+                @click="changePage(pagination.current_page - 1)"
+                :disabled="pagination.current_page === 1"
+                class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                «
+              </button>
+              
+              <template v-for="page in getPageNumbers()" :key="page">
+                <button
+                  v-if="page !== '...'"
+                  @click="changePage(page)"
+                  :class="[
+                    'px-3 py-1 border rounded text-sm',
+                    pagination.current_page === page
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'border-gray-300 hover:bg-gray-50'
+                  ]"
+                >
+                  {{ page }}
+                </button>
+                <span v-else class="px-2 py-1 text-sm text-gray-500">...</span>
+              </template>
+
+              <button
+                @click="changePage(pagination.current_page + 1)"
+                :disabled="pagination.current_page === pagination.last_page"
+                class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                »
+              </button>
+              <button
+                @click="changePage(pagination.last_page)"
+                :disabled="pagination.current_page === pagination.last_page"
+                class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
+              >
+                »»
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -492,6 +554,12 @@ import axios from 'axios'
 const { t } = useI18n()
 
 const bookings = ref([])
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 15,
+  total: 0
+})
 const guests = ref([])
 const availableRooms = ref([])
 const loading = ref(false)
@@ -512,6 +580,7 @@ const filters = ref({
   status: '',
   start_date: '',
   end_date: '',
+  page: 1,
 })
 
 const formData = ref({
@@ -551,13 +620,38 @@ async function loadBookings() {
     if (filters.value.status) params.status = filters.value.status
     if (filters.value.start_date) params.start_date = filters.value.start_date
     if (filters.value.end_date) params.end_date = filters.value.end_date
+    if (filters.value.page) params.page = filters.value.page
 
-    bookings.value = await bookingApi.getBookings(params)
+    const response = await bookingApi.getBookings(params)
+    
+    // Handle paginated response
+    if (response.data) {
+      bookings.value = response.data
+      pagination.value = {
+        current_page: response.current_page,
+        last_page: response.last_page,
+        per_page: response.per_page,
+        total: response.total
+      }
+    } else {
+      // Fallback for non-paginated response
+      bookings.value = response
+    }
   } catch (err) {
     console.error('Failed to load bookings:', err)
   } finally {
     loading.value = false
   }
+}
+
+function changePage(page) {
+  filters.value.page = page
+  loadBookings()
+}
+
+function handleFilterChange() {
+  filters.value.page = 1 // Reset to first page when filtering
+  loadBookings()
 }
 
 async function loadGuests() {
@@ -785,5 +879,42 @@ function formatCurrency(amount) {
     currency: 'IDR',
     minimumFractionDigits: 0,
   }).format(amount)
+}
+
+function getPageNumbers() {
+  const pages = []
+  const current = pagination.value.current_page
+  const last = pagination.value.last_page
+  
+  if (last <= 7) {
+    // Show all pages if 7 or less
+    for (let i = 1; i <= last; i++) {
+      pages.push(i)
+    }
+  } else {
+    // Always show first page
+    pages.push(1)
+    
+    if (current > 3) {
+      pages.push('...')
+    }
+    
+    // Show pages around current
+    const start = Math.max(2, current - 1)
+    const end = Math.min(last - 1, current + 1)
+    
+    for (let i = start; i <= end; i++) {
+      pages.push(i)
+    }
+    
+    if (current < last - 2) {
+      pages.push('...')
+    }
+    
+    // Always show last page
+    pages.push(last)
+  }
+  
+  return pages
 }
 </script>

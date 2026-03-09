@@ -19,15 +19,14 @@ DB_CONFIG = {
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-BACKEND_DIR = os.path.join(BASE_DIR, '..', 'backend')
-MODEL_DIR = os.path.join(BACKEND_DIR, 'storage', 'ml', 'models')
-DATA_DIR = os.path.join(BACKEND_DIR, 'storage', 'ml', 'data')
-PREDICTIONS_DIR = os.path.join(BACKEND_DIR, 'storage', 'ml', 'predictions')
+BACKEND_DIR = os.path.abspath(os.path.join(BASE_DIR, '..', 'backend'))
+MODEL_DIR = os.path.abspath(os.path.join(BACKEND_DIR, 'storage', 'ml', 'models'))
+DATA_DIR = os.path.abspath(os.path.join(BACKEND_DIR, 'storage', 'ml', 'data'))
+PREDICTIONS_DIR = os.path.abspath(os.path.join(BACKEND_DIR, 'storage', 'ml', 'predictions'))
 
-# Ensure directories exist
-os.makedirs(MODEL_DIR, exist_ok=True)
-os.makedirs(DATA_DIR, exist_ok=True)
-os.makedirs(PREDICTIONS_DIR, exist_ok=True)
+# Ensure directories exist with proper permissions
+for directory in [MODEL_DIR, DATA_DIR, PREDICTIONS_DIR]:
+    os.makedirs(directory, mode=0o775, exist_ok=True)
 
 # Model Configuration
 MODEL_NAMES = {

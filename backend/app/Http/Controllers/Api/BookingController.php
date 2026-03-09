@@ -43,7 +43,8 @@ class BookingController extends Controller
             });
         }
 
-        $bookings = $query->orderBy('created_at', 'desc')->get();
+        $perPage = $request->get('per_page', 15);
+        $bookings = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json($bookings);
     }

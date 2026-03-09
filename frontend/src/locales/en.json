@@ -687,6 +687,10 @@
     "cancelFailed": "Failed to cancel booking",
     "deleteFailed": "Failed to delete booking",
     "saveFailed": "Failed to save booking",
-    "bookingDetails": "Booking Details"
+    "bookingDetails": "Booking Details",
+    "showing": "Showing",
+    "to": "to",
+    "of": "of",
+    "results": "results"
   }
 }
