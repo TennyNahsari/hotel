@@ -16,6 +16,18 @@ class MLDummyDataSeeder extends Seeder
     {
         $this->command->info('🚀 Generating ML dummy data...');
 
+        // Clear existing ML dummy data
+        $this->command->info('Clearing existing ML data...');
+        
+        // Delete in order (respecting foreign keys)
+        DB::table('restaurant_order_items')->delete();
+        DB::table('restaurant_orders')->delete();
+        DB::table('booking_rooms')->delete();
+        DB::table('hall_bookings')->delete();
+        DB::table('bookings')->delete();
+        
+        $this->command->info('✓ Cleared old data');
+
         // Ensure we have guests and rooms
         $guests = DB::table('guests')->pluck('id');
         $rooms = DB::table('rooms')->pluck('id');
