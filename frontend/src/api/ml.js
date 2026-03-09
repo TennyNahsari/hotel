@@ -1,7 +1,7 @@
 /**
  * ML/AI Predictions API Service
  */
-import api from './api'
+import api from './axios'
 
 export default {
   /**
