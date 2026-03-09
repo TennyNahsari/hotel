@@ -36,5 +36,5 @@ MODEL_NAMES = {
 }
 
 # Prediction Settings
-PREDICTION_DAYS = 30  # Predict next 30 days
+PREDICTION_DAYS = 7  # Predict next 7 days
 CONFIDENCE_THRESHOLD = 0.7  # Minimum confidence for predictions

@@ -1,7 +1,7 @@
 """
 Generate Predictions from Trained Models
-- Room demand forecast (next 30 days)
-- Hall peak dates
+- Room demand forecast (next 7 days, top 3 per day)
+- Hall peak dates (7 days)
 - Menu popularity ranking
 """
 import sys
@@ -42,7 +42,7 @@ def load_models():
     return models
 
 def predict_room_demand(model_data):
-    """Predict room demand for next 30 days"""
+    """Predict room demand for next 7 days with top 3 room types"""
     if model_data is None:
         return None
     
@@ -81,8 +81,9 @@ def predict_room_demand(model_data):
                 'confidence': 0.85 if is_weekend else 0.75
             })
         
-        # Sort by demand
+        # Sort by demand and keep only top 3
         room_predictions.sort(key=lambda x: x['demand'], reverse=True)
+        room_predictions = room_predictions[:3]  # Keep only top 3
         
         predictions.append({
             'date': pred_date.isoformat(),
@@ -95,7 +96,7 @@ def predict_room_demand(model_data):
     return predictions
 
 def predict_hall_peaks(model):
-    """Predict hall booking peaks for next 30 days"""
+    """Predict hall booking peaks for next 7 days"""
     if model is None:
         return None
     

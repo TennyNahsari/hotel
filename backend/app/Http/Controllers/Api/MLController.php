@@ -169,7 +169,7 @@ class MLController extends Controller
                     'prediction_data' => json_encode($data),
                     'confidence_score' => $this->calculateAvgConfidence($data),
                     'generated_at' => now(),
-                    'expires_at' => now()->addDay(),
+                    'expires_at' => now()->addDays(7), // 7 days validity
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);

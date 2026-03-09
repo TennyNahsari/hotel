@@ -67,9 +67,9 @@
         </div>
         
         <div class="space-y-2">
-          <div v-for="(day, index) in predictions.room_demand.data.slice(0, 7)" :key="index" 
+          <div v-for="(day, index) in predictions.room_demand.data" :key="index" 
                class="bg-white/60 rounded p-2">
-            <div class="flex justify-between items-center">
+            <div class="flex justify-between items-center mb-1">
               <span class="text-xs text-gray-700 font-medium">
                 {{ formatPredictionDate(day.date) }}
               </span>
@@ -77,16 +77,21 @@
                 Weekend
               </span>
             </div>
-            <div class="mt-1 text-xs text-gray-600">
-              Top: <span class="font-medium text-blue-700">{{ day.predictions[0]?.room_type }}</span>
-              ({{ day.predictions[0]?.demand }} bookings)
+            <!-- Top 3 Predictions -->
+            <div class="space-y-0.5">
+              <div v-for="(pred, pidx) in day.predictions.slice(0, 3)" :key="pidx" class="flex items-center gap-1">
+                <span class="text-xs font-bold text-blue-600 bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                  {{ pidx + 1 }}
+                </span>
+                <span class="text-xs text-gray-700 font-medium">{{ pred.room_type }}:</span>
+                <span class="text-xs text-blue-700 font-semibold">{{ pred.demand }}</span>
+              </div>
             </div>
           </div>
         </div>
 
         <div class="mt-3 text-xs text-blue-700">
-          Showing 7-day forecast • 
-          <span class="font-medium">{{ predictions.room_demand.data.length }} days total</span>
+          7-day forecast with top 3 room types per day
         </div>
       </div>
 
@@ -100,7 +105,7 @@
         </div>
         
         <div class="space-y-2">
-          <div v-for="(peak, index) in predictions.hall_peaks.data.peak_dates.slice(0, 7)" :key="index"
+          <div v-for="(peak, index) in predictions.hall_peaks.data.peak_dates" :key="index"
                class="bg-white/60 rounded p-2">
             <div class="flex justify-between items-center">
               <span class="text-xs text-gray-700 font-medium">
@@ -118,8 +123,7 @@
         </div>
 
         <div class="mt-3 text-xs text-purple-700">
-          Showing top 7 peaks • 
-          <span class="font-medium">{{ predictions.hall_peaks.data.peak_dates.length }} total peaks</span>
+          7-day hall booking peak forecast
         </div>
       </div>
 
@@ -133,7 +137,7 @@
         </div>
         
         <div class="space-y-2">
-          <div v-for="(item, index) in predictions.menu_popularity.data.top_10.slice(0, 7)" :key="index"
+          <div v-for="(item, index) in predictions.menu_popularity.data.top_10" :key="index"
                class="bg-white/60 rounded p-2 flex items-center justify-between">
             <div class="flex items-center gap-2">
               <span class="text-xs font-bold text-green-700 bg-green-200 rounded-full w-5 h-5 flex items-center justify-center">
@@ -150,8 +154,7 @@
         </div>
 
         <div class="mt-3 text-xs text-green-700">
-          Top 7 items • 
-          <span class="font-medium">{{ predictions.menu_popularity.data.top_10.length }} ranked items</span>
+          Top {{ predictions.menu_popularity.data.top_10.length }} most popular menu items
         </div>
       </div>
     </div>

@@ -118,6 +118,9 @@
           </div>
         </div>
 
+        <!-- AI Predictions Section -->
+        <AIPredictionsCard />
+
         <!-- Payment Report Section -->
         <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <h2 class="text-base md:text-lg font-semibold text-gray-900 mb-4">{{ $t('dashboard.paymentReport') }}</h2>
@@ -195,9 +198,6 @@
             </div>
           </div>
         </div>
-
-        <!-- AI Predictions Section -->
-        <AIPredictionsCard />
 
         <!-- Recent Bookings -->
         <div class="bg-white rounded-lg shadow">
