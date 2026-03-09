@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\BreakfastController;
 use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\RestaurantOrderController;
 use App\Http\Controllers\Api\LaundryOrderController;
+use App\Http\Controllers\Api\MLController;
 
 /*
 |--------------------------------------------------------------------------
@@ -101,4 +102,15 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/bookings/{booking}/laundry-charges', [LaundryOrderController::class, 'getBookingCharges']);
     Route::get('/laundry-orders/export', [LaundryOrderController::class, 'export']);
     Route::apiResource('laundry-orders', LaundryOrderController::class)->only(['index', 'store', 'show', 'destroy']);
+
+    // ML/AI Predictions
+    Route::prefix('ml')->group(function () {
+        // Admin only - training and predictions
+        Route::post('/train', [MLController::class, 'trainModels'])->middleware('throttle:2,60');
+        Route::post('/predict', [MLController::class, 'generatePredictions'])->middleware('throttle:10,60');
+        
+        // All authenticated users - view predictions
+        Route::get('/predictions', [MLController::class, 'getPredictions']);
+        Route::get('/info', [MLController::class, 'getModelInfo']);
+    });
 });

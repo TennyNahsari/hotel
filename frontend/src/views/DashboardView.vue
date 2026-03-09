@@ -196,6 +196,9 @@
           </div>
         </div>
 
+        <!-- AI Predictions Section -->
+        <AIPredictionsCard />
+
         <!-- Recent Bookings -->
         <div class="bg-white rounded-lg shadow">
           <div class="px-6 py-4 border-b border-gray-200">
@@ -276,6 +279,7 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
+import AIPredictionsCard from '../components/AIPredictionsCard.vue'
 import { dashboardApi } from '../api'
 import axios from 'axios'
 
