@@ -7,9 +7,9 @@
           <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
-          AI Predictions
+          {{ $t('aiPredictions.title') }}
         </h2>
-        <p class="text-sm text-gray-500 mt-1">Smart forecasting for better decision making</p>
+        <p class="text-sm text-gray-500 mt-1">{{ $t('aiPredictions.subtitle') }}</p>
       </div>
 
       <!-- Owner Controls -->
@@ -23,7 +23,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span>{{ training ? 'Training...' : 'Fetch & Train' }}</span>
+          <span>{{ training ? $t('aiPredictions.training') : $t('aiPredictions.fetchTrain') }}</span>
         </button>
         
         <button
@@ -35,7 +35,7 @@
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
           </svg>
-          <span>{{ predicting ? 'Predicting...' : 'Generate Predictions' }}</span>
+          <span>{{ predicting ? $t('aiPredictions.predicting') : $t('aiPredictions.generatePredictions') }}</span>
         </button>
       </div>
     </div>
@@ -43,7 +43,7 @@
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-8">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
-      <p class="text-gray-500 mt-2 text-sm">Loading predictions...</p>
+      <p class="text-gray-500 mt-2 text-sm">{{ $t('aiPredictions.loading') }}</p>
     </div>
 
     <!-- No Predictions -->
@@ -51,8 +51,8 @@
       <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
       </svg>
-      <h3 class="mt-2 text-sm font-medium text-gray-900">No predictions available</h3>
-      <p class="mt-1 text-sm text-gray-500">Train models and generate predictions to see AI insights</p>
+      <h3 class="mt-2 text-sm font-medium text-gray-900">{{ $t('aiPredictions.noPredictions') }}</h3>
+      <p class="mt-1 text-sm text-gray-500">{{ $t('aiPredictions.noPredictionsDesc') }}</p>
     </div>
 
     <!-- Predictions Grid -->
@@ -60,9 +60,9 @@
       <!-- Room Demand Card -->
       <div v-if="predictions.room_demand" class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-blue-900">Room Demand Forecast</h3>
+          <h3 class="text-sm font-semibold text-blue-900">{{ $t('aiPredictions.roomDemand') }}</h3>
           <span class="text-xs px-2 py-1 bg-blue-200 text-blue-800 rounded-full">
-            {{ Math.round(predictions.room_demand.confidence_score * 100) }}% confidence
+            {{ Math.round(predictions.room_demand.confidence_score * 100) }}% {{ $t('aiPredictions.confidence') }}
           </span>
         </div>
         
@@ -74,7 +74,7 @@
                 {{ formatPredictionDate(day.date) }}
               </span>
               <span v-if="day.is_weekend" class="text-xs px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded">
-                Weekend
+                {{ $t('aiPredictions.weekend') }}
               </span>
             </div>
             <!-- Top 3 Predictions -->
@@ -91,48 +91,48 @@
         </div>
 
         <div class="mt-3 text-xs text-blue-700">
-          7-day forecast with top 3 room types per day
+          {{ $t('aiPredictions.roomForecastFooter') }}
         </div>
       </div>
 
       <!-- Hall Peak Dates Card -->
       <div v-if="predictions.hall_peaks" class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-purple-900">Hall Peak Dates</h3>
+          <h3 class="text-sm font-semibold text-purple-900">{{ $t('aiPredictions.hallPeaks') }}</h3>
           <span class="text-xs px-2 py-1 bg-purple-200 text-purple-800 rounded-full">
-            {{ Math.round(predictions.hall_peaks.confidence_score * 100) }}% confidence
+            {{ Math.round(predictions.hall_peaks.confidence_score * 100) }}% {{ $t('aiPredictions.confidence') }}
           </span>
         </div>
         
         <div class="space-y-2">
-          <div v-for="(peak, index) in predictions.hall_peaks.data.peak_dates" :key="index"
+          <div v-for="(peak, index) in predictions.hall_peaks.data.peak_dates" :key=" index"
                class="bg-white/60 rounded p-2">
             <div class="flex justify-between items-center">
               <span class="text-xs text-gray-700 font-medium">
                 {{ formatPredictionDate(peak.date) }}
               </span>
               <span class="text-xs px-2 py-0.5 bg-red-200 text-red-800 rounded font-medium">
-                PEAK
+                {{ $t('aiPredictions.peak') }}
               </span>
             </div>
             <div class="mt-1 text-xs text-gray-600">
-              Expected: <span class="font-medium text-purple-700">{{ peak.expected_bookings }} bookings</span>
-              <span v-if="peak.is_weekend" class="ml-1 text-yellow-600">(Weekend)</span>
+              {{ $t('aiPredictions.expected') }}: <span class="font-medium text-purple-700">{{ peak.expected_bookings }} {{ $t('aiPredictions.bookings') }}</span>
+              <span v-if="peak.is_weekend" class="ml-1 text-yellow-600">({{ $t('aiPredictions.weekend') }})</span>
             </div>
           </div>
         </div>
 
         <div class="mt-3 text-xs text-purple-700">
-          7-day hall booking peak forecast
+          {{ $t('aiPredictions.hallForecastFooter') }}
         </div>
       </div>
 
       <!-- Menu Popularity Card -->
       <div v-if="predictions.menu_popularity" class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
         <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-green-900">Popular Menu Items</h3>
+          <h3 class="text-sm font-semibold text-green-900">{{ $t('aiPredictions.menuPopularity') }}</h3>
           <span class="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
-            {{ Math.round(predictions.menu_popularity.confidence_score * 100) }}% confidence
+            {{ Math.round(predictions.menu_popularity.confidence_score * 100) }}% {{ $t('aiPredictions.confidence') }}
           </span>
         </div>
         
@@ -154,19 +154,19 @@
         </div>
 
         <div class="mt-3 text-xs text-green-700">
-          Top {{ predictions.menu_popularity.data.top_10.length }} most popular menu items
+          {{ $t('aiPredictions.menuFooter', { count: predictions.menu_popularity.data.top_10.length }) }}
         </div>
       </div>
     </div>
 
-    <!-- Footer Info -->
+    <!-- Footer Info  -->
     <div v-if="predictions" class="mt-4 pt-4 border-t border-gray-200 flex flex-col sm:flex-row sm:justify-between gap-2 text-xs text-gray-500">
       <div>
-        Generated: <span class="font-medium">{{ formatTimestamp(predictions.room_demand?.generated_at) }}</span>
+        {{ $t('aiPredictions.generated') }}: <span class="font-medium">{{ formatTimestamp(predictions.room_demand?.generated_at) }}</span>
       </div>
       <div v-if="modelInfo">
-        Models: <span class="font-medium">{{ modelInfo.total_models }} active</span> •
-        Avg accuracy: <span class="font-medium">{{ averageAccuracy }}%</span>
+        {{ $t('aiPredictions.models') }}: <span class="font-medium">{{ modelInfo.total_models }} {{ $t('aiPredictions.active') }}</span> •
+        {{ $t('aiPredictions.avgAccuracy') }}: <span class="font-medium">{{ averageAccuracy }}%</span>
       </div>
     </div>
   </div>
@@ -174,9 +174,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/stores/auth'
 import mlApi from '@/api/ml'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const isAdmin = computed(() => {
   const roleName = authStore.user?.role?.name || authStore.user?.role
@@ -227,7 +229,7 @@ async function loadModelInfo() {
 }
 
 async function handleTrain() {
-  if (!confirm('Training models will analyze 6+ months of data and may take 5-10 minutes. Continue?')) {
+  if (!confirm(t('aiPredictions.trainConfirm'))) {
     return
   }
 
@@ -235,11 +237,14 @@ async function handleTrain() {
   try {
     const response = await mlApi.train()
     if (response.success) {
-      alert(`Models trained successfully!\n\n${response.data.models_trained} models trained\nAverage accuracy: ${response.data.average_accuracy}%`)
+      alert(t('aiPredictions.trainSuccess', {
+        models: response.data.models_trained,
+        accuracy: response.data.average_accuracy
+      }))
       await loadModelInfo()
     }
   } catch (err) {
-    alert('Training failed: ' + (err.response?.data?.message || err.message))
+    alert(t('aiPredictions.trainFailed') + ': ' + (err.response?.data?.message || err.message))
   } finally {
     training.value = false
   }
@@ -250,11 +255,11 @@ async function handlePredict() {
   try {
     const response = await mlApi.generatePredictions()
     if (response.success) {
-      alert('Predictions generated successfully!')
+      alert(t('aiPredictions.predictSuccess'))
       await loadPredictions()
     }
   } catch (err) {
-    alert('Prediction generation failed: ' + (err.response?.data?.message || err.message))
+    alert(t('aiPredictions.predictFailed') + ': ' + (err.response?.data?.message || err.message))
   } finally {
     predicting.value = false
   }
@@ -266,10 +271,11 @@ function formatPredictionDate(dateStr) {
   const tomorrow = new Date(today)
   tomorrow.setDate(tomorrow.getDate() + 1)
 
-  if (date.toDateString() === today.toDateString()) return 'Today'
-  if (date.toDateString() === tomorrow.toDateString()) return 'Tomorrow'
+  if (date.toDateString() === today.toDateString()) return t('aiPredictions.today')
+  if (date.toDateString() === tomorrow.toDateString()) return t('aiPredictions.tomorrow')
 
-  return date.toLocaleDateString('en-US', { 
+  const locale = t('locale') // 'id-ID' or 'en-US'
+  return date.toLocaleDateString(locale, { 
     month: 'short', 
     day: 'numeric',
     weekday: 'short'
@@ -279,7 +285,8 @@ function formatPredictionDate(dateStr) {
 function formatTimestamp(timestamp) {
   if (!timestamp) return '-'
   const date = new Date(timestamp)
-  return date.toLocaleString('en-US', {
+  const locale = t('locale')
+  return date.toLocaleString(locale, {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
