@@ -3,13 +3,13 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
       <div>
-        <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-          <svg class="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <h2 class="text-lg sm:text-xl font-semibold text-gray-900 flex items-center gap-2">
+          <svg class="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
           {{ $t('aiPredictions.title') }}
         </h2>
-        <p class="text-sm text-gray-500 mt-1">{{ $t('aiPredictions.subtitle') }}</p>
+        <p class="text-xs sm:text-sm text-gray-500 mt-1">{{ $t('aiPredictions.subtitle') }}</p>
       </div>
 
       <!-- Owner Controls -->
@@ -58,10 +58,10 @@
     <!-- Predictions Grid -->
     <div v-else class="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
       <!-- Room Demand Card -->
-      <div v-if="predictions.room_demand" class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-blue-900">{{ $t('aiPredictions.roomDemand') }}</h3>
-          <span class="text-xs px-2 py-1 bg-blue-200 text-blue-800 rounded-full">
+      <div v-if="predictions.room_demand" class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 sm:p-4 border border-blue-200">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h3 class="text-sm sm:text-base font-semibold text-blue-900">{{ $t('aiPredictions.roomDemand') }}</h3>
+          <span class="text-[10px] sm:text-xs px-2 py-1 bg-blue-200 text-blue-800 rounded-full whitespace-nowrap">
             {{ Math.round(predictions.room_demand.confidence_score * 100) }}% {{ $t('aiPredictions.confidence') }}
           </span>
         </div>
@@ -69,37 +69,37 @@
         <div class="space-y-2">
           <div v-for="(day, index) in predictions.room_demand.data" :key="index" 
                class="bg-white/60 rounded p-2">
-            <div class="flex justify-between items-center mb-1">
-              <span class="text-xs text-gray-700 font-medium">
+            <div class="flex justify-between items-center mb-1 flex-wrap gap-1">
+              <span class="text-xs sm:text-sm text-gray-700 font-medium">
                 {{ formatPredictionDate(day.date) }}
               </span>
-              <span v-if="day.is_weekend" class="text-xs px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded">
+              <span v-if="day.is_weekend" class="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-yellow-200 text-yellow-800 rounded">
                 {{ $t('aiPredictions.weekend') }}
               </span>
             </div>
             <!-- Top 3 Predictions -->
             <div class="space-y-0.5">
               <div v-for="(pred, pidx) in day.predictions.slice(0, 3)" :key="pidx" class="flex items-center gap-1">
-                <span class="text-xs font-bold text-blue-600 bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
+                <span class="text-[10px] font-bold text-blue-600 bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center flex-shrink-0">
                   {{ pidx + 1 }}
                 </span>
-                <span class="text-xs text-gray-700 font-medium">{{ pred.room_type }}:</span>
+                <span class="text-xs text-gray-700 font-medium truncate">{{ pred.room_type }}:</span>
                 <span class="text-xs text-blue-700 font-semibold">{{ pred.demand }}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div class="mt-3 text-xs text-blue-700">
+        <div class="mt-3 text-[10px] sm:text-xs text-blue-700">
           {{ $t('aiPredictions.roomForecastFooter') }}
         </div>
       </div>
 
       <!-- Hall Peak Dates Card -->
-      <div v-if="predictions.hall_peaks" class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-purple-900">{{ $t('aiPredictions.hallPeaks') }}</h3>
-          <span class="text-xs px-2 py-1 bg-purple-200 text-purple-800 rounded-full">
+      <div v-if="predictions.hall_peaks" class="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-3 sm:p-4 border border-purple-200">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h3 class="text-sm sm:text-base font-semibold text-purple-900">{{ $t('aiPredictions.hallPeaks') }}</h3>
+          <span class="text-[10px] sm:text-xs px-2 py-1 bg-purple-200 text-purple-800 rounded-full whitespace-nowrap">
             {{ Math.round(predictions.hall_peaks.confidence_score * 100) }}% {{ $t('aiPredictions.confidence') }}
           </span>
         </div>
@@ -107,53 +107,53 @@
         <div class="space-y-2">
           <div v-for="(peak, index) in predictions.hall_peaks.data.peak_dates" :key=" index"
                class="bg-white/60 rounded p-2">
-            <div class="flex justify-between items-center">
-              <span class="text-xs text-gray-700 font-medium">
+            <div class="flex justify-between items-center flex-wrap gap-1">
+              <span class="text-xs sm:text-sm text-gray-700 font-medium">
                 {{ formatPredictionDate(peak.date) }}
               </span>
-              <span class="text-xs px-2 py-0.5 bg-red-200 text-red-800 rounded font-medium">
+              <span class="text-[10px] sm:text-xs px-1.5 sm:px-2 py-0.5 bg-red-200 text-red-800 rounded font-medium">
                 {{ $t('aiPredictions.peak') }}
               </span>
             </div>
-            <div class="mt-1 text-xs text-gray-600">
+            <div class="mt-1 text-xs sm:text-sm text-gray-600">
               {{ $t('aiPredictions.expected') }}: <span class="font-medium text-purple-700">{{ peak.expected_bookings }} {{ $t('aiPredictions.bookings') }}</span>
               <span v-if="peak.is_weekend" class="ml-1 text-yellow-600">({{ $t('aiPredictions.weekend') }})</span>
             </div>
           </div>
         </div>
 
-        <div class="mt-3 text-xs text-purple-700">
+        <div class="mt-3 text-[10px] sm:text-xs text-purple-700">
           {{ $t('aiPredictions.hallForecastFooter') }}
         </div>
       </div>
 
       <!-- Menu Popularity Card -->
-      <div v-if="predictions.menu_popularity" class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-        <div class="flex items-center justify-between mb-3">
-          <h3 class="text-sm font-semibold text-green-900">{{ $t('aiPredictions.menuPopularity') }}</h3>
-          <span class="text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full">
+      <div v-if="predictions.menu_popularity" class="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 sm:p-4 border border-green-200">
+        <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+          <h3 class="text-sm sm:text-base font-semibold text-green-900">{{ $t('aiPredictions.menuPopularity') }}</h3>
+          <span class="text-[10px] sm:text-xs px-2 py-1 bg-green-200 text-green-800 rounded-full whitespace-nowrap">
             {{ Math.round(predictions.menu_popularity.confidence_score * 100) }}% {{ $t('aiPredictions.confidence') }}
           </span>
         </div>
         
         <div class="space-y-2">
           <div v-for="(item, index) in predictions.menu_popularity.data.top_10" :key="index"
-               class="bg-white/60 rounded p-2 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="text-xs font-bold text-green-700 bg-green-200 rounded-full w-5 h-5 flex items-center justify-center">
+               class="bg-white/60 rounded p-2 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0 flex-1">
+              <span class="text-xs font-bold text-green-700 bg-green-200 rounded-full w-5 h-5 flex items-center justify-center flex-shrink-0">
                 {{ index + 1 }}
               </span>
-              <span class="text-xs text-gray-700 font-medium truncate">
+              <span class="text-xs sm:text-sm text-gray-700 font-medium truncate">
                 {{ item.menu_name }}
               </span>
             </div>
-            <span class="text-xs font-semibold text-green-700">
+            <span class="text-xs sm:text-sm font-semibold text-green-700 flex-shrink-0">
               {{ Math.round(item.popularity_score) }}
             </span>
           </div>
         </div>
 
-        <div class="mt-3 text-xs text-green-700">
+        <div class="mt-3 text-[10px] sm:text-xs text-green-700">
           {{ $t('aiPredictions.menuFooter', { count: predictions.menu_popularity.data.top_10.length }) }}
         </div>
       </div>
