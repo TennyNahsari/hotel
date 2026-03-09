@@ -29,7 +29,7 @@ class MLController extends Controller
         try {
             // Execute Python training script
             $pythonPath = env('PYTHON_PATH', 'python3');
-            $scriptPath = base_path('ml_scripts/train_models.py');
+            $scriptPath = base_path('../ml_scripts/train_models.py');
 
             $result = Process::timeout(600) // 10 minute timeout
                 ->run("$pythonPath $scriptPath");
@@ -126,7 +126,7 @@ class MLController extends Controller
         try {
             // Execute Python prediction script
             $pythonPath = env('PYTHON_PATH', 'python3');
-            $scriptPath = base_path('ml_scripts/predict.py');
+            $scriptPath = base_path('../ml_scripts/predict.py');
 
             $result = Process::timeout(120) // 2 minute timeout
                 ->run("$pythonPath $scriptPath");
