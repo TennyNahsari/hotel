@@ -5,7 +5,7 @@ import api from './axios'
 
 export default {
   /**
-   * Train ML models (Admin only)
+   * Train ML models (Owner only)
    * Rate limited: 2 requests per hour
    */
   async train() {
@@ -14,7 +14,7 @@ export default {
   },
 
   /**
-   * Generate predictions (Admin only)
+   * Generate predictions (Owner only)
    * Rate limited: 10 requests per hour
    */
   async generatePredictions() {

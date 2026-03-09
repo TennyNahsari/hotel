@@ -105,7 +105,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // ML/AI Predictions
     Route::prefix('ml')->group(function () {
-        // Admin only - training and predictions
+        // Owner only - training and predictions
         Route::post('/train', [MLController::class, 'trainModels'])->middleware('throttle:2,60');
         Route::post('/predict', [MLController::class, 'generatePredictions'])->middleware('throttle:10,60');
         

@@ -12,7 +12,7 @@
         <p class="text-sm text-gray-500 mt-1">Smart forecasting for better decision making</p>
       </div>
 
-      <!-- Admin Controls -->
+      <!-- Owner Controls -->
       <div v-if="isAdmin" class="flex flex-wrap gap-2">
         <button
           @click="handleTrain"
@@ -175,7 +175,10 @@ import { useAuthStore } from '@/stores/auth'
 import mlApi from '@/api/ml'
 
 const authStore = useAuthStore()
-const isAdmin = computed(() => authStore.user?.role === 'admin')
+const isAdmin = computed(() => {
+  const roleName = authStore.user?.role?.name || authStore.user?.role
+  return roleName === 'owner'
+})
 
 const loading = ref(false)
 const training = ref(false)

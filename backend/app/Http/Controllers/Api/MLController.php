@@ -18,11 +18,11 @@ class MLController extends Controller
      */
     public function trainModels(Request $request): JsonResponse
     {
-        // Check admin permission
-        if (!$request->user()->hasRole('admin')) {
+        // Check owner permission
+        if (!$request->user()->hasRole('owner')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized. Admin access required.'
+                'message' => 'Unauthorized. Owner access required.'
             ], 403);
         }
 
@@ -115,11 +115,11 @@ class MLController extends Controller
      */
     public function generatePredictions(Request $request): JsonResponse
     {
-        // Check admin permission
-        if (!$request->user()->hasRole('admin')) {
+        // Check owner permission
+        if (!$request->user()->hasRole('owner')) {
             return response()->json([
                 'success' => false,
-                'message' => 'Unauthorized. Admin access required.'
+                'message' => 'Unauthorized. Owner access required.'
             ], 403);
         }
 
