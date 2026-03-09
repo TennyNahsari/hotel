@@ -18,8 +18,11 @@ class MLController extends Controller
      */
     public function trainModels(Request $request): JsonResponse
     {
+        // Load user with role relationship
+        $user = $request->user()->load('role');
+        
         // Check owner permission
-        if (!$request->user()->hasRole('owner')) {
+        if (!$user->hasRole('owner')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. Owner access required.'
@@ -115,8 +118,11 @@ class MLController extends Controller
      */
     public function generatePredictions(Request $request): JsonResponse
     {
+        // Load user with role relationship
+        $user = $request->user()->load('role');
+        
         // Check owner permission
-        if (!$request->user()->hasRole('owner')) {
+        if (!$user->hasRole('owner')) {
             return response()->json([
                 'success' => false,
                 'message' => 'Unauthorized. Owner access required.'

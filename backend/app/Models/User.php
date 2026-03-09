@@ -53,6 +53,12 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    // Helper methods
+    public function hasRole($roleName)
+    {
+        return $this->role && $this->role->name === $roleName;
+    }
+
     public function bookings()
     {
         return $this->hasMany(Booking::class, 'created_by');
