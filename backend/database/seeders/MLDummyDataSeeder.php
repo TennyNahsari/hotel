@@ -89,7 +89,11 @@ class MLDummyDataSeeder extends Seeder
                 $statuses = ['confirmed', 'checked_in', 'checked_out', 'checked_out', 'checked_out'];
                 $status = $statuses[array_rand($statuses)];
 
+                // Generate booking number
+                $bookingNumber = 'BKG-' . $checkInDate->format('Ymd') . '-' . str_pad($bookingCount + 1, 4, '0', STR_PAD_LEFT);
+
                 $bookingId = DB::table('bookings')->insertGetId([
+                    'booking_number' => $bookingNumber,
                     'guest_id' => $guestId,
                     'check_in_date' => $checkInDate->toDateString(),
                     'check_out_date' => $checkOutDate->toDateString(),
@@ -159,17 +163,29 @@ class MLDummyDataSeeder extends Seeder
                 }
                 $status = $statuses[array_rand($statuses)];
 
+                // Get guest info
+                $guest = DB::table('guests')->find($guestId);
+                
+                // Get first user as booked_by
+                $firstUserId = DB::table('users')->first()->id ?? 1;
+
                 DB::table('hall_bookings')->insert([
+                    'booking_number' => 'HB-' . $date->format('Ymd') . '-' . str_pad($count + 1, 4, '0', STR_PAD_LEFT),
                     'guest_id' => $guestId,
                     'hall_id' => $hallId,
+                    'customer_name' => $guest->name ?? 'Guest ' . $guestId,
+                    'customer_email' => $guest->email ?? "guest{$guestId}@example.com",
+                    'customer_phone' => $guest->phone ?? '081234567890',
+                    'customer_company' => rand(0, 1) ? 'Company ' . rand(1, 50) : null,
                     'event_name' => $this->getRandomEventName(),
                     'event_date' => $date->toDateString(),
                     'start_time' => '10:00:00',
                     'end_time' => sprintf('%02d:00:00', 10 + $durationHours),
                     'duration_hours' => $durationHours,
-                    'guests_count' => rand(30, 200),
+                    'attendees' => rand(30, 200),
                     'total_amount' => $totalAmount,
                     'status' => $status,
+                    'booked_by' => $firstUserId,
                     'created_at' => $date->copy()->subDays(rand(7, 45)),
                     'updated_at' => now()
                 ]);
@@ -207,6 +223,9 @@ class MLDummyDataSeeder extends Seeder
         $startDate = Carbon::now()->subMonths(6);
         $endDate = Carbon::now();
 
+        // Get first user as created_by
+        $firstUserId = DB::table('users')->first()->id ?? 1;
+
         // Generate daily orders
         for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
             $isWeekend = $date->isWeekend();
@@ -224,11 +243,11 @@ class MLDummyDataSeeder extends Seeder
                 $orderDate = $date->copy()->setTimeFromTimeString($orderTime);
 
                 $orderId = DB::table('restaurant_orders')->insertGetId([
+                    'order_number' => 'RO-' . $orderDate->format('Ymd') . '-' . str_pad($orderCount + 1, 4, '0', STR_PAD_LEFT),
                     'booking_id' => $bookingId,
-                    'order_date' => $orderDate->toDateTimeString(),
-                    'table_number' => rand(1, 20),
                     'total_amount' => 0, // Will calculate later
-                    'status' => 'completed',
+                    'status' => 'delivered',
+                    'created_by' => $firstUserId,
                     'created_at' => $orderDate,
                     'updated_at' => $orderDate
                 ]);
