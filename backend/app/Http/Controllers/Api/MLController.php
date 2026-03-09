@@ -38,7 +38,10 @@ class MLController extends Controller
                 ->run("$pythonPath $scriptPath");
 
             if ($result->failed()) {
-                throw new \Exception('Training script failed: ' . $result->errorOutput());
+                $errorOutput = $result->errorOutput();
+                $stdOutput = $result->output();
+                $fullError = trim($errorOutput ?: $stdOutput);
+                throw new \Exception('Training script failed: ' . $fullError);
             }
 
             // Parse JSON output from Python
@@ -48,8 +51,9 @@ class MLController extends Controller
             
             $trainingResult = json_decode($jsonOutput, true);
 
-            if (!$trainingResult || $trainingResult['status'] !== 'success') {
-                throw new \Exception($trainingResult['error'] ?? 'Training failed');
+            if (!$trainingResult || !isset($trainingResult['status']) || $trainingResult['status'] !== 'success') {
+                $debugInfo = "Output: " . substr($output, 0, 500);
+                throw new \Exception($trainingResult['error'] ?? 'Training failed. ' . $debugInfo);
             }
 
             // Save model versions to database
