@@ -1,7 +1,8 @@
 """
 Utility functions for ML scripts
 """
-import mysql.connector
+import psycopg2
+from psycopg2.extras import RealDictCursor
 import pandas as pd
 import json
 from datetime import datetime
@@ -10,9 +11,9 @@ from config import DB_CONFIG
 def get_db_connection():
     """Create database connection"""
     try:
-        conn = mysql.connector.connect(**DB_CONFIG)
+        conn = psycopg2.connect(**DB_CONFIG)
         return conn
-    except mysql.connector.Error as error:
+    except psycopg2.Error as error:
         print(f"Failed to connect to database: {error}")
         return None
 

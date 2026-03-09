@@ -32,7 +32,7 @@ def extract_room_data():
     JOIN rooms r ON br.room_id = r.id
     JOIN room_types rt ON r.room_type_id = rt.id
     WHERE b.status IN ('confirmed', 'checked_in', 'checked_out')
-        AND b.check_in_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        AND b.check_in_date >= CURRENT_DATE - INTERVAL '12 months'
     GROUP BY b.check_in_date, rt.id, rt.name
     ORDER BY b.check_in_date
     """
@@ -63,7 +63,7 @@ def extract_hall_data():
         AVG(total_amount) as avg_amount
     FROM hall_bookings
     WHERE status IN ('confirmed', 'completed')
-        AND event_date >= DATE_SUB(CURDATE(), INTERVAL 12 MONTH)
+        AND event_date >= CURRENT_DATE - INTERVAL '12 months'
     GROUP BY event_date
     ORDER BY event_date
     """
@@ -87,7 +87,7 @@ def extract_menu_data():
     """Extract restaurant order data for menu popularity"""
     query = """
     SELECT 
-        DATE(ro.created_at) as order_date,
+        ro.created_at::date as order_date,
         mi.name as menu_name,
         mi.id as menu_id,
         mi.category,
@@ -97,8 +97,8 @@ def extract_menu_data():
     FROM restaurant_orders ro
     JOIN restaurant_order_items roi ON ro.id = roi.restaurant_order_id
     JOIN menu_items mi ON roi.menu_item_id = mi.id
-    WHERE ro.created_at >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
-    GROUP BY DATE(ro.created_at), mi.id, mi.name, mi.category
+    WHERE ro.created_at >= CURRENT_DATE - INTERVAL '6 months'
+    GROUP BY ro.created_at::date, mi.id, mi.name, mi.category
     ORDER BY order_date
     """
     

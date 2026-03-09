@@ -12,9 +12,9 @@ load_dotenv('../backend/.env')
 DB_CONFIG = {
     'host': os.getenv('DB_HOST', 'localhost'),
     'database': os.getenv('DB_DATABASE', 'hotel'),
-    'user': os.getenv('DB_USERNAME', 'root'),
+    'user': os.getenv('DB_USERNAME', 'postgres'),
     'password': os.getenv('DB_PASSWORD', ''),
-    'port': int(os.getenv('DB_PORT', 3306))
+    'port': int(os.getenv('DB_PORT', 5432))
 }
 
 # Paths
