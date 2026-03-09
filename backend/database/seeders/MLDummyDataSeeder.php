@@ -22,6 +22,7 @@ class MLDummyDataSeeder extends Seeder
         // Delete in order (respecting foreign keys)
         DB::table('restaurant_order_items')->delete();
         DB::table('restaurant_orders')->delete();
+        DB::table('payments')->delete(); // Delete payments first (references bookings & hall_bookings)
         DB::table('booking_rooms')->delete();
         DB::table('hall_bookings')->delete();
         DB::table('bookings')->delete();
