@@ -19,10 +19,10 @@ return new class extends Migration
             // Add hall_booking_id
             $table->foreignId('hall_booking_id')->nullable()->after('booking_id')->constrained('hall_bookings')->onDelete('restrict');
             $table->index('hall_booking_id');
-            
-            // Add check constraint: must have either booking_id or hall_booking_id
-            DB::statement('ALTER TABLE payments ADD CONSTRAINT payments_booking_check CHECK ((booking_id IS NOT NULL AND hall_booking_id IS NULL) OR (booking_id IS NULL AND hall_booking_id IS NOT NULL))');
         });
+
+        // Add check constraint: must have either booking_id or hall_booking_id
+        DB::statement('ALTER TABLE payments ADD CONSTRAINT payments_booking_check CHECK ((booking_id IS NOT NULL AND hall_booking_id IS NULL) OR (booking_id IS NULL AND hall_booking_id IS NOT NULL))');
     }
 
     /**

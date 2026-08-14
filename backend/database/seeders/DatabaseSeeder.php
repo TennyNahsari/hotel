@@ -21,6 +21,8 @@ class DatabaseSeeder extends Seeder
             HousekeepingSeeder::class,
             HallSeeder::class,
             HallBookingSeeder::class,
+            MenuItemSeeder::class,
+            MLDummyDataSeeder::class,
         ]);
     }
 }
