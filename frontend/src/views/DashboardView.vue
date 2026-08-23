@@ -9,7 +9,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="text-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-forest"></div>
         <p class="text-gray-500 mt-2">{{ $t('dashboard.loading') }}</p>
       </div>
 
@@ -17,10 +17,10 @@
       <div v-else class="space-y-6">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           <!-- Available Rooms -->
-          <div class="bg-white rounded-lg shadow p-4 md:p-6">
+          <div class="bg-white rounded-lg shadow p-4 md:p-6 border border-sand/20">
             <div class="flex items-center">
-              <div class="flex-shrink-0 bg-blue-500 rounded-md p-3">
-                <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div class="flex-shrink-0 bg-forest rounded-md p-3">
+                <svg class="h-6 w-6 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
@@ -290,7 +290,7 @@ const loading = ref(false)
 onMounted(async () => {
   // Ensure CSRF cookie
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
       withCredentials: true
     })

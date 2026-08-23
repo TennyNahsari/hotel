@@ -98,8 +98,19 @@
               <div class="space-y-3">
                 <div class="flex justify-between items-start">
                   <div>
-                    <div class="font-medium text-gray-900">{{ booking.booking_number }}</div>
-                    <div class="text-sm text-gray-600">{{ booking.guest?.name }}</div>
+                    <div class="font-mono font-bold text-gray-900 flex items-center gap-1.5">
+                      <span>{{ booking.booking_number }}</span>
+                      <span
+                        :class="booking.source === 'website' ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-100 text-gray-700'"
+                        class="px-1.5 py-0.5 text-[10px] rounded font-sans font-semibold"
+                      >
+                        {{ booking.source === 'website' ? '🌐 Website' : 'Walk-In' }}
+                      </span>
+                    </div>
+                    <div class="text-sm font-semibold text-gray-800">{{ booking.guest?.name }}</div>
+                    <div v-if="booking.guest?.phone" class="text-xs text-emerald-700 font-medium">
+                      💬 WA: <a :href="'https://wa.me/' + booking.guest?.phone.replace(/[^0-9]/g, '')" target="_blank" class="hover:underline font-mono">{{ booking.guest?.phone }}</a>
+                    </div>
                   </div>
                   <span :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
                     {{ getStatusLabel(booking.status) }}
@@ -108,7 +119,10 @@
                 <div class="text-sm text-gray-600 space-y-1">
                   <div>{{ formatDate(booking.check_in_date) }} - {{ formatDate(booking.check_out_date) }}</div>
                   <div>{{ booking.nights }} {{ $t('bookings.nights') }} • {{ booking.adults }} {{ $t('bookings.adults') }}</div>
-                  <div class="font-semibold text-gray-900">{{ formatCurrency(booking.subtotal) }}</div>
+                  <div class="font-semibold text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
+                  <div v-if="getBookingRefNumber(booking)" class="text-xs text-purple-700 font-mono font-medium">
+                    💳 {{ getBookingRefNumber(booking) }}
+                  </div>
                 </div>
                 <div class="flex flex-wrap gap-2">
                   <button
@@ -153,132 +167,161 @@
                   >
                     {{ $t('bookings.deleteAction') }}
                   </button>
+                  <button
+                    @click="viewBooking(booking)"
+                    class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                  >
+                    Detail
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
           <!-- Desktop Table View -->
-          <table class="hidden md:table min-w-full divide-y divide-gray-200">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ $t('bookings.booking') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ $t('bookings.guest') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ $t('bookings.checkInOut') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ $t('bookings.rooms') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ $t('bookings.total') }}
-              </th>
-              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                {{ $t('bookings.statusActions') }}
-              </th>
-            </tr>
-          </thead>
-          <tbody class="bg-white divide-y divide-gray-200">
-            <tr v-for="booking in bookings" :key="booking.id" class="hover:bg-gray-50">
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ booking.booking_number }}</div>
-                <div class="text-sm text-gray-500">{{ booking.nights }} {{ $t('bookings.nights') }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">
-                  {{ booking.guest?.name }}
-                </div>
-                <div class="text-sm text-gray-500">{{ booking.guest?.email || booking.guest?.phone }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">{{ formatDate(booking.check_in_date) }}</div>
-                <div class="text-sm text-gray-500">{{ formatDate(booking.check_out_date) }}</div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="text-sm text-gray-900">
-                  <span v-for="(room, idx) in booking.rooms" :key="room.id">
-                    {{ room.room_number }}<span v-if="idx < booking.rooms.length - 1">, </span>
-                  </span>
-                </div>
-                <div class="text-sm text-gray-500">{{ booking.adults }} {{ $t('bookings.adults') }}, {{ booking.children }} {{ $t('bookings.children') }}</div>
-              </td>
-              <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm font-medium text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
-                <div v-if="booking.deposit_amount > 0" class="text-sm text-gray-500">
-                  {{ $t('bookings.deposit') }}: {{ formatCurrency(booking.deposit_amount) }}
-                </div>
-              </td>
-              <td class="px-6 py-4">
-                <div class="mb-2">
-                  <span :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
-                    {{ getStatusLabel(booking.status) }}
-                  </span>
-                </div>
-                <div class="flex flex-wrap gap-2">
-                  <button
-                    v-if="booking.status === 'pending'"
-                    @click="handleConfirm(booking.id)"
-                    class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                    :title="$t('bookings.confirmAction')"
-                  >
-                    {{ $t('bookings.confirmAction') }}
-                  </button>
-                  <button
-                    v-if="booking.status === 'confirmed'"
-                    @click="handleCheckIn(booking.id)"
-                    class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
-                    :title="$t('bookings.checkInAction')"
-                  >
-                    {{ $t('bookings.checkInAction') }}
-                  </button>
-                  <button
-                    v-if="booking.status === 'checked_in'"
-                    @click="handleCheckOut(booking.id)"
-                    class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
-                    :title="$t('bookings.checkOutAction')"
-                  >
-                    {{ $t('bookings.checkOutAction') }}
-                  </button>
-                  <button
-                    v-if="booking.status === 'pending'"
-                    @click="openEditModal(booking)"
-                    class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
-                    :title="$t('bookings.editAction')"
-                  >
-                    {{ $t('bookings.editAction') }}
-                  </button>
-                  <button
-                    v-if="['pending', 'confirmed'].includes(booking.status)"
-                    @click="confirmCancel(booking)"
-                    class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
-                    :title="$t('bookings.cancelAction')"
-                  >
-                    {{ $t('bookings.cancelAction') }}
-                  </button>
-                  <button
-                    v-if="['pending', 'cancelled'].includes(booking.status)"
-                    @click="confirmDeleteBooking(booking)"
-                    class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
-                    :title="$t('bookings.deleteAction')"
-                  >
-                    {{ $t('bookings.deleteAction') }}
-                  </button>
-                  <button
-                    @click="viewBooking(booking)"
-                    class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
-                    :title="$t('bookings.viewAction')"
-                  >
-                    {{ $t('bookings.viewAction') }}
-                  </button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+          <div class="hidden md:block overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ $t('bookings.booking') }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ $t('bookings.guest') }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ $t('bookings.checkInOut') }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ $t('bookings.rooms') }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ $t('bookings.total') }}
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  {{ $t('bookings.statusActions') }}
+                </th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="booking in bookings" :key="booking.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900 font-mono">{{ booking.booking_number }}</div>
+                  <div class="text-xs text-gray-500">{{ booking.nights }} {{ $t('bookings.nights') }}</div>
+                  <div class="mt-1">
+                    <span
+                      :class="booking.source === 'website' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-gray-100 text-gray-700 border-gray-200'"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-semibold border"
+                    >
+                      <span>{{ booking.source === 'website' ? '🌐 Website' : '🏨 Walk-In' }}</span>
+                    </span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">
+                    {{ booking.guest?.name }}
+                  </div>
+                  <div v-if="booking.guest?.phone" class="text-xs text-emerald-700 font-medium mt-0.5 flex items-center gap-1">
+                    <span>💬 WA:</span>
+                    <a :href="'https://wa.me/' + booking.guest?.phone.replace(/[^0-9]/g, '')" target="_blank" class="hover:underline font-mono">
+                      {{ booking.guest?.phone }}
+                    </a>
+                  </div>
+                  <div v-if="booking.guest?.email" class="text-xs text-gray-500">
+                    {{ booking.guest?.email }}
+                  </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm text-gray-900">{{ formatDate(booking.check_in_date) }}</div>
+                  <div class="text-sm text-gray-500">{{ formatDate(booking.check_out_date) }}</div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">
+                    <span v-for="(room, idx) in booking.rooms" :key="room.id">
+                      {{ room.room_number }}<span v-if="idx < booking.rooms.length - 1">, </span>
+                    </span>
+                  </div>
+                  <div class="text-sm text-gray-500">{{ booking.adults }} {{ $t('bookings.adults') }}, {{ booking.children }} {{ $t('bookings.children') }}</div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm font-medium text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
+                  <div v-if="booking.deposit_amount > 0" class="text-xs text-gray-500">
+                    {{ $t('bookings.deposit') }}: {{ formatCurrency(booking.deposit_amount) }}
+                  </div>
+                  <div v-if="getBookingRefNumber(booking)" class="mt-1">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">
+                      💳 {{ getBookingRefNumber(booking) }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-6 py-4">
+                  <div class="mb-2">
+                    <span :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                      {{ getStatusLabel(booking.status) }}
+                    </span>
+                  </div>
+                  <div class="flex flex-wrap gap-2">
+                    <button
+                      v-if="booking.status === 'pending'"
+                      @click="handleConfirm(booking.id)"
+                      class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                      :title="$t('bookings.confirmAction')"
+                    >
+                      {{ $t('bookings.confirmAction') }}
+                    </button>
+                    <button
+                      v-if="booking.status === 'confirmed'"
+                      @click="handleCheckIn(booking.id)"
+                      class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200"
+                      :title="$t('bookings.checkInAction')"
+                    >
+                      {{ $t('bookings.checkInAction') }}
+                    </button>
+                    <button
+                      v-if="booking.status === 'checked_in'"
+                      @click="handleCheckOut(booking.id)"
+                      class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
+                      :title="$t('bookings.checkOutAction')"
+                    >
+                      {{ $t('bookings.checkOutAction') }}
+                    </button>
+                    <button
+                      v-if="booking.status === 'pending'"
+                      @click="openEditModal(booking)"
+                      class="text-xs px-2 py-1 bg-indigo-100 text-indigo-700 rounded hover:bg-indigo-200"
+                      :title="$t('bookings.editAction')"
+                    >
+                      {{ $t('bookings.editAction') }}
+                    </button>
+                    <button
+                      v-if="['pending', 'confirmed'].includes(booking.status)"
+                      @click="confirmCancel(booking)"
+                      class="text-xs px-2 py-1 bg-orange-100 text-orange-700 rounded hover:bg-orange-200"
+                      :title="$t('bookings.cancelAction')"
+                    >
+                      {{ $t('bookings.cancelAction') }}
+                    </button>
+                    <button
+                      v-if="['pending', 'cancelled'].includes(booking.status)"
+                      @click="confirmDeleteBooking(booking)"
+                      class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                      :title="$t('bookings.deleteAction')"
+                    >
+                      {{ $t('bookings.deleteAction') }}
+                    </button>
+                    <button
+                      @click="viewBooking(booking)"
+                      class="text-xs px-2 py-1 bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
+                      :title="$t('bookings.viewAction')"
+                    >
+                      Detail
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
         </div>
 
         <!-- Pagination -->
@@ -541,6 +584,128 @@
         </div>
       </div>
     </div>
+
+    <!-- View Booking Details Modal -->
+    <div
+      v-if="showViewModal && selectedBookingDetail"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto"
+      @click.self="closeViewModal"
+    >
+      <div class="bg-white rounded-lg max-w-xl w-full p-6 shadow-2xl relative">
+        <button
+          @click="closeViewModal"
+          class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+        >
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+
+        <div class="space-y-4">
+          <div class="border-b pb-3 flex justify-between items-start">
+            <div>
+              <span class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Detail Reservasi</span>
+              <div class="flex items-center gap-2 mt-0.5">
+                <h2 class="text-2xl font-bold text-gray-900 font-mono">{{ selectedBookingDetail.booking_number }}</h2>
+                <span
+                  :class="selectedBookingDetail.source === 'website' ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-gray-100 text-gray-700 border-gray-200'"
+                  class="px-2 py-0.5 text-xs font-semibold rounded border"
+                >
+                  {{ selectedBookingDetail.source === 'website' ? '🌐 Website' : '🏨 Walk-In' }}
+                </span>
+              </div>
+            </div>
+            <span :class="getStatusBadgeClass(selectedBookingDetail.status)" class="px-3 py-1 text-xs font-bold rounded-full uppercase">
+              {{ getStatusLabel(selectedBookingDetail.status) }}
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 text-sm">
+            <div>
+              <span class="text-gray-500 text-xs block">Nama Tamu</span>
+              <span class="font-semibold text-gray-900">{{ selectedBookingDetail.guest?.name || '-' }}</span>
+            </div>
+            <div>
+              <span class="text-gray-500 text-xs block">Kontak / WhatsApp</span>
+              <span v-if="selectedBookingDetail.guest?.phone" class="font-medium text-emerald-700 block">
+                💬 WA: <a :href="'https://wa.me/' + selectedBookingDetail.guest?.phone.replace(/[^0-9]/g, '')" target="_blank" class="hover:underline font-mono">{{ selectedBookingDetail.guest?.phone }}</a>
+              </span>
+              <span v-if="selectedBookingDetail.guest?.email" class="text-xs text-gray-600 block">
+                {{ selectedBookingDetail.guest?.email }}
+              </span>
+            </div>
+            <div>
+              <span class="text-gray-500 text-xs block">Tanggal Check-In</span>
+              <span class="font-medium text-gray-900">{{ formatDate(selectedBookingDetail.check_in_date) }}</span>
+            </div>
+            <div>
+              <span class="text-gray-500 text-xs block">Tanggal Check-Out</span>
+              <span class="font-medium text-gray-900">{{ formatDate(selectedBookingDetail.check_out_date) }}</span>
+            </div>
+            <div>
+              <span class="text-gray-500 text-xs block">Durasi & Tamu</span>
+              <span class="font-medium text-gray-900">{{ selectedBookingDetail.nights }} Malam • {{ selectedBookingDetail.adults }} Dewasa, {{ selectedBookingDetail.children }} Anak</span>
+            </div>
+            <div>
+              <span class="text-gray-500 text-xs block">Kamar</span>
+              <span class="font-medium text-gray-900">
+                <template v-if="selectedBookingDetail.rooms && selectedBookingDetail.rooms.length > 0">
+                  <span v-for="(room, idx) in selectedBookingDetail.rooms" :key="room.id">
+                    {{ room.room_number }} ({{ room.room_type?.name }})<span v-if="idx < selectedBookingDetail.rooms.length - 1">, </span>
+                  </span>
+                </template>
+                <template v-else>-</template>
+              </span>
+            </div>
+          </div>
+
+          <div class="border-t border-b py-3 my-2 bg-gray-50 p-3 rounded-lg space-y-2">
+            <div class="flex justify-between items-center text-sm">
+              <span class="text-gray-600">Total Biaya Kamar</span>
+              <span class="font-bold text-gray-900 text-base">{{ formatCurrency(selectedBookingDetail.total_amount) }}</span>
+            </div>
+            <div v-if="selectedBookingDetail.deposit_amount > 0" class="flex justify-between items-center text-sm">
+              <span class="text-gray-600">DP Jaminan Terbayar</span>
+              <span class="font-bold text-blue-700">{{ formatCurrency(selectedBookingDetail.deposit_amount) }}</span>
+            </div>
+
+            <!-- Reference Number -->
+            <div v-if="getBookingRefNumber(selectedBookingDetail)" class="flex justify-between items-center text-sm pt-1 border-t border-gray-200">
+              <span class="text-gray-600 font-medium">Nomor Referensi Transfer / Pembayaran</span>
+              <span class="font-mono font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded text-xs">
+                {{ getBookingRefNumber(selectedBookingDetail) }}
+              </span>
+            </div>
+
+            <!-- Receipt Link -->
+            <div v-if="getBookingReceiptUrl(selectedBookingDetail)" class="flex justify-between items-center text-sm pt-1.5 border-t border-gray-200">
+              <span class="text-gray-600 font-medium">Foto Struk Transfer</span>
+              <a
+                :href="getBookingReceiptUrl(selectedBookingDetail)"
+                target="_blank"
+                class="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded border border-blue-200 transition-colors"
+              >
+                🖼️ Buka Struk Transfer (Foto/PDF)
+              </a>
+            </div>
+          </div>
+
+          <div v-if="selectedBookingDetail.special_requests" class="text-xs text-gray-600">
+            <strong class="text-gray-800 block">Permintaan Khusus:</strong>
+            <p class="bg-gray-50 p-2 rounded border border-gray-200 mt-1">{{ selectedBookingDetail.special_requests }}</p>
+          </div>
+
+          <div class="flex justify-end pt-2">
+            <button
+              @click="closeViewModal"
+              class="px-4 py-2 bg-gray-200 text-gray-800 text-sm font-semibold rounded-lg hover:bg-gray-300"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </LayoutMain>
 </template>
 
@@ -567,6 +732,8 @@ const exporting = ref(false)
 const showModal = ref(false)
 const showCancelConfirm = ref(false)
 const showDeleteConfirm = ref(false)
+const showViewModal = ref(false)
+const selectedBookingDetail = ref(null)
 const isEditing = ref(false)
 const saving = ref(false)
 const cancelling = ref(false)
@@ -600,7 +767,7 @@ const today = computed(() => {
 onMounted(async () => {
   // Ensure CSRF cookie
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
       withCredentials: true
     })
@@ -685,7 +852,7 @@ async function exportBookings() {
     
     // Build query string
     const queryString = new URLSearchParams(params).toString()
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'https://hotel.tazkia.web.id/api'
+    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
     const url = `${apiBaseUrl}/bookings/export${queryString ? '?' + queryString : ''}`
     
     // Download the file
@@ -840,7 +1007,32 @@ async function handleDeleteBooking() {
 }
 
 function viewBooking(booking) {
-  alert(`${t('bookings.bookingDetails')}:\n\n${t('bookings.booking')} #: ${booking.booking_number}\n${t('bookings.guest')}: ${booking.guest?.name}\n${t('bookings.status')}: ${getStatusLabel(booking.status)}`)
+  selectedBookingDetail.value = booking
+  showViewModal.value = true
+}
+
+function closeViewModal() {
+  showViewModal.value = false
+  selectedBookingDetail.value = null
+}
+
+function getBookingRefNumber(booking) {
+  if (booking && booking.payments && booking.payments.length > 0) {
+    const p = booking.payments.find(p => p.reference_number)
+    if (p) return p.reference_number
+  }
+  return null
+}
+
+function getBookingReceiptUrl(booking) {
+  if (booking && booking.payments && booking.payments.length > 0) {
+    const p = booking.payments.find(p => p.receipt_path)
+    if (p && p.receipt_path) {
+      const cleanPath = p.receipt_path.replace(/^public\//, '').replace(/^storage\//, '')
+      return 'http://localhost:8000/storage/' + cleanPath
+    }
+  }
+  return null
 }
 
 function getStatusBadgeClass(status) {

@@ -3,7 +3,7 @@ import api from './axios'
 export const authApi = {
   async login(credentials) {
     // Get CSRF cookie first
-    const apiUrl = import.meta.env.VITE_API_URL || 'https://hotel.tazkia.web.id'
+    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     await api.get(`${apiUrl}/sanctum/csrf-cookie`)
     // Then login
     const response = await api.post('/login', credentials)
@@ -341,6 +341,11 @@ export const hallBookingApi = {
 
   async confirmHallBooking(bookingId) {
     const response = await api.post(`/hall-bookings/${bookingId}/confirm`)
+    return response.data
+  },
+
+  async checkInHallBooking(bookingId) {
+    const response = await api.post(`/hall-bookings/${bookingId}/check-in`)
     return response.data
   },
 

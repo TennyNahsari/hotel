@@ -46,6 +46,7 @@
               <option value="">{{ $t('hallBookings.allStatus') }}</option>
               <option value="pending">{{ $t('hallBookings.pending') }}</option>
               <option value="confirmed">{{ $t('hallBookings.confirmed') }}</option>
+              <option value="checked_in">Checked In</option>
               <option value="completed">{{ $t('hallBookings.completed') }}</option>
               <option value="cancelled">{{ $t('hallBookings.cancelled') }}</option>
             </select>
@@ -86,6 +87,7 @@
                   :class="{
                     'bg-yellow-100 text-yellow-800': booking.status === 'pending',
                     'bg-green-100 text-green-800': booking.status === 'confirmed',
+                    'bg-purple-100 text-purple-800': booking.status === 'checked_in',
                     'bg-gray-100 text-gray-800': booking.status === 'completed',
                     'bg-red-100 text-red-800': booking.status === 'cancelled',
                   }"
@@ -120,14 +122,21 @@
                   {{ $t('hallBookings.confirm') }}
                 </button>
                 <button
-                  v-if="booking.status === 'confirmed'"
+                  v-if="['pending', 'confirmed'].includes(booking.status)"
+                  @click="checkInBooking(booking)"
+                  class="flex-1 text-xs px-3 py-1.5 bg-purple-100 text-purple-700 rounded hover:bg-purple-200"
+                >
+                  Check In
+                </button>
+                <button
+                  v-if="['confirmed', 'checked_in'].includes(booking.status)"
                   @click="completeBooking(booking)"
                   class="flex-1 text-xs px-3 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                 >
                   {{ $t('hallBookings.complete') }}
                 </button>
                 <button
-                  v-if="['pending', 'confirmed'].includes(booking.status)"
+                  v-if="['pending', 'confirmed', 'checked_in'].includes(booking.status)"
                   @click="cancelBooking(booking)"
                   class="flex-1 text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200"
                 >
@@ -187,8 +196,28 @@
                   <div class="text-sm text-gray-900">{{ booking.event_name }}</div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">{{ booking.customer_name }}</div>
-                  <div class="text-xs text-gray-500">{{ booking.customer_email }}</div>
+                  <div class="text-sm font-semibold text-gray-900">{{ booking.customer_name }}</div>
+                  <div v-if="booking.customer_phone" class="text-xs text-gray-600 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                    </svg>
+                    <span>{{ booking.customer_phone }}</span>
+                  </div>
+                  <div v-if="booking.customer_email" class="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                    <svg class="w-3.5 h-3.5 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    <span>{{ booking.customer_email }}</span>
+                  </div>
+                  <div v-if="getReceiptPath(booking)" class="mt-1.5">
+                    <a
+                      :href="getReceiptUrl(booking)"
+                      target="_blank"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-xs font-semibold hover:bg-emerald-100 transition-colors"
+                    >
+                      📎 Lihat Struk
+                    </a>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm text-gray-900">{{ formatDate(booking.event_date) }}</div>
@@ -222,7 +251,15 @@
                       {{ $t('hallBookings.confirm') }}
                     </button>
                     <button
-                      v-if="booking.status === 'confirmed'"
+                      v-if="['pending', 'confirmed'].includes(booking.status)"
+                      @click="checkInBooking(booking)"
+                      class="text-purple-600 hover:text-purple-900"
+                      title="Check In"
+                    >
+                      Check In
+                    </button>
+                    <button
+                      v-if="['confirmed', 'checked_in'].includes(booking.status)"
                       @click="completeBooking(booking)"
                       class="text-blue-600 hover:text-blue-900"
                       :title="$t('hallBookings.complete')"
@@ -230,12 +267,20 @@
                       {{ $t('hallBookings.complete') }}
                     </button>
                     <button
-                      v-if="['pending', 'confirmed'].includes(booking.status)"
+                      v-if="['pending', 'confirmed', 'checked_in'].includes(booking.status)"
                       @click="cancelBooking(booking)"
                       class="text-red-600 hover:text-red-900"
                       :title="$t('hallBookings.cancel')"
                     >
                       {{ $t('hallBookings.cancel') }}
+                    </button>
+                    <button
+                      v-if="['pending', 'cancelled'].includes(booking.status)"
+                      @click="deleteBooking(booking)"
+                      class="text-red-600 hover:text-red-900 font-medium"
+                      :title="$t('hallBookings.delete')"
+                    >
+                      {{ $t('hallBookings.delete') }}
                     </button>
                     <button
                       @click="viewBooking(booking)"
@@ -253,7 +298,7 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div v-if="pagination.total > 0" class="bg-white rounded-lg shadow p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
         <div class="text-xs sm:text-sm text-gray-700">
           {{ $t('hallBookings.showing') }} {{ pagination.from }} {{ $t('hallBookings.to') }} {{ pagination.to }} {{ $t('hallBookings.of') }} {{ pagination.total }} {{ $t('hallBookings.bookings') }}
         </div>
@@ -543,6 +588,23 @@
             </div>
           </div>
 
+          <div v-if="getReceiptPath(viewData)" class="bg-emerald-50 border border-emerald-200 p-4 rounded-lg space-y-2">
+            <h4 class="font-semibold text-emerald-900 text-sm flex items-center gap-1.5">
+              <span>📎</span>
+              <span>Bukti Transfer Pembayaran / DP (Struk Uploaded)</span>
+            </h4>
+            <p class="text-xs text-emerald-700">Tamu telah mengunggah bukti transfer untuk pemesanan hall ini.</p>
+            <div class="pt-1 flex items-center gap-3">
+              <a
+                :href="getReceiptUrl(viewData)"
+                target="_blank"
+                class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded shadow transition-colors inline-flex items-center gap-1.5"
+              >
+                <span>🔍</span> Lihat & Buka File Struk Transfer
+              </a>
+            </div>
+          </div>
+
           <div v-if="viewData.special_requests">
             <h3 class="font-semibold text-gray-900 mb-2">{{ $t('hallBookings.specialRequests') }}</h3>
             <p class="text-gray-700 text-sm">{{ viewData.special_requests }}</p>
@@ -788,6 +850,20 @@ const confirmBooking = async (booking) => {
   }
 }
 
+// Check in booking
+const checkInBooking = async (booking) => {
+  if (confirm(`Check In pemesanan hall ${booking.booking_number}?`)) {
+    try {
+      await hallBookingApi.checkInHallBooking(booking.id)
+      alert('Hall booking checked in successfully')
+      fetchBookings(pagination.value.current_page)
+    } catch (error) {
+      console.error('Error checking in hall booking:', error)
+      alert('Failed to check in hall booking')
+    }
+  }
+}
+
 // Complete booking
 const completeBooking = async (booking) => {
   if (confirm(`${t('hallBookings.completeBooking')} ${booking.booking_number}?`)) {
@@ -812,6 +888,20 @@ const cancelBooking = async (booking) => {
     } catch (error) {
       console.error('Error cancelling booking:', error)
       alert(t('hallBookings.bookingCancelFailed'))
+    }
+  }
+}
+
+// Delete booking
+const deleteBooking = async (booking) => {
+  if (confirm(`Apakah Anda yakin ingin menghapus pemesanan hall ${booking.booking_number}?`)) {
+    try {
+      await hallBookingApi.deleteHallBooking(booking.id)
+      alert('Pemesanan hall berhasil dihapus')
+      fetchBookings(pagination.value.current_page)
+    } catch (error) {
+      console.error('Error deleting booking:', error)
+      alert(error.response?.data?.message || 'Gagal menghapus pemesanan hall')
     }
   }
 }
@@ -848,6 +938,19 @@ const formatDate = (date) => {
     month: 'long',
     day: 'numeric'
   })
+}
+
+// Get receipt path & URL
+const getReceiptPath = (booking) => {
+  if (!booking || !booking.payments || !booking.payments.length) return null
+  const p = booking.payments.find(payment => payment.receipt_path)
+  return p ? p.receipt_path : null
+}
+
+const getReceiptUrl = (booking) => {
+  const path = getReceiptPath(booking)
+  if (!path) return '#'
+  return `http://localhost:8000/storage/${path}`
 }
 
 // Format currency

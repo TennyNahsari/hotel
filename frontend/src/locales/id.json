@@ -381,6 +381,7 @@
     "confirm": "Konfirmasi",
     "complete": "Selesai",
     "cancel": "Batal",
+    "delete": "Hapus",
     "view": "Lihat",
     "showing": "Menampilkan",
     "to": "sampai",
@@ -726,5 +727,284 @@
     "to": "hingga",
     "of": "dari",
     "results": "hasil"
+  },
+  "landing": {
+    "nav": {
+      "home": "Beranda",
+      "hotel": "Tentang Hotel",
+      "rooms": "Kamar",
+      "facilities": "Fasilitas",
+      "dining": "Restoran",
+      "experiences": "Pengalaman",
+      "technology": "Teknologi",
+      "bookNow": "Pesan Sekarang",
+      "trackStatus": "Cek Status",
+      "staffPortal": "Portal Staf",
+      "dashboard": "Dasbor"
+    },
+    "hero": {
+      "welcome": "SELAMAT DATANG DI AURA HOTEL & RESORTS",
+      "title": "Pengalaman Menginap Yang Dirancang Untuk Anda.",
+      "description": "Nikmati kenyamanan mewah, keramahan yang hangat, dan momen tak terlupakan di tengah suasana yang tenang dan indah.",
+      "bookStay": "Pesan Kamar",
+      "exploreHotel": "Jelajahi Hotel",
+      "scroll": "Gulir"
+    },
+    "hotel": {
+      "eyebrow": "TENTANG HOTEL",
+      "title": "Lebih Dari Sekadar Menginap.",
+      "titleItalic": "Tempat Untuk Memiliki Kenangan.",
+      "p1": "AURA Hotel & Resorts didirikan dengan filosofi yang jelas: menghadirkan tempat perlindungan arsitektural di mana kemewahan alami bertemu dengan keramahan sejati. Dari lobi yang terang hingga kamar suite yang dirancang cermat, setiap elemen dibuat untuk menciptakan ketenangan.",
+      "p2": "Baik untuk perjalanan bisnis, liburan keluarga, maupun perjalanan kuliner, staf profesional kami siap memastikan setiap momen Anda dipenuhi kenyamanan luar biasa.",
+      "cta": "Temukan Cerita Kami",
+      "badgeVal": "100%",
+      "badgeText": "Kenyamanan Tenteram & Tempat Perlindungan Modern"
+    },
+    "rooms": {
+      "eyebrow": "AKOMODASI",
+      "title": "Pilihan Kamar Anda",
+      "subtitle": "Kamar mewah yang dirancang dengan kayu alami, seprai berkualitas tinggi, dan kontrol pintar yang intuitif.",
+      "from": "Mulai dari",
+      "perNight": "malam",
+      "viewRoom": "Lihat Kamar",
+      "modalTitle": "Fasilitas Kamar",
+      "close": "Tutup",
+      "reserve": "Pesan Kamar Ini",
+      "items": {
+        "deluxe": {
+          "title": "Deluxe Ocean Sanctuary",
+          "specs": "32 m² · 2 Tamu · Kasur King",
+          "description": "Kamar luas dengan pemandangan balkon pribadi, furnitur kayu kustom, dan kamar mandi marmer."
+        },
+        "executive": {
+          "title": "Executive Heritage Suite",
+          "specs": "56 m² · 2 Tamu · Kasur Super King",
+          "description": "Suite elegan dengan area ruang tamu terpisah, mesin espresso, dan jendela panorama lantai-ke-atap."
+        },
+        "villa": {
+          "title": "Royal Garden Villa",
+          "specs": "120 m² · 4 Tamu · Kolam Renang Pribadi",
+          "description": "Villa eksklusif dengan kolam renang pribadi, halaman taman asri, dan pelayan pribadi 24/7."
+        }
+      }
+    },
+    "facilities": {
+      "eyebrow": "FASILITAS KELAS DUNIA",
+      "title": "Dirancang Untuk Ketenangan & Kebugaran",
+      "pool": {
+        "title": "Kolam Renang Infinity",
+        "desc": "Kolam renang infinity dengan pengatur suhu menghadap teluk indah dengan layanan koktail tepi kolam."
+      },
+      "dining": {
+        "title": "Restoran Botanical",
+        "desc": "Sajian kuliner organik farm-to-table yang merayakan hidangan lokal musiman terbaik."
+      },
+      "spa": {
+        "title": "Serenity Spa & Wellness",
+        "desc": "Terapi pijat holistik, ruang uap sauna, dan relaksasi meditasi suara."
+      },
+      "meeting": {
+        "title": "Ruang Pertemuan Eksekutif",
+        "desc": "Ballroom dan ruang rapat canggih berfasilitas audio-visual untuk acara korporat."
+      }
+    },
+    "dining": {
+      "eyebrow": "KULINER EKSKLUSIF",
+      "title": "Nikmati Setiap",
+      "titleItalic": "Momen.",
+      "description": "Konsep restoran unggulan kami menyajikan bahan-bahan organik segar lokal, kue artikal berkualitas, dan pilihan minuman kurasi sommelier profesional.",
+      "quote": "Memasak adalah bentuk keramahan sejati. Setiap hidangan di AURA bercerita tentang kehangatan dan keindahan tempat ini.",
+      "chef": "Koki Eksekutif Michael Vance",
+      "cta": "Jelajahi Restoran"
+    },
+    "experiences": {
+      "eyebrow": "PENGALAMAN TERKURASI",
+      "title": "Jelajahi Destinasi",
+      "subtitle": "Nikmati kebudayaan lokal otentik, tur alam, dan eksplorasi tempat bersejarah.",
+      "exp1": {
+        "tag": "TUR KULINER",
+        "title": "Pasar Rempah Bersama Koki",
+        "desc": "Eksplorasi pasar rempah lokal dipandu langsung oleh koki eksekutif kami."
+      },
+      "exp2": {
+        "tag": "ALAM & KEBUGARAN",
+        "title": "Yoga Pesisir Pantai Sunrise",
+        "desc": "Meditasi dan yoga pagi dipandu instruktur di paviliun tebing yang tenang."
+      },
+      "exp3": {
+        "tag": "WARISAN BUDAYA",
+        "title": "Wisata Candi & Sejarah",
+        "desc": "Perjalanan pribadi dengan sopir menuju situs warisan budaya bersejarah."
+      },
+      "exp4": {
+        "tag": "PETUALANGAN",
+        "title": "Sewa Kapal Pesiar Pribadi",
+        "desc": "Nikmati matahari terbenam dengan kapal pesiar mengelilingi pulau-pulau eksotis."
+      }
+    },
+    "technology": {
+      "badge": "SISTEM MANAJEMEN TERINTEGRASI",
+      "title": "Operasional Modern, Powered by Technology",
+      "description": "Di balik kenyamanan menginap yang sempurna terdapat operasional hotel yang saling terhubung. Sistem manajemen hotel terintegrasi kami membantu tim mengelola pemesanan, tamu, kamar, tata graha, pembayaran, dan operasional harian secara efisien.",
+      "tabs": {
+        "overview": "Dasbor",
+        "reservations": "Pemesanan",
+        "housekeeping": "Tata Graha"
+      },
+      "occupancy": "Tingkat Okupansi",
+      "activeBookings": "Pemesanan Aktif",
+      "cleanRooms": "Kamar Bersih",
+      "todayRev": "Pendapatan Hari Ini",
+      "tableTitle": "Status Resepsionis Real-time",
+      "realtimeSync": "Sinkronisasi otomatis aktif",
+      "cta": "Jelajahi Sistem Teknologi Kami"
+    },
+    "whyTech": {
+      "eyebrow": "MANFAAT",
+      "title": "Dirancang Untuk Pelayanan Terbaik",
+      "b1": {
+        "title": "Seamless Operations",
+        "desc": "Seluruh operasional hotel terhubung dalam satu sistem terintegrasi dari check-in, layanan kamar, hingga laporan keuangan."
+      },
+      "b2": {
+        "title": "Better Guest Experience",
+        "desc": "Staff dapat bekerja lebih cepat sehingga lebih banyak waktu terfokus pada layanan personal dan kenyamanan tamu."
+      },
+      "b3": {
+        "title": "Smarter Decisions",
+        "desc": "Manajemen mendapatkan informasi operasional real-time untuk membantu pengambilan keputusan strategis."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "TESTIMONI TAMU",
+      "quote": "Setiap detail terasa sangat mudah, dari check-in hingga checkout. Otomatisasi kamar, ketenangan taman, dan pelayanan staf luar biasa.",
+      "name": "Alexander Wright",
+      "role": "Tamu Korporat & Wisatawan"
+    },
+    "location": {
+      "eyebrow": "LOKASI STRATEGIS",
+      "title": "Temukan Kami",
+      "desc": "Terletak di kawasan pesisir yang indah dengan akses cepat ke pusat budaya dan bandara.",
+      "address": "Grand Ocean Drive No. 88, Heritage Bay",
+      "airport": "25 Menit dari Bandara Internasional (Tersedia Antar-Jemput)"
+    },
+    "cta": {
+      "eyebrow": "PESAN SEKARANG",
+      "title": "Liburan Impian Anda Dimulai Di Sini.",
+      "desc": "Dapatkan penawaran eksklusif, jaminan harga terbaik, dan layanan keramahan yang disesuaikan untuk Anda.",
+      "book": "Pesan Kamar Sekarang",
+      "contact": "Hubungi Kami"
+    },
+    "footer": {
+      "rights": "© 2026 AURA Hotel & Resorts. Hak cipta dilindungi undang-undang."
+    },
+    "bookingModal": {
+      "submitted": "PEMESANAN TERKIRIM",
+      "thankYou": "Terima Kasih, {name}!",
+      "successDesc": "Permintaan pemesanan kamar Anda telah berhasil dikirim ke dasbor staf hotel kami.",
+      "bookingCode": "Kode Booking",
+      "paymentOption": "Metode Pembayaran",
+      "stayDates": "Tanggal Menginap",
+      "guaranteedDP": "Jaminan Transfer DP 50%",
+      "payAtHotel": "Bayar Saat Check-In di Hotel",
+      "paidDeposit": "DP Jaminan Terbayar",
+      "totalAmount": "Total Biaya Kamar",
+      "bankDestination": "Rekening Tujuan Transfer Hotel:",
+      "waConfirm": "Konfirmasi via WhatsApp Hotel",
+      "uploadStruk": "Atau Unggah Struk Transfer (Foto/PDF)",
+      "uploadBtn": "Unggah Struk",
+      "uploading": "Mengunggah...",
+      "autoNotice": "Data pemesanan ini telah otomatis masuk ke sistem Room Bookings dan akan dikonfirmasi oleh tim concierge kami.",
+      "doneBtn": "Selesai",
+      "title": "Reservasi Online",
+      "subTitle": "Reservasi Kamar AURA Hotel",
+      "desc": "Lengkapi detail pemesanan Anda di bawah ini.",
+      "fullName": "Nama Lengkap *",
+      "email": "Alamat Email *",
+      "phone": "Nomor WhatsApp / HP *",
+      "checkIn": "Tanggal Check-In *",
+      "checkOut": "Tanggal Check-Out *",
+      "adults": "Dewasa",
+      "children": "Anak-anak",
+      "roomCategory": "Kategori Kamar *",
+      "paymentChoice": "Pilihan Pembayaran *",
+      "payAtHotelOption": "Bayar di Hotel (Kamar ditahan hingga jam 18:00 sore)",
+      "transferGuaranteedOption": "Transfer DP 50% (Reservasi Dijamin / Guaranteed)",
+      "selectBank": "Bank Tujuan / Pengirim *",
+      "senderName": "Atas Nama Pengirim *",
+      "refNumber": "No. Referensi / Struk Transfer",
+      "refNumberPlaceholder": "Contoh: 8829103",
+      "senderPlaceholder": "Nama pemilik rekening",
+      "specialRequests": "Permintaan Khusus (Opsional)",
+      "submitBtn": "Kirim Pemesanan Kamar",
+      "submittingBtn": "Mengirim..."
+    },
+    "trackModal": {
+      "title": "Cek Status Reservasi",
+      "desc": "Masukkan Kode Booking dan Email/No. HP Anda untuk memeriksa status reservasi terkini.",
+      "bookingCode": "Kode Booking *",
+      "contact": "Email / Nomor WhatsApp *",
+      "submitBtn": "Cari Reservasi",
+      "searching": "Mencari...",
+      "confirmed": "Terkonfirmasi (Confirmed)",
+      "checkedIn": "Checked In",
+      "checkedOut": "Selesai (Checked Out)",
+      "cancelled": "Dibatalkan",
+      "pending": "Menunggu Konfirmasi Staf",
+      "guestName": "Nama Pemesan",
+      "source": "Sumber Pemesanan",
+      "checkIn": "Tanggal Check-In",
+      "checkOut": "Tanggal Check-Out",
+      "totalAmount": "Total Biaya Kamar",
+      "paidDeposit": "DP Terbayar",
+      "paymentNotes": "Catatan/Status Pembayaran:",
+      "waConfirm": "Konfirmasi Struk via WhatsApp",
+      "uploadStruk": "Unggah Struk Transfer (Foto/PDF)"
+    },
+    "halls": {
+      "eyebrow": "RUANG ACARA & PERTEMUAN",
+      "title": "Sewa Hall & Ruang Pertemuan",
+      "subtitle": "Ballroom megah dan ruang rapat fleksibel yang dirancang khusus untuk pernikahan, konferensi perusahaan, dan perayaan eksklusif.",
+      "perHour": "/ jam",
+      "capacity": "Kapasitas",
+      "guests": "Orang",
+      "area": "m²",
+      "details": "Detail",
+      "reserve": "Pesan Hall",
+      "page": "Halaman",
+      "of": "dari",
+      "prev": "Sebelumnya",
+      "next": "Berikutnya"
+    },
+    "hallModal": {
+      "title": "Sewa Hall / Ruang Acara",
+      "desc": "Lengkapi rincian acara Anda di bawah ini untuk memesan AURA Hall.",
+      "fullName": "Nama Lengkap *",
+      "email": "Alamat Email *",
+      "phone": "Nomor WhatsApp / HP *",
+      "company": "Nama Perusahaan / Organisasi (Opsional)",
+      "eventName": "Nama Acara / Keperluan *",
+      "eventNamePlaceholder": "Contoh: Konferensi Tahunan Perusahaan / Resepsi Pernikahan",
+      "eventDate": "Tanggal Acara *",
+      "startTime": "Jam Mulai *",
+      "endTime": "Jam Selesai *",
+      "selectHall": "Pilih Hall / Ruang Acara *",
+      "attendees": "Estimasi Peserta / Tamu *",
+      "paymentChoice": "Metode Pembayaran *",
+      "payAtHotelOption": "Bayar di Hotel saat Hari Acara",
+      "transferGuaranteedOption": "Jaminan DP Transfer Bank",
+      "specialRequests": "Permintaan Khusus / Tata Letak (Opsional)",
+      "submitBtn": "Kirim Pemesanan Hall",
+      "submittingBtn": "Mengirim...",
+      "successTitle": "RESERVASI HALL BERHASIL DIKIRIM",
+      "thankYou": "Terima Kasih, {name}!",
+      "successDesc": "Permintaan reservasi hall Anda telah berhasil dikirimkan ke tim acara hotel kami.",
+      "bookingCode": "Kode Booking Hall",
+      "eventDetails": "Rincian Acara",
+      "duration": "Durasi Waktu",
+      "totalAmount": "Estimasi Total Biaya",
+      "autoNotice": "Data pemesanan hall ini telah otomatis masuk ke sistem Hall Bookings kami dan akan dikonfirmasi oleh tim concierge.",
+      "doneBtn": "Selesai"
+    }
   }
 }

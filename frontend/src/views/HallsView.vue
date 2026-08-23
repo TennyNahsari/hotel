@@ -45,6 +45,8 @@
             >
               <option value="">{{ $t('halls.allStatus') }}</option>
               <option value="available">{{ $t('halls.available') }}</option>
+              <option value="booked">Booked</option>
+              <option value="occupied">Occupied</option>
               <option value="maintenance">{{ $t('halls.maintenance') }}</option>
               <option value="unavailable">{{ $t('halls.unavailable') }}</option>
             </select>
@@ -75,12 +77,14 @@
                 <span
                   :class="{
                     'bg-green-100 text-green-800': hall.status === 'available',
+                    'bg-blue-100 text-blue-800': hall.status === 'booked',
+                    'bg-purple-100 text-purple-800': hall.status === 'occupied',
                     'bg-yellow-100 text-yellow-800': hall.status === 'maintenance',
                     'bg-red-100 text-red-800': hall.status === 'unavailable',
                   }"
                   class="px-2 py-1 text-xs font-semibold rounded-full"
                 >
-                  {{ hall.status }}
+                  {{ getStatusBadgeText(hall.status) }}
                 </span>
               </div>
               <div class="grid grid-cols-2 gap-2 text-sm">
@@ -170,12 +174,14 @@
                   <span
                     :class="{
                       'bg-green-100 text-green-800': hall.status === 'available',
+                      'bg-blue-100 text-blue-800': hall.status === 'booked',
+                      'bg-purple-100 text-purple-800': hall.status === 'occupied',
                       'bg-yellow-100 text-yellow-800': hall.status === 'maintenance',
                       'bg-red-100 text-red-800': hall.status === 'unavailable',
                     }"
                     class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
                   >
-                    {{ hall.status }}
+                    {{ getStatusBadgeText(hall.status) }}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -319,6 +325,8 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               >
                 <option value="available">{{ $t('halls.available') }}</option>
+                <option value="booked">Booked</option>
+                <option value="occupied">Occupied</option>
                 <option value="maintenance">{{ $t('halls.maintenance') }}</option>
                 <option value="unavailable">{{ $t('halls.unavailable') }}</option>
               </select>
@@ -720,6 +728,18 @@ const deleteHall = async (id) => {
 const changePage = (page) => {
   if (page >= 1 && page <= pagination.value.last_page) {
     fetchHalls(page)
+  }
+}
+
+// Status badge text
+const getStatusBadgeText = (status) => {
+  switch (status) {
+    case 'available': return t('halls.available') || 'Available'
+    case 'booked': return 'Booked'
+    case 'occupied': return 'Occupied'
+    case 'maintenance': return t('halls.maintenance') || 'Maintenance'
+    case 'unavailable': return t('halls.unavailable') || 'Unavailable'
+    default: return status
   }
 }
 

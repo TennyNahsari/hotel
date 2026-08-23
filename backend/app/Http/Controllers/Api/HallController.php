@@ -9,6 +9,12 @@ use Illuminate\Support\Facades\Validator;
 
 class HallController extends Controller
 {
+    public function publicIndex()
+    {
+        $halls = Hall::where('status', 'available')->orderBy('id', 'asc')->get();
+        return response()->json($halls);
+    }
+
     /**
      * Display a listing of halls.
      */
@@ -65,7 +71,7 @@ class HallController extends Controller
             'facilities' => 'nullable|json',
             'description' => 'nullable|string',
             'image_url' => 'nullable|url',
-            'status' => 'required|in:available,maintenance,unavailable',
+            'status' => 'required|in:available,booked,occupied,maintenance,unavailable',
         ]);
 
         if ($validator->fails()) {
@@ -111,7 +117,7 @@ class HallController extends Controller
             'facilities' => 'nullable|json',
             'description' => 'nullable|string',
             'image_url' => 'nullable|url',
-            'status' => 'required|in:available,maintenance,unavailable',
+            'status' => 'required|in:available,booked,occupied,maintenance,unavailable',
         ]);
 
         if ($validator->fails()) {

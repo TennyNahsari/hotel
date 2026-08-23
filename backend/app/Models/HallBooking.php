@@ -114,14 +114,17 @@ class HallBooking extends Model
      */
     public static function isAvailable($hallId, $eventDate, $startTime, $endTime, $excludeBookingId = null)
     {
+        $hall = Hall::find($hallId);
+        if (!$hall || $hall->status !== 'available') {
+            return false;
+        }
+
         $query = self::where('hall_id', $hallId)
             ->where('event_date', $eventDate)
             ->whereNotIn('status', ['cancelled'])
             ->where(function ($q) use ($startTime, $endTime) {
-                $q->where(function ($q2) use ($startTime, $endTime) {
-                    $q2->where('start_time', '<', $endTime)
-                       ->where('end_time', '>', $startTime);
-                });
+                $q->where('start_time', '<', $endTime)
+                  ->where('end_time', '>', $startTime);
             });
 
         if ($excludeBookingId) {

@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\Room;
 use App\Models\Guest;
+use App\Models\Payment;
 use App\Exports\BookingsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -60,6 +62,7 @@ class BookingController extends Controller
             'room_ids' => 'required|array|min:1',
             'room_ids.*' => 'exists:rooms,id',
             'source' => 'nullable|string',
+            'status' => 'nullable|in:pending,confirmed,checked_in',
             'notes' => 'nullable|string',
             'special_requests' => 'nullable|string',
             'deposit_amount' => 'nullable|numeric|min:0',
@@ -93,6 +96,8 @@ class BookingController extends Controller
             $totalAmount += $room->roomType->base_price * $nights;
         }
 
+        $bookingStatus = $validated['status'] ?? 'pending';
+
         // Create booking
         $booking = Booking::create([
             'booking_number' => $this->generateBookingNumber(),
@@ -104,14 +109,14 @@ class BookingController extends Controller
             'nights' => $nights,
             'adults' => $validated['adults'],
             'children' => $validated['children'] ?? 0,
-            'status' => 'pending',
+            'status' => $bookingStatus,
             'total_amount' => $totalAmount,
             'deposit_amount' => $validated['deposit_amount'] ?? 0,
             'notes' => $validated['notes'] ?? null,
             'special_requests' => $validated['special_requests'] ?? null,
         ]);
 
-        // Attach rooms
+        // Attach rooms & update room status if confirmed or checked_in
         foreach ($validated['room_ids'] as $roomId) {
             $room = Room::with('roomType')->find($roomId);
             $booking->rooms()->attach($roomId, [
@@ -119,6 +124,12 @@ class BookingController extends Controller
                 'nights' => $nights,
                 'subtotal' => $room->roomType->base_price * $nights,
             ]);
+
+            if (in_array($bookingStatus, ['pending', 'confirmed'])) {
+                $room->update(['status' => 'booked']);
+            } elseif ($bookingStatus === 'checked_in') {
+                $room->update(['status' => 'occupied']);
+            }
         }
 
         return response()->json([
@@ -168,6 +179,15 @@ class BookingController extends Controller
         ]);
     }
 
+    private function deleteBookingReceiptFiles(Booking $booking)
+    {
+        foreach ($booking->payments as $payment) {
+            if ($payment->receipt_path && Storage::disk('public')->exists($payment->receipt_path)) {
+                Storage::disk('public')->delete($payment->receipt_path);
+            }
+        }
+    }
+
     public function destroy(Booking $booking)
     {
         if (in_array($booking->status, ['checked_in', 'checked_out'])) {
@@ -175,6 +195,13 @@ class BookingController extends Controller
                 'message' => 'Cannot delete booking that has been checked in or out'
             ], 422);
         }
+
+        // Delete associated receipt files from storage
+        $this->deleteBookingReceiptFiles($booking);
+
+        // Delete associated payments and detach rooms to avoid foreign key violation
+        $booking->payments()->delete();
+        $booking->rooms()->detach();
 
         $booking->delete();
 
@@ -185,13 +212,18 @@ class BookingController extends Controller
 
     public function confirm(Booking $booking)
     {
-        if ($booking->status !== 'pending') {
+        if (!in_array($booking->status, ['pending', 'confirmed'])) {
             return response()->json([
-                'message' => 'Only pending bookings can be confirmed'
+                'message' => 'Only pending or confirmed bookings can be confirmed'
             ], 422);
         }
 
         $booking->update(['status' => 'confirmed']);
+
+        // Update assigned room(s) status to 'booked'
+        foreach ($booking->rooms as $room) {
+            $room->update(['status' => 'booked']);
+        }
 
         return response()->json([
             'message' => 'Booking confirmed successfully',
@@ -241,6 +273,9 @@ class BookingController extends Controller
             $room->update(['status' => 'dirty']);
         }
 
+        // Delete associated receipt files from storage upon checkout
+        $this->deleteBookingReceiptFiles($booking);
+
         return response()->json([
             'message' => 'Booking checked out successfully',
             'data' => $booking->fresh(['guest', 'rooms.roomType', 'payments'])
@@ -256,6 +291,13 @@ class BookingController extends Controller
         }
 
         $booking->update(['status' => 'cancelled']);
+
+        // Revert assigned room(s) status back to available if booked
+        foreach ($booking->rooms as $room) {
+            if (in_array($room->status, ['booked', 'occupied'])) {
+                $room->update(['status' => 'available']);
+            }
+        }
 
         return response()->json([
             'message' => 'Booking cancelled successfully',
@@ -292,18 +334,33 @@ class BookingController extends Controller
 
     private function checkRoomAvailability($roomId, $checkIn, $checkOut)
     {
+        $room = Room::find($roomId);
+        if (!$room || !$room->is_active) {
+            return false;
+        }
+
+        // If booking starts today or in the past, physical room status must be 'available'
+        $checkInDate = Carbon::parse($checkIn)->startOfDay();
+        $today = now()->startOfDay();
+
+        if ($checkInDate->lte($today)) {
+            if ($room->status !== 'available') {
+                return false;
+            }
+        } else {
+            // For future dates, room must not be out of order
+            if ($room->status === 'out_of_order') {
+                return false;
+            }
+        }
+
+        // Check date conflict with existing pending, confirmed, or checked_in bookings
         $hasConflict = Booking::whereHas('rooms', function($q) use ($roomId) {
             $q->where('room_id', $roomId);
         })
         ->whereIn('status', ['pending', 'confirmed', 'checked_in'])
-        ->where(function($q) use ($checkIn, $checkOut) {
-            $q->whereBetween('check_in_date', [$checkIn, $checkOut])
-              ->orWhereBetween('check_out_date', [$checkIn, $checkOut])
-              ->orWhere(function($q) use ($checkIn, $checkOut) {
-                  $q->where('check_in_date', '<=', $checkIn)
-                    ->where('check_out_date', '>=', $checkOut);
-              });
-        })
+        ->where('check_in_date', '<', $checkOut)
+        ->where('check_out_date', '>', $checkIn)
         ->exists();
 
         return !$hasConflict;
@@ -323,5 +380,297 @@ class BookingController extends Controller
         $filename = 'bookings_' . date('Y-m-d_His') . '.xlsx';
         
         return Excel::download(new BookingsExport($filters), $filename);
+    }
+
+    public function publicStore(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'phone' => 'required|string|max:30',
+            'check_in_date' => 'required|date|after_or_equal:today',
+            'check_out_date' => 'required|date|after:check_in_date',
+            'adults' => 'required|integer|min:1',
+            'children' => 'nullable|integer|min:0',
+            'room_type_id' => 'nullable|exists:room_types,id',
+            'special_requests' => 'nullable|string|max:1000',
+            'payment_option' => 'required|in:pay_at_hotel,transfer_guaranteed',
+            'bank_name' => 'nullable|string|max:50',
+            'sender_name' => 'nullable|string|max:100',
+            'reference_number' => 'nullable|string|max:100',
+        ]);
+
+        // Find or create guest
+        $guest = Guest::where('email', $validated['email'])
+            ->orWhere('phone', $validated['phone'])
+            ->first();
+
+        if (!$guest) {
+            $guest = Guest::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+            ]);
+        }
+
+        // Calculate nights
+        $checkIn = Carbon::parse($validated['check_in_date']);
+        $checkOut = Carbon::parse($validated['check_out_date']);
+        $nights = max(1, $checkIn->diffInDays($checkOut));
+
+        // Find an available room matching room_type_id or any room
+        $roomQuery = Room::with('roomType')->where('is_active', true)->where('status', '!=', 'out_of_order');
+        if (!empty($validated['room_type_id'])) {
+            $roomQuery->where('room_type_id', $validated['room_type_id']);
+        }
+
+        $allRooms = $roomQuery->get();
+        $selectedRoom = null;
+        foreach ($allRooms as $room) {
+            if ($this->checkRoomAvailability($room->id, $validated['check_in_date'], $validated['check_out_date'])) {
+                $selectedRoom = $room;
+                break;
+            }
+        }
+
+        if (!$selectedRoom) {
+            $typeName = 'yang dipilih';
+            if (!empty($validated['room_type_id'])) {
+                $roomTypeObj = \App\Models\RoomType::find($validated['room_type_id']);
+                if ($roomTypeObj) {
+                    $typeName = "tipe '" . $roomTypeObj->name . "'";
+                }
+            }
+            return response()->json([
+                'message' => "Maaf, kamar {$typeName} tidak tersedia (penuh/terisi) pada tanggal " . 
+                             date('d/m/Y', strtotime($validated['check_in_date'])) . " s/d " . 
+                             date('d/m/Y', strtotime($validated['check_out_date'])) . ". Silakan pilih tanggal atau tipe kamar lainnya."
+            ], 422);
+        }
+
+        $rate = $selectedRoom && $selectedRoom->roomType ? $selectedRoom->roomType->base_price : 280;
+        $totalAmount = $rate * $nights;
+
+        $isGuaranteed = $validated['payment_option'] === 'transfer_guaranteed';
+        $depositAmount = $isGuaranteed ? round($totalAmount * 0.5, 2) : 0;
+
+        $refInput = trim($validated['reference_number'] ?? '');
+        $bankInput = trim($validated['bank_name'] ?? '');
+        $senderInput = trim($validated['sender_name'] ?? '');
+
+        $refParts = [];
+        if ($bankInput) $refParts[] = strtoupper($bankInput);
+        if ($senderInput) $refParts[] = "a/n " . $senderInput;
+        if ($refInput) $refParts[] = "No. Ref: " . $refInput;
+
+        $finalRef = count($refParts) > 0 ? implode(' - ', $refParts) : ('REF' . strtoupper(Str::random(6)));
+
+        $paymentNotes = $isGuaranteed
+            ? "Jaminan Transfer Bank: " . $finalRef
+            : "Bayar di Hotel saat check-in (Kamar ditahan hingga jam 18:00 sore hari check-in).";
+
+        $combinedNotes = trim($paymentNotes . " " . ($validated['special_requests'] ?? ''));
+
+        $booking = Booking::create([
+            'booking_number' => $this->generateBookingNumber(),
+            'guest_id' => $guest->id,
+            'created_by' => null,
+            'source' => 'website',
+            'check_in_date' => $validated['check_in_date'],
+            'check_out_date' => $validated['check_out_date'],
+            'nights' => $nights,
+            'adults' => $validated['adults'],
+            'children' => $validated['children'] ?? 0,
+            'status' => 'pending',
+            'total_amount' => $totalAmount,
+            'deposit_amount' => $depositAmount,
+            'special_requests' => $validated['special_requests'] ?? null,
+            'notes' => $combinedNotes,
+        ]);
+
+        if ($selectedRoom) {
+            $booking->rooms()->attach($selectedRoom->id, [
+                'room_rate' => $rate,
+                'nights' => $nights,
+                'subtotal' => $totalAmount,
+            ]);
+            $selectedRoom->update(['status' => 'booked']);
+        }
+
+        // If guaranteed, log deposit payment entry for staff verification
+        if ($isGuaranteed) {
+            Payment::create([
+                'booking_id' => $booking->id,
+                'payment_type' => 'deposit',
+                'payment_method' => 'transfer',
+                'amount' => $depositAmount,
+                'reference_number' => $finalRef,
+                'notes' => 'Pemesanan Jaminan via Website (' . $finalRef . ') - Menunggu Verifikasi Staf',
+                'processed_by' => null,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Pemesanan kamar berhasil dikirim! Kode booking Anda adalah ' . $booking->booking_number,
+            'booking_number' => $booking->booking_number,
+            'payment_option' => $validated['payment_option'],
+            'deposit_amount' => $depositAmount,
+            'data' => $booking->load(['guest', 'rooms.roomType', 'payments'])
+        ], 201);
+    }
+
+    public function publicSearch(Request $request)
+    {
+        $validated = $request->validate([
+            'booking_number' => 'required|string',
+            'contact' => 'required|string',
+        ]);
+
+        $bookingNumber = trim($validated['booking_number']);
+        $contact = trim($validated['contact']);
+
+        // Check if it's a hall booking (HB-...)
+        if (str_starts_with(strtoupper($bookingNumber), 'HB-')) {
+            $hallBooking = \App\Models\HallBooking::with(['hall', 'guest'])
+                ->where('booking_number', $bookingNumber)
+                ->where(function($q) use ($contact) {
+                    $q->where('customer_email', $contact)
+                      ->orWhere('customer_phone', $contact)
+                      ->orWhereHas('guest', function($g) use ($contact) {
+                          $g->where('email', $contact)->orWhere('phone', $contact);
+                      });
+                })
+                ->first();
+
+            if ($hallBooking) {
+                $eventDateStr = is_string($hallBooking->event_date) ? substr($hallBooking->event_date, 0, 10) : $hallBooking->event_date->format('Y-m-d');
+                return response()->json([
+                    'data' => [
+                        'booking_number' => $hallBooking->booking_number,
+                        'status' => $hallBooking->status,
+                        'check_in_date' => $eventDateStr . ' (' . $hallBooking->start_time . ')',
+                        'check_out_date' => $eventDateStr . ' (' . $hallBooking->end_time . ')',
+                        'total_amount' => $hallBooking->total_amount,
+                        'deposit_amount' => 0,
+                        'source' => 'Website (Hall)',
+                        'guest' => [
+                            'name' => $hallBooking->customer_name,
+                            'email' => $hallBooking->customer_email,
+                            'phone' => $hallBooking->customer_phone,
+                        ]
+                    ]
+                ]);
+            }
+        }
+
+        $booking = Booking::with(['guest', 'rooms.roomType', 'payments'])
+            ->where('booking_number', $bookingNumber)
+            ->whereHas('guest', function($q) use ($contact) {
+                $q->where('email', $contact)
+                  ->orWhere('phone', $contact);
+            })
+            ->first();
+
+        if (!$booking) {
+            return response()->json([
+                'message' => 'Pemesanan tidak ditemukan. Harap periksa kembali Nomor Kode Booking dan Email/No. HP Anda.'
+            ], 404);
+        }
+
+        return response()->json([
+            'data' => $booking
+        ]);
+    }
+
+    public function uploadReceipt(Request $request)
+    {
+        $validated = $request->validate([
+            'booking_number' => 'required|string',
+            'contact' => 'nullable|string',
+            'receipt' => 'required|file|mimes:jpeg,png,jpg,pdf,webp|max:10240',
+        ]);
+
+        $bookingNumber = trim($validated['booking_number']);
+        $contact = trim($validated['contact'] ?? '');
+
+        // 1. Check Hall Bookings first
+        $hallBooking = \App\Models\HallBooking::where('booking_number', $bookingNumber)->first();
+        if ($hallBooking) {
+            $file = $request->file('receipt');
+            $filename = 'receipt_' . $hallBooking->booking_number . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('receipts', $filename, 'public');
+
+            $payment = Payment::where('hall_booking_id', $hallBooking->id)->first();
+            if ($payment) {
+                if ($payment->receipt_path && Storage::disk('public')->exists($payment->receipt_path)) {
+                    Storage::disk('public')->delete($payment->receipt_path);
+                }
+                $payment->update(['receipt_path' => $path]);
+            } else {
+                $payment = Payment::create([
+                    'booking_id' => null,
+                    'hall_booking_id' => $hallBooking->id,
+                    'payment_type' => 'deposit',
+                    'payment_method' => 'transfer',
+                    'amount' => round($hallBooking->total_amount * 0.5, 2),
+                    'reference_number' => 'UP-' . strtoupper(Str::random(6)),
+                    'receipt_path' => $path,
+                    'notes' => 'Bukti Transfer Hall diunggah oleh Tamu via Website',
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Bukti transfer hall berhasil diunggah! Tim concierge hotel kami akan memverifikasi pembayaran Anda.',
+                'receipt_path' => $path,
+                'receipt_url' => asset('storage/' . $path),
+                'payment' => $payment
+            ]);
+        }
+
+        // 2. Check Room Bookings
+        $bookingQuery = Booking::where('booking_number', $bookingNumber);
+        if (!empty($contact)) {
+            $bookingQuery->whereHas('guest', function($q) use ($contact) {
+                $q->where('email', $contact)->orWhere('phone', $contact);
+            });
+        }
+        $booking = $bookingQuery->first();
+
+        if (!$booking) {
+            $booking = Booking::where('booking_number', $bookingNumber)->first();
+        }
+
+        if (!$booking) {
+            return response()->json(['message' => 'Pemesanan tidak ditemukan. Periksa kembali Nomor Kode Booking Anda.'], 404);
+        }
+
+        $file = $request->file('receipt');
+        $filename = 'receipt_' . $booking->booking_number . '_' . time() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('receipts', $filename, 'public');
+
+        $payment = Payment::where('booking_id', $booking->id)->first();
+        if ($payment) {
+            if ($payment->receipt_path && Storage::disk('public')->exists($payment->receipt_path)) {
+                Storage::disk('public')->delete($payment->receipt_path);
+            }
+            $payment->update(['receipt_path' => $path]);
+        } else {
+            $payment = Payment::create([
+                'booking_id' => $booking->id,
+                'payment_type' => 'deposit',
+                'payment_method' => 'transfer',
+                'amount' => round($booking->total_amount * 0.5, 2),
+                'reference_number' => 'UP-' . strtoupper(Str::random(6)),
+                'receipt_path' => $path,
+                'notes' => 'Bukti Transfer diunggah oleh Tamu via Website',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Bukti transfer berhasil diunggah! Tim concierge hotel kami akan memverifikasi pembayaran Anda.',
+            'receipt_path' => $path,
+            'receipt_url' => asset('storage/' . $path),
+            'payment' => $payment
+        ]);
     }
 }

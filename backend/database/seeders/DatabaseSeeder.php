@@ -18,9 +18,10 @@ class DatabaseSeeder extends Seeder
             RoomTypeSeeder::class,
             GuestSeeder::class,
             BookingSeeder::class,
-            HousekeepingSeeder::class,
             HallSeeder::class,
             HallBookingSeeder::class,
+            HousekeepingSeeder::class,
+            PaymentSeeder::class,
             MenuItemSeeder::class,
             MLDummyDataSeeder::class,
         ]);

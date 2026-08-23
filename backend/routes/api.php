@@ -27,6 +27,12 @@ use App\Http\Controllers\Api\MLController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/public/bookings', [BookingController::class, 'publicStore']);
+Route::post('/public/bookings/upload-receipt', [BookingController::class, 'uploadReceipt']);
+Route::get('/public/bookings/search', [BookingController::class, 'publicSearch']);
+Route::get('/public/room-types', [RoomTypeController::class, 'index']);
+Route::get('/public/halls', [HallController::class, 'publicIndex']);
+Route::post('/public/hall-bookings', [HallBookingController::class, 'publicStore']);
 
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -87,6 +93,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Hall Bookings Management
     Route::get('/hall-bookings/calendar', [HallBookingController::class, 'calendar']);
     Route::post('/hall-bookings/{hallBooking}/confirm', [HallBookingController::class, 'confirm']);
+    Route::post('/hall-bookings/{hallBooking}/check-in', [HallBookingController::class, 'checkIn']);
     Route::post('/hall-bookings/{hallBooking}/cancel', [HallBookingController::class, 'cancel']);
     Route::post('/hall-bookings/{hallBooking}/complete', [HallBookingController::class, 'complete']);
     Route::apiResource('hall-bookings', HallBookingController::class);

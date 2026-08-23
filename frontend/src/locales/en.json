@@ -381,6 +381,7 @@
     "confirm": "Confirm",
     "complete": "Complete",
     "cancel": "Cancel",
+    "delete": "Delete",
     "view": "View",
     "showing": "Showing",
     "to": "to",
@@ -726,5 +727,284 @@
     "to": "to",
     "of": "of",
     "results": "results"
+  },
+  "landing": {
+    "nav": {
+      "home": "Home",
+      "hotel": "The Hotel",
+      "rooms": "Rooms",
+      "facilities": "Facilities",
+      "dining": "Dining",
+      "experiences": "Experiences",
+      "technology": "Technology",
+      "bookNow": "Book Now",
+      "trackStatus": "Track Status",
+      "staffPortal": "Staff Portal",
+      "dashboard": "Dashboard"
+    },
+    "hero": {
+      "welcome": "WELCOME TO AURA HOTEL & RESORTS",
+      "title": "A Stay Designed Around You.",
+      "description": "Experience thoughtful luxury hospitality, refined comfort, and memorable moments in the heart of serene destinations.",
+      "bookStay": "Book Your Stay",
+      "exploreHotel": "Explore Hotel",
+      "scroll": "Scroll"
+    },
+    "hotel": {
+      "eyebrow": "THE HOTEL",
+      "title": "More Than a Stay.",
+      "titleItalic": "A Place to Belong.",
+      "p1": "AURA Hotel & Resorts was created with a clear philosophy: to provide an architectural haven where natural luxury meets genuine warmth. From our light-filled lobbies to our meticulously tailored suites, every element has been designed to promote peace and effortless living.",
+      "p2": "Whether visiting for business, a restorative getaway, or an unforgettable culinary journey, our dedicated hosts ensure your time with us is defined by subtle luxury and seamless care.",
+      "cta": "Discover Our Story",
+      "badgeVal": "100%",
+      "badgeText": "Serene Comfort & Modern Sanctuary"
+    },
+    "rooms": {
+      "eyebrow": "ACCOMMODATIONS",
+      "title": "Stay Your Way",
+      "subtitle": "Refined sanctuaries crafted with natural woods, plush linens, and intuitive smart room amenities.",
+      "from": "From",
+      "perNight": "night",
+      "viewRoom": "View Room",
+      "modalTitle": "Room Amenities",
+      "close": "Close",
+      "reserve": "Reserve Room",
+      "items": {
+        "deluxe": {
+          "title": "Deluxe Ocean Sanctuary",
+          "specs": "32 m² · 2 Guests · King Bed",
+          "description": "Light-filled sanctuary featuring private balcony views, custom timber furnishings, and marble bath."
+        },
+        "executive": {
+          "title": "Executive Heritage Suite",
+          "specs": "56 m² · 2 Guests · Super King Bed",
+          "description": "Spacious suite with dedicated lounge area, espresso bar, and panoramic floor-to-ceiling windows."
+        },
+        "villa": {
+          "title": "Royal Garden Villa",
+          "specs": "120 m² · 4 Guests · Private Pool",
+          "description": "Exclusive multi-bedroom sanctuary with private plunge pool, secluded garden courtyard, and 24/7 butler."
+        }
+      }
+    },
+    "facilities": {
+      "eyebrow": "WORLD-CLASS AMENITIES",
+      "title": "Designed For Serenity & Wellbeing",
+      "pool": {
+        "title": "Infinity Horizon Pool",
+        "desc": "Temperature-controlled infinity pool overlooking the bay with poolside cocktail service."
+      },
+      "dining": {
+        "title": "The Botanical Restaurant",
+        "desc": "Organic farm-to-table fine dining celebrating seasonal local delicacies."
+      },
+      "spa": {
+        "title": "Serenity Spa & Wellness",
+        "desc": "Holistic massage therapies, steam saunas, and mindfulness sound baths."
+      },
+      "meeting": {
+        "title": "Executive Meeting Halls",
+        "desc": "High-tech audio-visual ballrooms and boardrooms for luxury corporate events."
+      }
+    },
+    "dining": {
+      "eyebrow": "CULINARY EXCELLENCE",
+      "title": "Taste the",
+      "titleItalic": "Moment.",
+      "description": "Our signature dining concepts celebrate locally sourced organic ingredients, artisan pastry craftsmanship, and a wine list curated by award-winning sommelier partners.",
+      "quote": "Cooking is an expression of hospitality. Every dish served at AURA tells a story of place and season.",
+      "chef": "Executive Chef Michael Vance",
+      "cta": "Explore Dining"
+    },
+    "experiences": {
+      "eyebrow": "CURATED JOURNEYS",
+      "title": "Explore the Destination",
+      "subtitle": "Immerse yourself in authentic local culture, nature excursions, and private city highlights.",
+      "exp1": {
+        "tag": "CULINARY TOUR",
+        "title": "Private Chef Market Walk",
+        "desc": "Explore vibrant local spice markets guided by our executive chef."
+      },
+      "exp2": {
+        "tag": "NATURE & WELLNESS",
+        "title": "Sunrise Coastal Yoga",
+        "desc": "Guided meditation and yoga on secluded cliffside pavilions."
+      },
+      "exp3": {
+        "tag": "HERITAGE",
+        "title": "Ancient Temple Discovery",
+        "desc": "Private chauffeur excursion to historical cultural sanctuaries."
+      },
+      "exp4": {
+        "tag": "ADVENTURE",
+        "title": "Private Yacht Charter",
+        "desc": "Sunset champagne cruise around nearby secluded islands."
+      }
+    },
+    "technology": {
+      "badge": "INTEGRATED HOTEL SYSTEM",
+      "title": "Hospitality, Powered by Technology",
+      "description": "Behind every seamless stay is a connected hotel operation. Our integrated hotel management system helps our team manage reservations, guests, rooms, housekeeping, billing, and daily operations efficiently.",
+      "tabs": {
+        "overview": "Dashboard",
+        "reservations": "Reservations",
+        "housekeeping": "Housekeeping"
+      },
+      "occupancy": "Occupancy Rate",
+      "activeBookings": "Active Bookings",
+      "cleanRooms": "Clean Rooms",
+      "todayRev": "Today's Revenue",
+      "tableTitle": "Live Reception Status",
+      "realtimeSync": "Real-time sync active",
+      "cta": "Explore Our Technology"
+    },
+    "whyTech": {
+      "eyebrow": "BENEFITS",
+      "title": "Designed for Better Hospitality",
+      "b1": {
+        "title": "Seamless Operations",
+        "desc": "All hotel operations are connected in one integrated system from check-in to guest requests and financial reporting."
+      },
+      "b2": {
+        "title": "Better Guest Experience",
+        "desc": "Staff can work faster so more time is focused on personal service and guest comfort."
+      },
+      "b3": {
+        "title": "Smarter Decisions",
+        "desc": "Management receives real-time operational insights to assist in strategic decision making."
+      }
+    },
+    "testimonials": {
+      "eyebrow": "GUEST TESTIMONIALS",
+      "quote": "Every detail feels effortless, from check-in to checkout. The room automation, serenity of the gardens, and genuine staff care set a new benchmark.",
+      "name": "Alexander Wright",
+      "role": "Corporate Guest & Frequent Traveler"
+    },
+    "location": {
+      "eyebrow": "PRIME LOCATION",
+      "title": "Find Us",
+      "desc": "Situated in a pristine coastal sanctuary with quick access to central cultural districts and transit hubs.",
+      "address": "Grand Ocean Drive No. 88, Heritage Bay",
+      "airport": "25 Minutes from International Airport (Private Shuttle Available)"
+    },
+    "cta": {
+      "eyebrow": "RESERVE YOUR STAY",
+      "title": "Your Next Stay Starts Here.",
+      "desc": "Unlock exclusive member benefits, best price guarantees, and tailored hospitality services.",
+      "book": "Book Your Stay",
+      "contact": "Contact Us"
+    },
+    "footer": {
+      "rights": "© 2026 AURA Hotel & Resorts. All rights reserved."
+    },
+    "bookingModal": {
+      "submitted": "RESERVATION SUBMITTED",
+      "thankYou": "Thank You, {name}!",
+      "successDesc": "Your room reservation request has been successfully submitted to our hotel staff dashboard.",
+      "bookingCode": "Booking Code",
+      "paymentOption": "Payment Method",
+      "stayDates": "Stay Dates",
+      "guaranteedDP": "Transfer 50% DP Deposit",
+      "payAtHotel": "Pay at Hotel upon Check-In",
+      "paidDeposit": "Deposit Paid",
+      "totalAmount": "Total Room Price",
+      "bankDestination": "Hotel Bank Account Destination:",
+      "waConfirm": "Confirm via Hotel WhatsApp",
+      "uploadStruk": "Or Upload Transfer Receipt (Image/PDF)",
+      "uploadBtn": "Upload Receipt",
+      "uploading": "Uploading...",
+      "autoNotice": "This reservation data has automatically entered our Room Bookings system and will be verified by our concierge team.",
+      "doneBtn": "Done",
+      "title": "Online Reservation",
+      "subTitle": "AURA Hotel Room Reservation",
+      "desc": "Please complete your reservation details below.",
+      "fullName": "Full Name *",
+      "email": "Email Address *",
+      "phone": "WhatsApp / Phone Number *",
+      "checkIn": "Check-In Date *",
+      "checkOut": "Check-Out Date *",
+      "adults": "Adults",
+      "children": "Children",
+      "roomCategory": "Room Category *",
+      "paymentChoice": "Payment Option *",
+      "payAtHotelOption": "Pay at Hotel (Hold room until 18:00 on check-in day)",
+      "transferGuaranteedOption": "Transfer 50% DP Deposit (Guaranteed Reservation)",
+      "selectBank": "Bank Destination / Sender *",
+      "senderName": "Sender Account Name *",
+      "refNumber": "Transfer Ref Number / Receipt No",
+      "refNumberPlaceholder": "Example: 8829103",
+      "senderPlaceholder": "Account owner name",
+      "specialRequests": "Special Requests (Optional)",
+      "submitBtn": "Submit Room Reservation",
+      "submittingBtn": "Submitting..."
+    },
+    "trackModal": {
+      "title": "Track Reservation Status",
+      "desc": "Enter your Booking Code and Email/Phone Number to check live reservation status.",
+      "bookingCode": "Booking Code *",
+      "contact": "Email / WhatsApp Number *",
+      "submitBtn": "Search Reservation",
+      "searching": "Searching...",
+      "confirmed": "Confirmed",
+      "checkedIn": "Checked In",
+      "checkedOut": "Checked Out",
+      "cancelled": "Cancelled",
+      "pending": "Pending Staff Verification",
+      "guestName": "Guest Name",
+      "source": "Booking Source",
+      "checkIn": "Check-In Date",
+      "checkOut": "Check-Out Date",
+      "totalAmount": "Total Room Price",
+      "paidDeposit": "Deposit Paid",
+      "paymentNotes": "Payment Status / Notes:",
+      "waConfirm": "Confirm Receipt via WhatsApp",
+      "uploadStruk": "Upload Transfer Receipt (Image/PDF)"
+    },
+    "halls": {
+      "eyebrow": "EVENT & BANQUET SPACES",
+      "title": "Book Your Next Event With Us",
+      "subtitle": "Sophisticated ballrooms and versatile meeting spaces tailored for weddings, corporate conferences, and exclusive celebrations.",
+      "perHour": "/ hour",
+      "capacity": "Capacity",
+      "guests": "Guests",
+      "area": "sqm",
+      "details": "Details",
+      "reserve": "Pesan Hall",
+      "page": "Page",
+      "of": "of",
+      "prev": "Prev",
+      "next": "Next"
+    },
+    "hallModal": {
+      "title": "Book Event Space / Hall",
+      "desc": "Fill in your event details below to reserve an AURA Hall.",
+      "fullName": "Full Name *",
+      "email": "Email Address *",
+      "phone": "WhatsApp / Phone Number *",
+      "company": "Company / Organization (Optional)",
+      "eventName": "Event Name / Purpose *",
+      "eventNamePlaceholder": "Example: Annual Corporate Conference / Wedding Reception",
+      "eventDate": "Event Date *",
+      "startTime": "Start Time *",
+      "endTime": "End Time *",
+      "selectHall": "Select Hall / Event Space *",
+      "attendees": "Estimated Attendees / Guests *",
+      "paymentChoice": "Payment Option *",
+      "payAtHotelOption": "Pay at Hotel upon Event Day",
+      "transferGuaranteedOption": "Transfer Guarantee Deposit",
+      "specialRequests": "Special Requests / Layout Requirements (Optional)",
+      "submitBtn": "Submit Hall Booking",
+      "submittingBtn": "Submitting...",
+      "successTitle": "HALL RESERVATION SUBMITTED",
+      "thankYou": "Thank You, {name}!",
+      "successDesc": "Your hall reservation request has been successfully submitted to our events team.",
+      "bookingCode": "Hall Booking Code",
+      "eventDetails": "Event Details",
+      "duration": "Duration",
+      "totalAmount": "Total Price Estimate",
+      "autoNotice": "This hall reservation request has automatically entered our Hall Bookings system and will be verified by our concierge team.",
+      "doneBtn": "Done"
+    }
   }
 }

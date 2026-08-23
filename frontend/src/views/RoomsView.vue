@@ -46,6 +46,7 @@
             >
               <option value="">{{ $t('rooms.allStatus') }}</option>
               <option value="available">{{ $t('rooms.available') }}</option>
+              <option value="booked">Booked (Terpesan)</option>
               <option value="occupied">{{ $t('rooms.occupied') }}</option>
               <option value="dirty">{{ $t('rooms.dirty') }}</option>
               <option value="cleaning">{{ $t('rooms.cleaning') }}</option>
@@ -500,6 +501,7 @@ async function updateStatus(roomId, status) {
 function getStatusBadgeClass(status) {
   const classes = {
     available: 'bg-green-100 text-green-800',
+    booked: 'bg-indigo-100 text-indigo-800 border border-indigo-300',
     occupied: 'bg-blue-100 text-blue-800',
     dirty: 'bg-yellow-100 text-yellow-800',
     cleaning: 'bg-purple-100 text-purple-800',
@@ -510,11 +512,12 @@ function getStatusBadgeClass(status) {
 
 function getStatusLabel(status) {
   const labels = {
-    available: t('rooms.available'),
-    occupied: t('rooms.occupied'),
-    dirty: t('rooms.dirty'),
-    cleaning: t('rooms.cleaning'),
-    out_of_order: t('rooms.outOfOrder'),
+    available: t('rooms.available') || 'Available',
+    booked: 'Booked / Terpesan',
+    occupied: t('rooms.occupied') || 'Occupied',
+    dirty: t('rooms.dirty') || 'Dirty',
+    cleaning: t('rooms.cleaning') || 'Cleaning',
+    out_of_order: t('rooms.outOfOrder') || 'Out of Order',
   }
   return labels[status] || status
 }

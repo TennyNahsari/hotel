@@ -20,6 +20,7 @@ class Payment extends Model
         'restaurant_charges',
         'laundry_charges',
         'reference_number',
+        'receipt_path',
         'notes',
         'processed_by',
     ];

@@ -8,6 +8,7 @@ use App\Models\Hall;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class HallBookingController extends Controller
 {
@@ -16,7 +17,7 @@ class HallBookingController extends Controller
      */
     public function index(Request $request)
     {
-        $query = HallBooking::with(['hall', 'guest', 'bookedBy']);
+        $query = HallBooking::with(['hall', 'guest', 'bookedBy', 'payments']);
 
         // Filter by status
         if ($request->filled('status')) {
@@ -48,8 +49,8 @@ class HallBookingController extends Controller
             });
         }
 
-        // Sort
-        $sortBy = $request->get('sort_by', 'event_date');
+        // Sort (default: latest created first)
+        $sortBy = $request->get('sort_by', 'created_at');
         $sortDir = $request->get('sort_dir', 'desc');
         $query->orderBy($sortBy, $sortDir);
 
@@ -134,6 +135,8 @@ class HallBookingController extends Controller
                 'notes' => $request->notes,
                 'booked_by' => auth()->id(),
             ]);
+
+            $this->updateHallStatus($booking->hall_id);
 
             DB::commit();
 
@@ -266,14 +269,18 @@ class HallBookingController extends Controller
     {
         $booking = HallBooking::findOrFail($id);
 
-        // Only pending bookings can be deleted
-        if ($booking->status !== 'pending') {
+        // Only pending or cancelled bookings can be deleted
+        if (!in_array($booking->status, ['pending', 'cancelled'])) {
             return response()->json([
-                'message' => 'Only pending bookings can be deleted'
+                'message' => 'Only pending or cancelled bookings can be deleted'
             ], 400);
         }
 
+        $hallId = $booking->hall_id;
+        $this->deleteBookingReceipts($booking);
+        $booking->payments()->delete();
         $booking->delete();
+        $this->updateHallStatus($hallId);
 
         return response()->json([
             'message' => 'Hall booking deleted successfully'
@@ -287,16 +294,39 @@ class HallBookingController extends Controller
     {
         $booking = HallBooking::findOrFail($id);
 
-        if ($booking->status !== 'pending') {
+        if (!in_array($booking->status, ['pending', 'confirmed'])) {
             return response()->json([
-                'message' => 'Only pending bookings can be confirmed'
+                'message' => 'Only pending or confirmed bookings can be confirmed'
             ], 400);
         }
 
         $booking->update(['status' => 'confirmed']);
+        $this->updateHallStatus($booking->hall_id);
 
         return response()->json([
             'message' => 'Hall booking confirmed successfully',
+            'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
+        ]);
+    }
+
+    /**
+     * Check in / Start event for hall booking.
+     */
+    public function checkIn($id)
+    {
+        $booking = HallBooking::findOrFail($id);
+
+        if (!in_array($booking->status, ['pending', 'confirmed'])) {
+            return response()->json([
+                'message' => 'Only pending or confirmed bookings can be checked in'
+            ], 400);
+        }
+
+        $booking->update(['status' => 'checked_in']);
+        $this->updateHallStatus($booking->hall_id);
+
+        return response()->json([
+            'message' => 'Hall booking checked in successfully',
             'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
         ]);
     }
@@ -315,6 +345,8 @@ class HallBookingController extends Controller
         }
 
         $booking->update(['status' => 'cancelled']);
+        $this->deleteBookingReceipts($booking);
+        $this->updateHallStatus($booking->hall_id);
 
         return response()->json([
             'message' => 'Hall booking cancelled successfully',
@@ -329,13 +361,15 @@ class HallBookingController extends Controller
     {
         $booking = HallBooking::findOrFail($id);
 
-        if ($booking->status !== 'confirmed') {
+        if (!in_array($booking->status, ['confirmed', 'checked_in'])) {
             return response()->json([
-                'message' => 'Only confirmed bookings can be completed'
+                'message' => 'Only confirmed or checked-in bookings can be completed'
             ], 400);
         }
 
         $booking->update(['status' => 'completed']);
+        $this->deleteBookingReceipts($booking);
+        $this->updateHallStatus($booking->hall_id);
 
         return response()->json([
             'message' => 'Hall booking completed successfully',
@@ -383,6 +417,114 @@ class HallBookingController extends Controller
     }
 
     /**
+     * Public hall reservation from website landing page.
+     */
+    public function publicStore(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'hall_id' => 'required|exists:halls,id',
+            'customer_name' => 'required|string|max:100',
+            'customer_email' => 'required|email|max:100',
+            'customer_phone' => 'required|string|max:20',
+            'customer_company' => 'nullable|string|max:100',
+            'event_name' => 'required|string|max:200',
+            'event_date' => 'required|date|after_or_equal:today',
+            'start_time' => 'required',
+            'end_time' => 'required',
+            'attendees' => 'required|integer|min:1',
+            'special_requests' => 'nullable|string|max:1000',
+            'payment_option' => 'nullable|string',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $hall = Hall::findOrFail($request->hall_id);
+
+        if ($request->attendees > $hall->capacity) {
+            return response()->json([
+                'message' => "Jumlah peserta ({$request->attendees}) melebihi kapasitas maksimum hall ini ({$hall->capacity} orang)."
+            ], 422);
+        }
+
+        $startTime = date('H:i', strtotime($request->start_time));
+        $endTime = date('H:i', strtotime($request->end_time));
+
+        if (strtotime($endTime) <= strtotime($startTime)) {
+            return response()->json([
+                'message' => 'Waktu selesai harus lebih lambat dari waktu mulai.'
+            ], 422);
+        }
+
+        $isAvailable = HallBooking::isAvailable(
+            $request->hall_id,
+            $request->event_date,
+            $startTime,
+            $endTime
+        );
+
+        if (!$isAvailable) {
+            return response()->json([
+                'message' => "Maaf, Hall '{$hall->name}' sudah dipesan pada tanggal " . date('d/m/Y', strtotime($request->event_date)) . " jam {$startTime} - {$endTime}. Silakan pilih tanggal atau jam lainnya."
+            ], 422);
+        }
+
+        DB::beginTransaction();
+        try {
+            $duration = HallBooking::calculateDuration($startTime, $endTime);
+            $total = HallBooking::calculateTotal($request->hall_id, $duration);
+
+            $guest = \App\Models\Guest::where('email', $request->customer_email)
+                ->orWhere('phone', $request->customer_phone)
+                ->first();
+
+            if (!$guest) {
+                $guest = \App\Models\Guest::create([
+                    'name' => $request->customer_name,
+                    'email' => $request->customer_email,
+                    'phone' => $request->customer_phone,
+                ]);
+            }
+
+            $booking = HallBooking::create([
+                'booking_number' => HallBooking::generateBookingNumber(),
+                'hall_id' => $request->hall_id,
+                'guest_id' => $guest->id,
+                'customer_name' => $request->customer_name,
+                'customer_email' => $request->customer_email,
+                'customer_phone' => $request->customer_phone,
+                'customer_company' => $request->customer_company ?? null,
+                'event_name' => $request->event_name,
+                'event_date' => $request->event_date,
+                'start_time' => $startTime,
+                'end_time' => $endTime,
+                'duration_hours' => $duration,
+                'attendees' => $request->attendees,
+                'total_amount' => $total,
+                'status' => 'pending',
+                'special_requests' => $request->special_requests,
+                'notes' => 'Pemesanan Hall via Website (' . ($request->payment_option ?? 'pay_at_hotel') . ')',
+                'booked_by' => null,
+            ]);
+
+            $this->updateHallStatus($booking->hall_id);
+
+            DB::commit();
+
+            return response()->json([
+                'message' => 'Pemesanan Hall berhasil dikirim! Kode booking Anda adalah ' . $booking->booking_number,
+                'data' => $booking->load(['hall', 'guest'])
+            ], 201);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Gagal membuat pemesanan hall: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get status color for calendar.
      */
     private function getStatusColor($status)
@@ -394,5 +536,57 @@ class HallBookingController extends Controller
             'cancelled' => '#DC3545',
             default => '#007BFF',
         };
+    }
+
+    /**
+     * Helper to update physical hall status based on active bookings.
+     */
+    private function updateHallStatus($hallId)
+    {
+        $hall = Hall::find($hallId);
+        if (!$hall) return;
+
+        // Keep administrative statuses
+        if (in_array($hall->status, ['maintenance', 'unavailable'])) {
+            return;
+        }
+
+        // Check if event is currently checked in
+        $hasCheckedIn = HallBooking::where('hall_id', $hallId)
+            ->where('status', 'checked_in')
+            ->exists();
+
+        if ($hasCheckedIn) {
+            $hall->update(['status' => 'occupied']);
+            return;
+        }
+
+        // Check if there is any active pending/confirmed booking
+        $hasBooked = HallBooking::where('hall_id', $hallId)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->exists();
+
+        if ($hasBooked) {
+            $hall->update(['status' => 'booked']);
+            return;
+        }
+
+        // Default: hall is available
+        $hall->update(['status' => 'available']);
+    }
+
+    /**
+     * Helper to delete physical receipt files associated with a hall booking.
+     */
+    private function deleteBookingReceipts($booking)
+    {
+        if (!$booking || !$booking->payments) return;
+
+        foreach ($booking->payments as $payment) {
+            if ($payment->receipt_path && Storage::disk('public')->exists($payment->receipt_path)) {
+                Storage::disk('public')->delete($payment->receipt_path);
+            }
+            $payment->update(['receipt_path' => null]);
+        }
     }
 }
