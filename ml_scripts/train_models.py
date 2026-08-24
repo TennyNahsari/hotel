@@ -62,7 +62,7 @@ def extract_hall_data():
         SUM(duration_hours) as total_hours,
         AVG(total_amount) as avg_amount
     FROM hall_bookings
-    WHERE status IN ('confirmed', 'completed')
+    WHERE status IN ('confirmed', 'checked_in', 'completed')
         AND event_date >= CURRENT_DATE - INTERVAL '12 months'
     GROUP BY event_date
     ORDER BY event_date
@@ -211,7 +211,8 @@ def train_menu_model(df):
         'menu_encoder': le_menu,
         'category_encoder': le_category,
         'menu_names': df['menu_name'].unique().tolist(),
-        'categories': df['category'].unique().tolist()
+        'categories': df['category'].unique().tolist(),
+        'menu_item_map': df[['menu_name', 'category']].drop_duplicates().set_index('menu_name')['category'].to_dict()
     }
     
     print(f"✓ Menu model trained - Accuracy: {metrics['accuracy']}%")
@@ -219,6 +220,8 @@ def train_menu_model(df):
 
 def main():
     """Main training pipeline"""
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
     print("=" * 60)
     print("HOTEL ML TRAINING PIPELINE")
     print("=" * 60)
@@ -244,7 +247,7 @@ def main():
         if room_df is not None:
             room_model, room_metrics = train_room_model(room_df)
             if room_model:
-                joblib.dump(room_model, f"{MODEL_DIR}/{MODEL_NAMES['room']}")
+                joblib.dump(room_model, f"{MODEL_DIR}/{MODEL_NAMES['room_demand']}")
                 results['models'].append({
                     'name': 'room_demand',
                     'accuracy': room_metrics['accuracy'],
@@ -257,7 +260,7 @@ def main():
         if hall_df is not None:
             hall_model, hall_metrics = train_hall_model(hall_df)
             if hall_model:
-                joblib.dump(hall_model, f"{MODEL_DIR}/{MODEL_NAMES['hall']}")
+                joblib.dump(hall_model, f"{MODEL_DIR}/{MODEL_NAMES['hall_peak']}")
                 results['models'].append({
                     'name': 'hall_peak',
                     'accuracy': hall_metrics['accuracy'],
@@ -270,7 +273,7 @@ def main():
         if menu_df is not None:
             menu_model, menu_metrics = train_menu_model(menu_df)
             if menu_model:
-                joblib.dump(menu_model, f"{MODEL_DIR}/{MODEL_NAMES['menu']}")
+                joblib.dump(menu_model, f"{MODEL_DIR}/{MODEL_NAMES['menu_popularity']}")
                 results['models'].append({
                     'name': 'menu_popularity',
                     'accuracy': menu_metrics['accuracy'],

@@ -12,29 +12,29 @@ import numpy as np
 from datetime import datetime, timedelta
 
 from config import MODEL_DIR, MODEL_NAMES, PREDICTIONS_DIR, PREDICTION_DAYS, CONFIDENCE_THRESHOLD
-from utils import save_json, format_timestamp
+from utils import save_json, format_timestamp, query_to_dataframe
 
 def load_models():
     """Load all trained models"""
     models = {}
     
     try:
-        room_model = joblib.load(f"{MODEL_DIR}/{MODEL_NAMES['room']}")
-        models['room'] = room_model
+        room_model = joblib.load(f"{MODEL_DIR}/{MODEL_NAMES['room_demand']}")
+        models['room_demand'] = room_model
         print("✓ Room model loaded")
     except FileNotFoundError:
         print("✗ Room model not found")
     
     try:
-        hall_model = joblib.load(f"{MODEL_DIR}/{MODEL_NAMES['hall']}")
-        models['hall'] = hall_model
+        hall_model = joblib.load(f"{MODEL_DIR}/{MODEL_NAMES['hall_peak']}")
+        models['hall_peak'] = hall_model
         print("✓ Hall model loaded")
     except FileNotFoundError:
         print("✗ Hall model not found")
     
     try:
-        menu_model = joblib.load(f"{MODEL_DIR}/{MODEL_NAMES['menu']}")
-        models['menu'] = menu_model
+        menu_model = joblib.load(f"{MODEL_DIR}/{MODEL_NAMES['menu_popularity']}")
+        models['menu_popularity'] = menu_model
         print("✓ Menu model loaded")
     except FileNotFoundError:
         print("✗ Menu model not found")
@@ -147,20 +147,18 @@ def predict_menu_popularity(model_data):
     category_encoder = model_data['category_encoder']
     menu_names = model_data['menu_names']
     categories = model_data['categories']
+    menu_item_map = model_data.get('menu_item_map', {})
+    
+    # Query database if map is not present
+    if not menu_item_map:
+        df_menu = query_to_dataframe("SELECT name, category FROM menu_items")
+        if df_menu is not None and len(df_menu) > 0:
+            menu_item_map = dict(zip(df_menu['name'], df_menu['category']))
     
     # Group menus by category
     menu_by_category = {}
     for menu in menu_names:
-        # Infer category from menu name patterns
-        if any(x in menu.lower() for x in ['nasi', 'rice', 'pasta']):
-            cat = 'Main Course'
-        elif any(x in menu.lower() for x in ['juice', 'coffee', 'tea', 'drink']):
-            cat = 'Beverage'
-        elif any(x in menu.lower() for x in ['cake', 'ice cream', 'dessert']):
-            cat = 'Dessert'
-        else:
-            cat = 'Appetizer'
-        
+        cat = menu_item_map.get(menu, 'food')
         if cat not in menu_by_category:
             menu_by_category[cat] = []
         menu_by_category[cat].append(menu)
@@ -178,16 +176,9 @@ def predict_menu_popularity(model_data):
         for menu in menu_names:
             try:
                 menu_encoded = menu_encoder.transform([menu])[0]
-                
-                # Infer category
-                if any(x in menu.lower() for x in ['nasi', 'rice', 'pasta']):
-                    cat = 'Main Course'
-                elif any(x in menu.lower() for x in ['juice', 'coffee', 'tea', 'drink']):
-                    cat = 'Beverage'
-                elif any(x in menu.lower() for x in ['cake', 'ice cream', 'dessert']):
-                    cat = 'Dessert'
-                else:
-                    cat = 'Appetizer'
+                cat = menu_item_map.get(menu, 'food')
+                if cat not in category_encoder.classes_:
+                    cat = category_encoder.classes_[0]
                 
                 category_encoded = category_encoder.transform([cat])[0]
                 
@@ -201,7 +192,7 @@ def predict_menu_popularity(model_data):
                 
                 popularity = model.predict(features)[0]
                 menu_scores[menu].append(popularity)
-            except:
+            except Exception:
                 pass
     
     # Calculate average popularity
@@ -226,6 +217,8 @@ def predict_menu_popularity(model_data):
 
 def main():
     """Main prediction pipeline"""
+    if hasattr(sys.stdout, 'reconfigure'):
+        sys.stdout.reconfigure(encoding='utf-8')
     print("=" * 60)
     print("HOTEL ML PREDICTION PIPELINE")
     print("=" * 60)
@@ -248,22 +241,22 @@ def main():
         
         # Generate room demand forecast
         print("\n[2/4] Generating room demand forecast...")
-        if 'room' in models:
-            room_pred = predict_room_demand(models['room'])
+        if 'room_demand' in models:
+            room_pred = predict_room_demand(models['room_demand'])
             if room_pred:
                 results['predictions']['room_demand'] = room_pred
         
         # Generate hall peak predictions
         print("\n[3/4] Detecting hall peak dates...")
-        if 'hall' in models:
-            hall_pred = predict_hall_peaks(models['hall'])
+        if 'hall_peak' in models:
+            hall_pred = predict_hall_peaks(models['hall_peak'])
             if hall_pred:
                 results['predictions']['hall_peaks'] = hall_pred
         
         # Generate menu popularity
         print("\n[4/4] Ranking menu popularity...")
-        if 'menu' in models:
-            menu_pred = predict_menu_popularity(models['menu'])
+        if 'menu_popularity' in models:
+            menu_pred = predict_menu_popularity(models['menu_popularity'])
             if menu_pred:
                 results['predictions']['menu_popularity'] = menu_pred
         

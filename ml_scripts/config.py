@@ -30,9 +30,9 @@ for directory in [MODEL_DIR, DATA_DIR, PREDICTIONS_DIR]:
 
 # Model Configuration
 MODEL_NAMES = {
-    'room': 'room_model.pkl',
-    'hall': 'hall_model.pkl',
-    'menu': 'menu_model.pkl'
+    'room_demand': 'room_demand_model.pkl',
+    'hall_peak': 'hall_peak_model.pkl',
+    'menu_popularity': 'menu_popularity_model.pkl'
 }
 
 # Prediction Settings
