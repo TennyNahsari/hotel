@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\MenuItemController;
 use App\Http\Controllers\Api\RestaurantOrderController;
 use App\Http\Controllers\Api\LaundryOrderController;
 use App\Http\Controllers\Api\MLController;
+use App\Http\Controllers\Api\SettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,6 +34,7 @@ Route::get('/public/bookings/search', [BookingController::class, 'publicSearch']
 Route::get('/public/room-types', [RoomTypeController::class, 'index']);
 Route::get('/public/halls', [HallController::class, 'publicIndex']);
 Route::post('/public/hall-bookings', [HallBookingController::class, 'publicStore']);
+Route::get('/public/settings/payment', [SettingController::class, 'getPaymentSettings']);
 
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -70,6 +72,10 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/payments/export', [PaymentController::class, 'export']);
     Route::apiResource('payments', PaymentController::class);
     Route::get('/bookings/{booking}/payments', [PaymentController::class, 'bookingPayments']);
+
+    // System & Payment Settings
+    Route::get('/settings/payment', [SettingController::class, 'getPaymentSettings']);
+    Route::post('/settings/payment', [SettingController::class, 'updatePaymentSettings']);
 
     // Housekeeping Management
     Route::get('/housekeeping-statistics', [HousekeepingController::class, 'statistics']);

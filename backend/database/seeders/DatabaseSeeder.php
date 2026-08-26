@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             PaymentSeeder::class,
             MenuItemSeeder::class,
             MLDummyDataSeeder::class,
+            SettingSeeder::class,
         ]);
     }
 }

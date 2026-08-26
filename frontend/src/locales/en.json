@@ -15,6 +15,7 @@
     "laundry": "Laundry",
     "housekeeping": "Housekeeping",
     "payments": "Payments",
+    "settings": "Payment Settings",
     "logout": "Logout"
   },
   "dashboard": {
@@ -898,6 +899,11 @@
     "footer": {
       "rights": "© 2026 AURA Hotel & Resorts. All rights reserved."
     },
+    "whatsapp": {
+      "chat": "Concierge WhatsApp Chat",
+      "tooltip": "Need help? Chat with us on WhatsApp!",
+      "greeting": "Hello AURA Hotel Concierge, I would like to inquire about room or hall bookings."
+    },
     "bookingModal": {
       "submitted": "RESERVATION SUBMITTED",
       "thankYou": "Thank You, {name}!",
@@ -937,7 +943,15 @@
       "senderPlaceholder": "Account owner name",
       "specialRequests": "Special Requests (Optional)",
       "submitBtn": "Submit Room Reservation",
-      "submittingBtn": "Submitting..."
+      "submittingBtn": "Submitting...",
+      "qrisTitle": "QRIS Payment",
+      "payViaQris": "Pay via QRIS",
+      "allEwallets": "All E-Wallets & Banks",
+      "enlargeQris": "Enlarge QRIS Code",
+      "scanQris": "SCAN QRIS",
+      "qrisSubtitle": "INSTANT PAYMENT",
+      "qrisHeader": "Hotel QRIS Code",
+      "closePreview": "Close Preview"
     },
     "trackModal": {
       "title": "Track Reservation Status",

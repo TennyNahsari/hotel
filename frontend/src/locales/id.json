@@ -15,6 +15,7 @@
     "laundry": "Laundry",
     "housekeeping": "Tata Graha",
     "payments": "Pembayaran",
+    "settings": "Pengaturan Pembayaran",
     "logout": "Keluar"
   },
   "dashboard": {
@@ -898,6 +899,11 @@
     "footer": {
       "rights": "© 2026 AURA Hotel & Resorts. Hak cipta dilindungi undang-undang."
     },
+    "whatsapp": {
+      "chat": "Chat WhatsApp Concierge",
+      "tooltip": "Butuh bantuan? Chat kami via WhatsApp!",
+      "greeting": "Halo Concierge AURA Hotel, saya ingin bertanya mengenai pemesanan kamar atau aula."
+    },
     "bookingModal": {
       "submitted": "PEMESANAN TERKIRIM",
       "thankYou": "Terima Kasih, {name}!",
@@ -937,7 +943,15 @@
       "senderPlaceholder": "Nama pemilik rekening",
       "specialRequests": "Permintaan Khusus (Opsional)",
       "submitBtn": "Kirim Pemesanan Kamar",
-      "submittingBtn": "Mengirim..."
+      "submittingBtn": "Mengirim...",
+      "qrisTitle": "Pembayaran QRIS",
+      "payViaQris": "Bayar via QRIS",
+      "allEwallets": "Semua E-Wallet & Bank",
+      "enlargeQris": "Perbesar Kode QRIS",
+      "scanQris": "SCAN QRIS",
+      "qrisSubtitle": "PEMBAYARAN INSTAN",
+      "qrisHeader": "Kode QRIS Hotel",
+      "closePreview": "Tutup Pratinjau"
     },
     "trackModal": {
       "title": "Cek Status Reservasi",
