@@ -951,7 +951,11 @@
       "scanQris": "SCAN QRIS",
       "qrisSubtitle": "INSTANT PAYMENT",
       "qrisHeader": "Hotel QRIS Code",
-      "closePreview": "Close Preview"
+      "closePreview": "Close Preview",
+      "multiRoomNoticeTitle": "Booking More Than 1 Room?",
+      "multiRoomNoticeDesc": "To add additional room bookings under the same booking code, ensure the Full Name and WhatsApp Number fields match exactly.",
+      "bookedRoomsList": "Booked Rooms List",
+      "multiRoomBadge": "{count} Rooms (Multi-Room)"
     },
     "trackModal": {
       "title": "Track Reservation Status",

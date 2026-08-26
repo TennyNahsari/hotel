@@ -951,7 +951,11 @@
       "scanQris": "SCAN QRIS",
       "qrisSubtitle": "PEMBAYARAN INSTAN",
       "qrisHeader": "Kode QRIS Hotel",
-      "closePreview": "Tutup Pratinjau"
+      "closePreview": "Tutup Pratinjau",
+      "multiRoomNoticeTitle": "Ingin Memesan Lebih Dari 1 Kamar?",
+      "multiRoomNoticeDesc": "Untuk memasukkan pemesanan kamar tambahan ke dalam 1 kode booking yang sama, pastikan isian field Full Name dan Whatsapp Number diisi dengan data yang sama persis.",
+      "bookedRoomsList": "Daftar Kamar Dipesan",
+      "multiRoomBadge": "{count} Kamar (Multi-Room)"
     },
     "trackModal": {
       "title": "Cek Status Reservasi",

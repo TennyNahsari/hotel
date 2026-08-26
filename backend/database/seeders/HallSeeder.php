@@ -96,7 +96,7 @@ class HallSeeder extends Seeder
         ];
 
         foreach ($halls as $hall) {
-            Hall::create($hall);
+            Hall::updateOrCreate(['name' => $hall['name']], $hall);
         }
 
         $this->command->info('✅ Sample halls created successfully!');

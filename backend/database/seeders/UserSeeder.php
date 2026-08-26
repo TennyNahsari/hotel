@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
         $frontOfficeRole = Role::where('name', 'front_office')->first();
         $housekeepingRole = Role::where('name', 'housekeeping')->first();
 
-        User::create([
+        User::updateOrCreate(['email' => 'owner@hotel.com'], [
             'role_id' => $ownerRole->id,
             'name' => 'Admin Owner',
             'email' => 'owner@hotel.com',
@@ -28,7 +28,7 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        User::create([
+        User::updateOrCreate(['email' => 'frontdesk@hotel.com'], [
             'role_id' => $frontOfficeRole->id,
             'name' => 'Front Desk',
             'email' => 'frontdesk@hotel.com',
@@ -37,7 +37,7 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        User::create([
+        User::updateOrCreate(['email' => 'housekeeping@hotel.com'], [
             'role_id' => $housekeepingRole->id,
             'name' => 'Housekeeping Staff',
             'email' => 'housekeeping@hotel.com',

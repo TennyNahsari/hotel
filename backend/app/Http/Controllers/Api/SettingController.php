@@ -35,6 +35,9 @@ class SettingController extends Controller
         ];
 
         $settings = Setting::get('payment_settings', $default);
+        if (empty($settings['bank_accounts']) || !is_array($settings['bank_accounts']) || count($settings['bank_accounts']) === 0) {
+            $settings['bank_accounts'] = $default['bank_accounts'];
+        }
         if (empty($settings['whatsapp_number'])) {
             $settings['whatsapp_number'] = '6281234567890';
         }

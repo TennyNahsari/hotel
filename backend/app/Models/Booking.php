@@ -63,7 +63,7 @@ class Booking extends Model
     public function rooms()
     {
         return $this->belongsToMany(Room::class, 'booking_rooms')
-            ->withPivot('room_rate', 'nights', 'subtotal')
+            ->withPivot('room_rate', 'nights', 'subtotal', 'check_in_date', 'check_out_date')
             ->withTimestamps();
     }
 
@@ -71,7 +71,7 @@ class Booking extends Model
     public function room()
     {
         return $this->belongsToMany(Room::class, 'booking_rooms')
-            ->withPivot('room_rate', 'nights', 'subtotal')
+            ->withPivot('room_rate', 'nights', 'subtotal', 'check_in_date', 'check_out_date')
             ->withTimestamps()
             ->limit(1);
     }

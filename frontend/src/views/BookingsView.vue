@@ -116,10 +116,26 @@
                     {{ getStatusLabel(booking.status) }}
                   </span>
                 </div>
-                <div class="text-sm text-gray-600 space-y-1">
-                  <div>{{ formatDate(booking.check_in_date) }} - {{ formatDate(booking.check_out_date) }}</div>
-                  <div>{{ booking.nights }} {{ $t('bookings.nights') }} • {{ booking.adults }} {{ $t('bookings.adults') }}</div>
-                  <div class="font-semibold text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
+                <div class="text-sm text-gray-600 space-y-1.5 border-t border-b border-gray-100 py-2 my-1">
+                  <!-- Rooms List for Mobile Card -->
+                  <div v-if="booking.rooms && booking.rooms.length > 0" class="space-y-1">
+                    <div v-if="booking.rooms.length > 1" class="mb-1">
+                      <span class="px-1.5 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-bold rounded border border-purple-200">
+                        Multi-Room ({{ booking.rooms.length }} Kamar)
+                      </span>
+                    </div>
+                    <div v-for="room in booking.rooms" :key="room.id" class="text-xs bg-gray-50 p-2 rounded border border-gray-200 flex flex-col gap-0.5">
+                      <div class="flex items-center justify-between font-medium">
+                        <span class="font-bold text-gray-900">Kamar {{ room.room_number }}</span>
+                        <span v-if="room.pivot?.subtotal" class="font-mono text-xs text-gray-700 font-semibold">{{ formatCurrency(room.pivot.subtotal) }}</span>
+                      </div>
+                      <div class="text-[11px] text-gray-600 font-mono">
+                        📅 {{ formatDate(room.pivot?.check_in_date || booking.check_in_date) }} - {{ formatDate(room.pivot?.check_out_date || booking.check_out_date) }}
+                      </div>
+                    </div>
+                  </div>
+                  <div class="text-xs text-gray-500 pt-0.5">{{ booking.nights }} {{ $t('bookings.nights') }} • {{ booking.adults }} {{ $t('bookings.adults') }}, {{ booking.children }} {{ $t('bookings.children') }}</div>
+                  <div class="font-bold text-gray-900 text-base pt-0.5">{{ formatCurrency(booking.total_amount) }}</div>
                   <div v-if="getBookingRefNumber(booking)" class="text-xs text-purple-700 font-mono font-medium">
                     💳 {{ getBookingRefNumber(booking) }}
                   </div>
@@ -232,16 +248,30 @@
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ formatDate(booking.check_in_date) }}</div>
+                  <div class="text-sm font-medium text-gray-900">{{ formatDate(booking.check_in_date) }}</div>
                   <div class="text-sm text-gray-500">{{ formatDate(booking.check_out_date) }}</div>
+                  <div v-if="booking.rooms && booking.rooms.length > 1" class="text-[10px] text-purple-700 font-medium mt-0.5">
+                    (Rentang Keseluruhan)
+                  </div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="text-sm text-gray-900">
-                    <span v-for="(room, idx) in booking.rooms" :key="room.id">
-                      {{ room.room_number }}<span v-if="idx < booking.rooms.length - 1">, </span>
-                    </span>
+                  <div class="space-y-1.5 min-w-[200px]">
+                    <div v-if="booking.rooms && booking.rooms.length > 1" class="mb-1">
+                      <span class="px-1.5 py-0.5 bg-purple-100 text-purple-800 text-[10px] font-bold rounded border border-purple-200">
+                        Multi-Room ({{ booking.rooms.length }} Kamar)
+                      </span>
+                    </div>
+                    <div v-for="room in booking.rooms" :key="room.id" class="text-xs bg-gray-50 p-2 rounded border border-gray-200 flex flex-col gap-1">
+                      <div class="flex items-center justify-between">
+                        <span class="font-bold text-gray-900">Kamar {{ room.room_number }}</span>
+                        <span v-if="room.pivot?.subtotal" class="font-mono text-xs text-gray-700 font-semibold">{{ formatCurrency(room.pivot.subtotal) }}</span>
+                      </div>
+                      <div class="text-[11px] text-gray-600 font-mono flex items-center gap-1 bg-white px-1.5 py-0.5 rounded border border-gray-100">
+                        <span>📅 {{ formatDate(room.pivot?.check_in_date || booking.check_in_date) }} - {{ formatDate(room.pivot?.check_out_date || booking.check_out_date) }}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div class="text-sm text-gray-500">{{ booking.adults }} {{ $t('bookings.adults') }}, {{ booking.children }} {{ $t('bookings.children') }}</div>
+                  <div class="text-xs text-gray-500 mt-1">{{ booking.adults }} {{ $t('bookings.adults') }}, {{ booking.children }} {{ $t('bookings.children') }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
@@ -646,16 +676,31 @@
               <span class="text-gray-500 text-xs block">Durasi & Tamu</span>
               <span class="font-medium text-gray-900">{{ selectedBookingDetail.nights }} Malam • {{ selectedBookingDetail.adults }} Dewasa, {{ selectedBookingDetail.children }} Anak</span>
             </div>
-            <div>
-              <span class="text-gray-500 text-xs block">Kamar</span>
-              <span class="font-medium text-gray-900">
+            <div class="col-span-2">
+              <span class="text-gray-500 text-xs block mb-1">Rincian Kamar & Tanggal Menginap</span>
+              <div class="font-medium text-gray-900 space-y-2">
                 <template v-if="selectedBookingDetail.rooms && selectedBookingDetail.rooms.length > 0">
-                  <span v-for="(room, idx) in selectedBookingDetail.rooms" :key="room.id">
-                    {{ room.room_number }} ({{ room.room_type?.name }})<span v-if="idx < selectedBookingDetail.rooms.length - 1">, </span>
-                  </span>
+                  <div v-if="selectedBookingDetail.rooms.length > 1" class="mb-1">
+                    <span class="px-2 py-0.5 bg-purple-100 text-purple-800 text-xs font-bold rounded border border-purple-200">
+                      Multi-Room ({{ selectedBookingDetail.rooms.length }} Kamar)
+                    </span>
+                  </div>
+                  <div class="grid grid-cols-1 gap-2">
+                    <div v-for="room in selectedBookingDetail.rooms" :key="room.id" class="text-xs bg-gray-50 p-2.5 rounded-lg border border-gray-200 space-y-1">
+                      <div class="flex justify-between items-center">
+                        <span class="font-bold text-gray-900 text-sm">Kamar {{ room.room_number }} <span class="font-normal text-gray-500 text-xs">({{ room.room_type?.name || room.roomType?.name }})</span></span>
+                        <span v-if="room.pivot?.subtotal" class="font-mono text-blue-700 font-bold text-sm">{{ formatCurrency(room.pivot.subtotal) }}</span>
+                      </div>
+                      <div class="flex items-center gap-2 text-gray-600 font-mono text-xs pt-1 border-t border-gray-200/60">
+                        <span>🗓️ Check-In: <strong>{{ formatDate(room.pivot?.check_in_date || selectedBookingDetail.check_in_date) }}</strong></span>
+                        <span>→</span>
+                        <span>Check-Out: <strong>{{ formatDate(room.pivot?.check_out_date || selectedBookingDetail.check_out_date) }}</strong></span>
+                      </div>
+                    </div>
+                  </div>
                 </template>
                 <template v-else>-</template>
-              </span>
+              </div>
             </div>
           </div>
 

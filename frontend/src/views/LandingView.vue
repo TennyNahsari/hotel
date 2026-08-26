@@ -1070,9 +1070,25 @@
                 <span class="text-taupe">{{ $t('landing.bookingModal.totalAmount') }}</span>
                 <span class="font-bold text-charcoal text-sm">{{ formatCurrency(bookingSuccessData.data?.total_amount) }}</span>
               </div>
+
+              <!-- Rooms Breakdown in Booking Success Screen -->
+              <div v-if="bookingSuccessData.data?.rooms && bookingSuccessData.data.rooms.length > 0" class="pt-2 border-t border-sand/20 space-y-1.5">
+                <div class="flex items-center justify-between text-xs">
+                  <span class="text-taupe uppercase tracking-wider text-[11px] font-semibold">{{ $t('landing.bookingModal.bookedRoomsList') }}</span>
+                  <span v-if="bookingSuccessData.data.rooms.length > 1" class="px-2 py-0.5 bg-forest text-gold text-[10px] font-bold rounded-full">
+                    {{ $t('landing.bookingModal.multiRoomBadge', { count: bookingSuccessData.data.rooms.length }) }}
+                  </span>
+                </div>
+                <div class="space-y-1">
+                  <div v-for="rm in bookingSuccessData.data.rooms" :key="rm.id" class="flex flex-col sm:flex-row sm:items-center justify-between text-xs bg-sand/10 px-2.5 py-1.5 rounded border border-sand/20 gap-1">
+                    <span class="font-semibold text-charcoal">Kamar {{ rm.room_number }} <span class="font-normal text-taupe text-[11px]">({{ rm.roomType?.name || rm.room_type?.name }})</span></span>
+                    <span class="font-mono text-forest font-bold">{{ formatCurrency(rm.pivot?.subtotal || (rm.pivot?.room_rate * (bookingSuccessData.data?.nights || 1)) || 0) }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div v-if="bookingSuccessData.payment_option === 'transfer_guaranteed'" class="space-y-3 pt-2">
+            <div class="space-y-3 pt-2">
               <div class="p-3.5 bg-forest/5 border border-forest/10 rounded text-left text-xs space-y-1.5">
                 <p class="font-bold text-forest uppercase tracking-wider">{{ $t('landing.bookingModal.bankDestination') }}</p>
                 <div class="space-y-1">
@@ -1083,16 +1099,16 @@
               </div>
 
               <!-- QRIS Box in Success Screen -->
-              <div v-if="paymentSettings.qris_url" class="p-3.5 bg-white border border-sand/40 rounded text-left space-y-2 shadow-xs">
+              <div v-if="hasQrisUrl" class="p-3.5 bg-white border border-sand/40 rounded text-left space-y-2 shadow-xs">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-forest uppercase tracking-wider">{{ $t('landing.bookingModal.payViaQris') }}</span>
                   <span class="text-[10px] bg-gold text-forest px-2 py-0.5 rounded font-bold uppercase">{{ $t('landing.bookingModal.allEwallets') }}</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <img
-                    :src="paymentSettings.qris_url"
+                    :src="formattedQrisUrl"
                     alt="QRIS Code"
-                    @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                    @click="qrisPreviewModalUrl = formattedQrisUrl"
                     class="w-24 h-24 object-contain bg-white p-1.5 rounded border border-sand/30 shadow-xs cursor-pointer hover:scale-105 transition-transform"
                     :title="$t('landing.bookingModal.enlargeQris')"
                   />
@@ -1100,7 +1116,7 @@
                     <p class="text-[11px] leading-snug">{{ paymentSettings.qris_notes || 'Pindai QRIS untuk pembayaran langsung.' }}</p>
                     <button
                       type="button"
-                      @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                      @click="qrisPreviewModalUrl = formattedQrisUrl"
                       class="text-[11px] text-forest font-bold underline hover:text-gold transition-colors inline-flex items-center space-x-1"
                     >
                       <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1178,6 +1194,19 @@
               <p class="text-xs text-taupe font-light">{{ $t('landing.bookingModal.desc') }}</p>
             </div>
 
+            <!-- Multi-Room Notice Banner -->
+            <div class="p-3 bg-forest/5 border border-forest/20 rounded text-xs text-forest flex items-start space-x-2.5 shadow-xs">
+              <svg class="w-4 h-4 text-gold flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <div class="space-y-0.5 leading-snug">
+                <span class="font-bold block text-forest">{{ $t('landing.bookingModal.multiRoomNoticeTitle') }}</span>
+                <p class="text-taupe text-[11px]">
+                  {{ $t('landing.bookingModal.multiRoomNoticeDesc') }}
+                </p>
+              </div>
+            </div>
+
             <!-- Error Alert -->
             <div v-if="bookingErrorMessage" class="p-3 bg-red-50 border border-red-200 rounded text-xs text-red-800">
               {{ bookingErrorMessage }}
@@ -1217,7 +1246,8 @@
                     v-model="bookingForm.phone"
                     type="tel"
                     required
-                    placeholder="+62 812 3456 7890"
+                    @input="bookingForm.phone = bookingForm.phone.replace(/[^0-9]/g, '')"
+                    placeholder="081234567890"
                     class="w-full px-3 py-2 text-sm bg-white border border-sand/40 rounded focus:outline-none focus:border-forest"
                   />
                 </div>
@@ -1355,16 +1385,16 @@
                   </div>
 
                   <!-- QRIS Display Section -->
-                  <div v-if="paymentSettings.qris_url" class="p-3 bg-ivory/80 border border-sand/30 rounded space-y-2">
+                  <div v-if="hasQrisUrl" class="p-3 bg-ivory/80 border border-sand/30 rounded space-y-2">
                     <div class="flex items-center justify-between">
                       <span class="text-[11px] font-bold text-forest uppercase tracking-wider">{{ $t('landing.bookingModal.qrisTitle') }}</span>
                       <span class="text-[10px] text-gold bg-forest px-2 py-0.5 rounded font-bold">{{ $t('landing.bookingModal.scanQris') }}</span>
                     </div>
                     <div class="flex items-center gap-3 pt-1">
                       <img
-                        :src="paymentSettings.qris_url"
+                        :src="formattedQrisUrl"
                         alt="Kode QRIS Pembayaran"
-                        @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                        @click="qrisPreviewModalUrl = formattedQrisUrl"
                         class="w-24 h-24 object-contain bg-white p-1 rounded border border-sand/40 shadow-xs cursor-pointer hover:scale-105 transition-transform"
                         :title="$t('landing.bookingModal.enlargeQris')"
                       />
@@ -1372,7 +1402,7 @@
                         <p class="font-medium text-charcoal">{{ paymentSettings.qris_notes || 'Pindai QRIS menggunakan m-Banking atau e-Wallet.' }}</p>
                         <button
                           type="button"
-                          @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                          @click="qrisPreviewModalUrl = formattedQrisUrl"
                           class="text-[10px] text-forest font-bold underline hover:text-gold transition-colors inline-flex items-center space-x-1"
                         >
                           <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1555,6 +1585,27 @@
               </div>
             </div>
 
+            <!-- Rooms List in Track Modal Result -->
+            <div v-if="trackResult.rooms && trackResult.rooms.length > 0" class="pt-2 border-t border-sand/20 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <span class="text-taupe text-[11px] font-semibold uppercase tracking-wider">{{ $t('landing.bookingModal.bookedRoomsList') }}</span>
+                <span v-if="trackResult.rooms.length > 1" class="px-2 py-0.5 bg-forest text-gold text-[10px] font-bold rounded-full">
+                  {{ $t('landing.bookingModal.multiRoomBadge', { count: trackResult.rooms.length }) }}
+                </span>
+              </div>
+              <div class="space-y-1">
+                <div v-for="rm in trackResult.rooms" :key="rm.id" class="p-2 bg-ivory rounded border border-sand/30 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-1">
+                  <div>
+                    <span class="font-bold text-forest font-mono">Kamar {{ rm.room_number }}</span>
+                    <span v-if="rm.roomType?.name || rm.room_type?.name" class="text-taupe text-[11px] ml-1">({{ rm.roomType?.name || rm.room_type?.name }})</span>
+                  </div>
+                  <span class="font-mono text-charcoal text-[11px]" v-if="rm.pivot?.subtotal">
+                    {{ formatCurrency(rm.pivot.subtotal) }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <div class="pt-2 border-t border-sand/20 flex items-center justify-between text-xs">
               <div>
                 <span class="text-taupe block text-[11px]">{{ $t('landing.trackModal.totalAmount') }}</span>
@@ -1582,16 +1633,16 @@
             </div>
 
             <!-- QRIS CODE BOX FOR TRACK MODAL -->
-            <div v-if="paymentSettings.qris_url" class="p-3 bg-white border border-sand/40 rounded text-left space-y-2 shadow-xs">
+            <div v-if="hasQrisUrl" class="p-3 bg-white border border-sand/40 rounded text-left space-y-2 shadow-xs">
               <div class="flex items-center justify-between">
                 <span class="text-xs font-bold text-forest uppercase tracking-wider">{{ $t('landing.bookingModal.payViaQris') }}</span>
                 <span class="text-[10px] bg-gold text-forest px-2 py-0.5 rounded font-bold uppercase">{{ $t('landing.bookingModal.allEwallets') }}</span>
               </div>
               <div class="flex items-center gap-3">
                 <img
-                  :src="paymentSettings.qris_url"
+                  :src="formattedQrisUrl"
                   alt="QRIS Code"
-                  @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                  @click="qrisPreviewModalUrl = formattedQrisUrl"
                   class="w-24 h-24 object-contain bg-white p-1.5 rounded border border-sand/30 shadow-xs cursor-pointer hover:scale-105 transition-transform"
                   :title="$t('landing.bookingModal.enlargeQris')"
                 />
@@ -1599,7 +1650,7 @@
                   <p class="text-[11px] leading-snug">{{ paymentSettings.qris_notes || 'Pindai QRIS untuk pembayaran langsung.' }}</p>
                   <button
                     type="button"
-                    @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                    @click="qrisPreviewModalUrl = formattedQrisUrl"
                     class="text-[11px] text-forest font-bold underline hover:text-gold transition-colors inline-flex items-center space-x-1"
                   >
                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2032,22 +2083,41 @@ const isScrolled = ref(false)
 const mobileMenuOpen = ref(false)
 const selectedRoom = ref(null)
 
+const defaultBankAccounts = [
+  { bank_name: 'Bank BCA', account_number: '8830-192-800', account_holder: 'PT AURA Hospitality Indonesia', is_active: true },
+  { bank_name: 'Bank Mandiri', account_number: '137-00-9918-2200', account_holder: 'PT AURA Hospitality Indonesia', is_active: true }
+]
+
 // Dynamic Payment & QRIS Settings State
 const paymentSettings = ref({
-  bank_accounts: [
-    { bank_name: 'Bank BCA', account_number: '8830-192-800', account_holder: 'PT AURA Hospitality Indonesia', is_active: true },
-    { bank_name: 'Bank Mandiri', account_number: '137-00-9918-2200', account_holder: 'PT AURA Hospitality Indonesia', is_active: true }
-  ],
+  bank_accounts: defaultBankAccounts,
   qris_url: null,
   qris_notes: 'Pindai kode QRIS menggunakan m-Banking atau e-Wallet (Gopay, OVO, Dana, LinkAja, ShopeePay) untuk pembayaran.'
 })
 
 const activeBankAccounts = computed(() => {
-  if (!paymentSettings.value?.bank_accounts) return []
-  return paymentSettings.value.bank_accounts.filter(b => b.is_active !== false)
+  const accounts = paymentSettings.value?.bank_accounts
+  if (Array.isArray(accounts) && accounts.length > 0) {
+    const filtered = accounts.filter(b => b.is_active !== false && b.is_active !== 'false' && b.is_active !== 0 && b.is_active !== '0')
+    if (filtered.length > 0) return filtered
+  }
+  return defaultBankAccounts
 })
 
 const qrisPreviewModalUrl = ref(null)
+
+const hasQrisUrl = computed(() => {
+  return !!(paymentSettings.value?.qris_url || paymentSettings.value?.qris_image_path)
+})
+
+const formattedQrisUrl = computed(() => {
+  const raw = paymentSettings.value?.qris_url || paymentSettings.value?.qris_image_path
+  if (!raw) return ''
+  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw
+  if (raw.startsWith('storage/')) return `http://localhost:8000/${raw}`
+  if (raw.startsWith('/storage/')) return `http://localhost:8000${raw}`
+  return `http://localhost:8000/storage/${raw}`
+})
 
 // Live Reservation Modal State
 const bookingModalOpen = ref(false)
@@ -2424,6 +2494,7 @@ function openTrackModal() {
   trackModalOpen.value = true
   trackResult.value = null
   trackError.value = ''
+  fetchPaymentSettings()
 }
 
 function closeTrackModal() {
@@ -2436,6 +2507,7 @@ async function submitTrackBooking() {
   tracking.value = true
   trackError.value = ''
   trackResult.value = null
+  fetchPaymentSettings()
   
   try {
     const res = await axios.get('http://localhost:8000/api/public/bookings/search', {

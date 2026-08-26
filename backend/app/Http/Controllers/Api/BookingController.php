@@ -123,6 +123,8 @@ class BookingController extends Controller
                 'room_rate' => $room->roomType->base_price,
                 'nights' => $nights,
                 'subtotal' => $room->roomType->base_price * $nights,
+                'check_in_date' => $validated['check_in_date'],
+                'check_out_date' => $validated['check_out_date'],
             ]);
 
             if (in_array($bookingStatus, ['pending', 'confirmed'])) {
@@ -384,10 +386,16 @@ class BookingController extends Controller
 
     public function publicStore(Request $request)
     {
+        if ($request->has('phone')) {
+            $request->merge([
+                'phone' => preg_replace('/[^0-9]/', '', $request->input('phone', ''))
+            ]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email',
-            'phone' => 'required|string|max:30',
+            'phone' => 'required|string|regex:/^[0-9]+$/|max:30',
             'check_in_date' => 'required|date|after_or_equal:today',
             'check_out_date' => 'required|date|after:check_in_date',
             'adults' => 'required|integer|min:1',
@@ -398,25 +406,9 @@ class BookingController extends Controller
             'bank_name' => 'nullable|string|max:50',
             'sender_name' => 'nullable|string|max:100',
             'reference_number' => 'nullable|string|max:100',
+        ], [
+            'phone.regex' => 'Nomor WhatsApp / HP hanya boleh berisi karakter angka.'
         ]);
-
-        // Find or create guest
-        $guest = Guest::where('email', $validated['email'])
-            ->orWhere('phone', $validated['phone'])
-            ->first();
-
-        if (!$guest) {
-            $guest = Guest::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'],
-            ]);
-        }
-
-        // Calculate nights
-        $checkIn = Carbon::parse($validated['check_in_date']);
-        $checkOut = Carbon::parse($validated['check_out_date']);
-        $nights = max(1, $checkIn->diffInDays($checkOut));
 
         // Find an available room matching room_type_id or any room
         $roomQuery = Room::with('roomType')->where('is_active', true)->where('status', '!=', 'out_of_order');
@@ -448,6 +440,11 @@ class BookingController extends Controller
             ], 422);
         }
 
+        // Calculate nights
+        $checkIn = Carbon::parse($validated['check_in_date']);
+        $checkOut = Carbon::parse($validated['check_out_date']);
+        $nights = max(1, $checkIn->diffInDays($checkOut));
+
         $rate = $selectedRoom && $selectedRoom->roomType ? $selectedRoom->roomType->base_price : 280;
         $totalAmount = $rate * $nights;
 
@@ -468,6 +465,87 @@ class BookingController extends Controller
         $paymentNotes = $isGuaranteed
             ? "Jaminan Transfer Bank: " . $finalRef
             : "Bayar di Hotel saat check-in (Kamar ditahan hingga jam 18:00 sore hari check-in).";
+
+        $inputName = trim($validated['name']);
+        $inputPhone = trim($validated['phone']);
+
+        // Check if a pending booking exists for guest with exact case-insensitive Full Name and exact Whatsapp Number
+        $existingBooking = Booking::where('status', 'pending')
+            ->whereHas('guest', function($q) use ($inputName, $inputPhone) {
+                $q->whereRaw('LOWER(TRIM(name)) = ?', [mb_strtolower($inputName)])
+                  ->whereRaw('TRIM(phone) = ?', [$inputPhone]);
+            })
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($existingBooking) {
+            // Group into existing booking
+            $existingBooking->rooms()->attach($selectedRoom->id, [
+                'room_rate' => $rate,
+                'nights' => $nights,
+                'subtotal' => $totalAmount,
+                'check_in_date' => $validated['check_in_date'],
+                'check_out_date' => $validated['check_out_date'],
+            ]);
+            $selectedRoom->update(['status' => 'booked']);
+
+            // Update parent check-in and check-out date boundaries
+            $curCheckIn = is_string($existingBooking->check_in_date) ? $existingBooking->check_in_date : ($existingBooking->check_in_date ? $existingBooking->check_in_date->format('Y-m-d') : $validated['check_in_date']);
+            $curCheckOut = is_string($existingBooking->check_out_date) ? $existingBooking->check_out_date : ($existingBooking->check_out_date ? $existingBooking->check_out_date->format('Y-m-d') : $validated['check_out_date']);
+
+            $minCheckIn = min($curCheckIn, $validated['check_in_date']);
+            $maxCheckOut = max($curCheckOut, $validated['check_out_date']);
+
+            $existingBooking->check_in_date = $minCheckIn;
+            $existingBooking->check_out_date = $maxCheckOut;
+            $existingBooking->nights = max(1, Carbon::parse($minCheckIn)->diffInDays(Carbon::parse($maxCheckOut)));
+
+            $existingBooking->total_amount = (float)$existingBooking->total_amount + $totalAmount;
+            $existingBooking->deposit_amount = (float)$existingBooking->deposit_amount + $depositAmount;
+            $existingBooking->adults += $validated['adults'];
+            $existingBooking->children += ($validated['children'] ?? 0);
+
+            if (!empty($validated['special_requests'])) {
+                $existingBooking->special_requests = trim(($existingBooking->special_requests ? $existingBooking->special_requests . " | " : "") . $validated['special_requests']);
+            }
+
+            $existingBooking->save();
+
+            if ($isGuaranteed) {
+                Payment::create([
+                    'booking_id' => $existingBooking->id,
+                    'payment_type' => 'deposit',
+                    'payment_method' => 'transfer',
+                    'amount' => $depositAmount,
+                    'reference_number' => $finalRef,
+                    'notes' => 'Pemesanan Kamar Tambahan via Website (' . $finalRef . ') - Menunggu Verifikasi Staf',
+                    'processed_by' => null,
+                ]);
+            }
+
+            $updatedBooking = $existingBooking->fresh(['guest', 'rooms.roomType', 'payments']);
+
+            return response()->json([
+                'message' => 'Kamar berhasil ditambahkan ke booking Anda! Kode booking Anda adalah ' . $updatedBooking->booking_number,
+                'booking_number' => $updatedBooking->booking_number,
+                'payment_option' => $validated['payment_option'],
+                'deposit_amount' => $updatedBooking->deposit_amount,
+                'data' => $updatedBooking
+            ], 201);
+        }
+
+        // Find or create guest if creating new booking
+        $guest = Guest::where('email', $validated['email'])
+            ->orWhere('phone', $validated['phone'])
+            ->first();
+
+        if (!$guest) {
+            $guest = Guest::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+            ]);
+        }
 
         $combinedNotes = trim($paymentNotes . " " . ($validated['special_requests'] ?? ''));
 
@@ -493,6 +571,8 @@ class BookingController extends Controller
                 'room_rate' => $rate,
                 'nights' => $nights,
                 'subtotal' => $totalAmount,
+                'check_in_date' => $validated['check_in_date'],
+                'check_out_date' => $validated['check_out_date'],
             ]);
             $selectedRoom->update(['status' => 'booked']);
         }

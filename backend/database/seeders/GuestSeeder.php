@@ -77,7 +77,7 @@ class GuestSeeder extends Seeder
         ];
 
         foreach ($guests as $guest) {
-            Guest::create($guest);
+            Guest::updateOrCreate(['email' => $guest['email']], $guest);
         }
     }
 }

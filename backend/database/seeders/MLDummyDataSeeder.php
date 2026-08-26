@@ -126,6 +126,8 @@ class MLDummyDataSeeder extends Seeder
                     'room_rate' => $basePrice,
                     'nights' => $nights,
                     'subtotal' => $totalAmount,
+                    'check_in_date' => $checkInDate->toDateString(),
+                    'check_out_date' => $checkOutDate->toDateString(),
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);

@@ -44,6 +44,8 @@ class BookingSeeder extends Seeder
             'room_rate' => 300000,
             'nights' => 2,
             'subtotal' => 600000,
+            'check_in_date' => $booking1->check_in_date,
+            'check_out_date' => $booking1->check_out_date,
         ]);
 
         // Update room status
@@ -81,6 +83,8 @@ class BookingSeeder extends Seeder
             'room_rate' => 500000,
             'nights' => 2,
             'subtotal' => 1000000,
+            'check_in_date' => $booking2->check_in_date,
+            'check_out_date' => $booking2->check_out_date,
         ]);
 
         Payment::create([
@@ -117,6 +121,8 @@ class BookingSeeder extends Seeder
             'room_rate' => 300000,
             'nights' => 1,
             'subtotal' => 300000,
+            'check_in_date' => $booking3->check_in_date,
+            'check_out_date' => $booking3->check_out_date,
         ]);
 
         Payment::create([
@@ -151,6 +157,8 @@ class BookingSeeder extends Seeder
             'room_rate' => 800000,
             'nights' => 3,
             'subtotal' => 2400000,
+            'check_in_date' => $booking4->check_in_date,
+            'check_out_date' => $booking4->check_out_date,
         ]);
 
         // Booking 5 - Checked In (multi-room)
@@ -177,6 +185,8 @@ class BookingSeeder extends Seeder
             'room_rate' => 300000,
             'nights' => 3,
             'subtotal' => 900000,
+            'check_in_date' => $booking5->check_in_date,
+            'check_out_date' => $booking5->check_out_date,
         ]);
 
         BookingRoom::create([
@@ -185,6 +195,8 @@ class BookingSeeder extends Seeder
             'room_rate' => 300000,
             'nights' => 3,
             'subtotal' => 900000,
+            'check_in_date' => $booking5->check_in_date,
+            'check_out_date' => $booking5->check_out_date,
         ]);
 
         // Update room status

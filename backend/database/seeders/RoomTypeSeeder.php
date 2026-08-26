@@ -15,7 +15,7 @@ class RoomTypeSeeder extends Seeder
     public function run(): void
     {
         // Create Room Types
-        $standard = RoomType::create([
+        $standard = RoomType::updateOrCreate(['name' => 'Standard'], [
             'name' => 'Standard',
             'description' => 'Standard room with basic amenities',
             'base_price' => 300000,
@@ -24,7 +24,7 @@ class RoomTypeSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $deluxe = RoomType::create([
+        $deluxe = RoomType::updateOrCreate(['name' => 'Deluxe'], [
             'name' => 'Deluxe',
             'description' => 'Deluxe room with premium amenities',
             'base_price' => 500000,
@@ -33,7 +33,7 @@ class RoomTypeSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        $suite = RoomType::create([
+        $suite = RoomType::updateOrCreate(['name' => 'Suite'], [
             'name' => 'Suite',
             'description' => 'Spacious suite with living area',
             'base_price' => 800000,
@@ -45,7 +45,7 @@ class RoomTypeSeeder extends Seeder
         // Create Sample Rooms
         // Standard Rooms (101-105)
         for ($i = 1; $i <= 5; $i++) {
-            Room::create([
+            Room::firstOrCreate(['room_number' => '10' . $i], [
                 'room_type_id' => $standard->id,
                 'room_number' => '10' . $i,
                 'floor' => '1',
@@ -56,7 +56,7 @@ class RoomTypeSeeder extends Seeder
 
         // Deluxe Rooms (201-203)
         for ($i = 1; $i <= 3; $i++) {
-            Room::create([
+            Room::firstOrCreate(['room_number' => '20' . $i], [
                 'room_type_id' => $deluxe->id,
                 'room_number' => '20' . $i,
                 'floor' => '2',
@@ -67,7 +67,7 @@ class RoomTypeSeeder extends Seeder
 
         // Suite Rooms (301-302)
         for ($i = 1; $i <= 2; $i++) {
-            Room::create([
+            Room::firstOrCreate(['room_number' => '30' . $i], [
                 'room_type_id' => $suite->id,
                 'room_number' => '30' . $i,
                 'floor' => '3',
