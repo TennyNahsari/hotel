@@ -225,6 +225,94 @@
               </button>
             </div>
           </div>
+
+          <!-- SOCIAL MEDIA LINKS CARD -->
+          <div class="bg-white rounded-md border border-sand/30 shadow-sm overflow-hidden p-6 space-y-4">
+            <div class="border-b border-sand/20 pb-3">
+              <h3 class="font-display text-lg text-forest font-semibold">Media Sosial Hotel</h3>
+              <p class="text-xs text-taupe mt-0.5">Tautan akun media sosial yang akan ditampilkan pada Footer halaman utama (Landing Page).</p>
+            </div>
+
+            <div class="space-y-3 text-xs">
+              <!-- Instagram -->
+              <div>
+                <label class="block font-semibold text-charcoal mb-1 flex items-center space-x-1.5">
+                  <span class="text-pink-600 font-bold">📷 Instagram</span>
+                </label>
+                <input
+                  v-model="socialForm.instagram"
+                  type="text"
+                  class="w-full px-3 py-2 bg-ivory/50 border border-sand/40 rounded focus:outline-none focus:border-forest text-xs font-mono"
+                  placeholder="https://instagram.com/aurahotels"
+                />
+              </div>
+
+              <!-- Twitter / X -->
+              <div>
+                <label class="block font-semibold text-charcoal mb-1 flex items-center space-x-1.5">
+                  <span class="text-gray-900 font-bold">𝕏 Twitter / X</span>
+                </label>
+                <input
+                  v-model="socialForm.twitter"
+                  type="text"
+                  class="w-full px-3 py-2 bg-ivory/50 border border-sand/40 rounded focus:outline-none focus:border-forest text-xs font-mono"
+                  placeholder="https://twitter.com/aurahotels"
+                />
+              </div>
+
+              <!-- YouTube -->
+              <div>
+                <label class="block font-semibold text-charcoal mb-1 flex items-center space-x-1.5">
+                  <span class="text-red-600 font-bold">▶ YouTube</span>
+                </label>
+                <input
+                  v-model="socialForm.youtube"
+                  type="text"
+                  class="w-full px-3 py-2 bg-ivory/50 border border-sand/40 rounded focus:outline-none focus:border-forest text-xs font-mono"
+                  placeholder="https://youtube.com/@aurahotels"
+                />
+              </div>
+
+              <!-- Facebook -->
+              <div>
+                <label class="block font-semibold text-charcoal mb-1 flex items-center space-x-1.5">
+                  <span class="text-blue-600 font-bold">📘 Facebook</span>
+                </label>
+                <input
+                  v-model="socialForm.facebook"
+                  type="text"
+                  class="w-full px-3 py-2 bg-ivory/50 border border-sand/40 rounded focus:outline-none focus:border-forest text-xs font-mono"
+                  placeholder="https://facebook.com/aurahotels"
+                />
+              </div>
+
+              <!-- LinkedIn -->
+              <div>
+                <label class="block font-semibold text-charcoal mb-1 flex items-center space-x-1.5">
+                  <span class="text-sky-700 font-bold">💼 LinkedIn</span>
+                </label>
+                <input
+                  v-model="socialForm.linkedin"
+                  type="text"
+                  class="w-full px-3 py-2 bg-ivory/50 border border-sand/40 rounded focus:outline-none focus:border-forest text-xs font-mono"
+                  placeholder="https://linkedin.com/company/aurahotels"
+                />
+              </div>
+
+              <!-- Threads -->
+              <div>
+                <label class="block font-semibold text-charcoal mb-1 flex items-center space-x-1.5">
+                  <span class="text-black font-bold">🧵 Threads</span>
+                </label>
+                <input
+                  v-model="socialForm.threads"
+                  type="text"
+                  class="w-full px-3 py-2 bg-ivory/50 border border-sand/40 rounded focus:outline-none focus:border-forest text-xs font-mono"
+                  placeholder="https://threads.net/@aurahotels"
+                />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -328,6 +416,15 @@ const selectedQrisFile = ref(null)
 const qrisPreviewUrl = ref(null)
 const deleteQrisFlag = ref(false)
 
+const socialForm = ref({
+  instagram: '',
+  twitter: '',
+  youtube: '',
+  facebook: '',
+  linkedin: '',
+  threads: '',
+})
+
 // Bank Modal State
 const bankModalOpen = ref(false)
 const editingBankIndex = ref(null)
@@ -342,8 +439,11 @@ const fetchSettings = async () => {
   loading.value = true
   errorMessage.value = ''
   try {
-    const res = await axios.get('/api/settings/payment')
-    const data = res.data?.data || {}
+    const [payRes, socialRes] = await Promise.all([
+      axios.get('/api/settings/payment'),
+      axios.get('/api/settings/social'),
+    ])
+    const data = payRes.data?.data || {}
     bankAccounts.value = data.bank_accounts || []
     qrisNotes.value = data.qris_notes || ''
     whatsappNumber.value = data.whatsapp_number || '6281234567890'
@@ -351,9 +451,19 @@ const fetchSettings = async () => {
     selectedQrisFile.value = null
     qrisPreviewUrl.value = null
     deleteQrisFlag.value = false
+
+    const socialData = socialRes.data?.data || {}
+    socialForm.value = {
+      instagram: socialData.instagram || '',
+      twitter: socialData.twitter || '',
+      youtube: socialData.youtube || '',
+      facebook: socialData.facebook || '',
+      linkedin: socialData.linkedin || '',
+      threads: socialData.threads || '',
+    }
   } catch (err) {
-    console.error('Failed to fetch payment settings:', err)
-    errorMessage.value = 'Gagal memuat pengaturan pembayaran. Pastikan koneksi server baik.'
+    console.error('Failed to fetch settings:', err)
+    errorMessage.value = 'Gagal memuat pengaturan. Pastikan koneksi server baik.'
   } finally {
     loading.value = false
   }
@@ -433,16 +543,19 @@ const saveSettings = async () => {
       formData.append('qris_image', selectedQrisFile.value)
     }
 
-    const res = await axios.post('/api/settings/payment', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    })
+    const [payRes, socialRes] = await Promise.all([
+      axios.post('/api/settings/payment', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }),
+      axios.post('/api/settings/social', socialForm.value),
+    ])
 
-    successMessage.value = res.data?.message || 'Pengaturan pembayaran berhasil diperbarui!'
+    successMessage.value = 'Pengaturan sistem & media sosial berhasil diperbarui!'
     
     // Refresh settings view data
-    const updated = res.data?.data || {}
+    const updated = payRes.data?.data || {}
     bankAccounts.value = updated.bank_accounts || []
     qrisNotes.value = updated.qris_notes || ''
     whatsappNumber.value = updated.whatsapp_number || '6281234567890'
@@ -450,9 +563,19 @@ const saveSettings = async () => {
     selectedQrisFile.value = null
     qrisPreviewUrl.value = null
     deleteQrisFlag.value = false
+
+    const updatedSocial = socialRes.data?.data || {}
+    socialForm.value = {
+      instagram: updatedSocial.instagram || '',
+      twitter: updatedSocial.twitter || '',
+      youtube: updatedSocial.youtube || '',
+      facebook: updatedSocial.facebook || '',
+      linkedin: updatedSocial.linkedin || '',
+      threads: updatedSocial.threads || '',
+    }
   } catch (err) {
     console.error('Failed to save settings:', err)
-    errorMessage.value = err.response?.data?.message || 'Gagal menyimpan pengaturan pembayaran.'
+    errorMessage.value = err.response?.data?.message || 'Gagal menyimpan pengaturan.'
   } finally {
     saving.value = false
   }

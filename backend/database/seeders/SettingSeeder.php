@@ -32,5 +32,18 @@ class SettingSeeder extends Seeder
         if (!Setting::get('payment_settings')) {
             Setting::set('payment_settings', $defaultPaymentSettings);
         }
+
+        $defaultSocialSettings = [
+            'instagram' => 'https://instagram.com/aurahotels',
+            'twitter' => 'https://twitter.com/aurahotels',
+            'youtube' => 'https://youtube.com/@aurahotels',
+            'facebook' => 'https://facebook.com/aurahotels',
+            'linkedin' => 'https://linkedin.com/company/aurahotels',
+            'threads' => 'https://threads.net/@aurahotels',
+        ];
+
+        if (!Setting::get('social_settings')) {
+            Setting::set('social_settings', $defaultSocialSettings);
+        }
     }
 }

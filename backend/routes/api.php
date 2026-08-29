@@ -35,6 +35,7 @@ Route::get('/public/room-types', [RoomTypeController::class, 'index']);
 Route::get('/public/halls', [HallController::class, 'publicIndex']);
 Route::post('/public/hall-bookings', [HallBookingController::class, 'publicStore']);
 Route::get('/public/settings/payment', [SettingController::class, 'getPaymentSettings']);
+Route::get('/public/settings/social', [SettingController::class, 'getSocialSettings']);
 
 // Protected routes
 Route::middleware(['auth:sanctum'])->group(function () {
@@ -76,6 +77,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // System & Payment Settings
     Route::get('/settings/payment', [SettingController::class, 'getPaymentSettings']);
     Route::post('/settings/payment', [SettingController::class, 'updatePaymentSettings']);
+    Route::get('/settings/social', [SettingController::class, 'getSocialSettings']);
+    Route::post('/settings/social', [SettingController::class, 'updateSocialSettings']);
 
     // Housekeeping Management
     Route::get('/housekeeping-statistics', [HousekeepingController::class, 'statistics']);

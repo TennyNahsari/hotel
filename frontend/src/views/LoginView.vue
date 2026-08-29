@@ -94,10 +94,17 @@ async function handleLogin() {
   error.value = ''
 
   try {
-    await authStore.login(form.value)
+    await authStore.login({
+      email: form.value.email.trim(),
+      password: form.value.password,
+    })
     router.push({ name: 'dashboard' })
   } catch (err) {
-    error.value = err.response?.data?.message || 'Login failed. Please check your credentials.'
+    if (err.response?.data?.errors?.email) {
+      error.value = err.response.data.errors.email[0]
+    } else {
+      error.value = err.response?.data?.message || 'Login failed. Please check your credentials.'
+    }
   } finally {
     loading.value = false
   }

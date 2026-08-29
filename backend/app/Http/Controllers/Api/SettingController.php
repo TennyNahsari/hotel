@@ -140,4 +140,66 @@ class SettingController extends Controller
             'data' => $currentSettings
         ]);
     }
+
+    /**
+     * Get Social Media Settings (Public & Protected API)
+     */
+    public function getSocialSettings()
+    {
+        $default = [
+            'instagram' => 'https://instagram.com/aurahotels',
+            'twitter' => 'https://twitter.com/aurahotels',
+            'youtube' => 'https://youtube.com/@aurahotels',
+            'facebook' => 'https://facebook.com/aurahotels',
+            'linkedin' => 'https://linkedin.com/company/aurahotels',
+            'threads' => 'https://threads.net/@aurahotels',
+        ];
+
+        $settings = Setting::get('social_settings', $default);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => array_merge($default, is_array($settings) ? $settings : [])
+        ]);
+    }
+
+    /**
+     * Update Social Media Settings (Protected API for Admin)
+     */
+    public function updateSocialSettings(Request $request)
+    {
+        $request->validate([
+            'instagram' => 'nullable|string',
+            'twitter' => 'nullable|string',
+            'youtube' => 'nullable|string',
+            'facebook' => 'nullable|string',
+            'linkedin' => 'nullable|string',
+            'threads' => 'nullable|string',
+        ]);
+
+        $default = [
+            'instagram' => 'https://instagram.com/aurahotels',
+            'twitter' => 'https://twitter.com/aurahotels',
+            'youtube' => 'https://youtube.com/@aurahotels',
+            'facebook' => 'https://facebook.com/aurahotels',
+            'linkedin' => 'https://linkedin.com/company/aurahotels',
+            'threads' => 'https://threads.net/@aurahotels',
+        ];
+
+        $currentSettings = Setting::get('social_settings', $default);
+
+        $keys = ['instagram', 'twitter', 'youtube', 'facebook', 'linkedin', 'threads'];
+        foreach ($keys as $key) {
+            if ($request->has($key)) {
+                $currentSettings[$key] = $request->input($key) ?? '';
+            }
+        }
+
+        Setting::set('social_settings', $currentSettings);
+
+        return response()->json([
+            'message' => 'Pengaturan media sosial berhasil diperbarui!',
+            'data' => $currentSettings
+        ]);
+    }
 }
