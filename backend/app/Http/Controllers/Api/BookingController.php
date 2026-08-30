@@ -23,32 +23,36 @@ class BookingController extends Controller
 
         $query = Booking::with(['guest', 'rooms.roomType', 'payments', 'createdBy']);
 
-        // Filter by status
-        if ($request->has('status')) {
+        // Filter by status — use filled() so empty string doesn't wrongly filter
+        if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
-        // Filter by date range
-        if ($request->has('start_date')) {
+        // Filter by check-in date range
+        if ($request->filled('start_date')) {
             $query->where('check_in_date', '>=', $request->start_date);
         }
-        if ($request->has('end_date')) {
-            $query->where('check_out_date', '<=', $request->end_date);
+        if ($request->filled('end_date')) {
+            $query->where('check_in_date', '<=', $request->end_date);
         }
 
-        // Search by guest name or booking number
-        if ($request->has('search')) {
+        // Search by guest name, booking number, or room number
+        if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('booking_number', 'like', "%{$search}%")
-                  ->orWhereHas('guest', function($q) use ($search) {
-                      $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%");
+                  ->orWhereHas('guest', function ($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%")
+                        ->orWhere('phone', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('rooms', function ($q) use ($search) {
+                      $q->where('room_number', 'like', "%{$search}%");
                   });
             });
         }
 
-        $perPage = $request->get('per_page', 15);
+        $perPage  = $request->get('per_page', 15);
         $bookings = $query->orderBy('created_at', 'desc')->paginate($perPage);
 
         return response()->json($bookings);

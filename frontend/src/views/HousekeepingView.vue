@@ -69,19 +69,6 @@
               <option value="urgent">{{ $t('housekeeping.urgent') }}</option>
             </select>
           </div>
-          <div class="flex-1">
-            <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.assignedTo') }}</label>
-            <select
-              v-model="filters.assigned_to"
-              @change="loadTasks"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">{{ $t('housekeeping.allStaff') }}</option>
-              <option v-for="user in users" :key="user.id" :value="user.id">
-                {{ user.name }}
-              </option>
-            </select>
-          </div>
         </div>
       </div>
 
@@ -122,8 +109,11 @@
                     {{ getStatusLabel(task.status) }}
                   </span>
                 </div>
-                <div class="text-sm text-gray-600">
-                  {{ task.assigned_user?.name || $t('housekeeping.unassigned') }}
+                <div class="text-xs bg-gray-50 p-2 rounded border border-gray-200 space-y-1">
+                  <div class="font-medium text-gray-700">🕒 Masuk: {{ formatDateTime(task.created_at) }}</div>
+                  <div v-if="task.started_at" class="text-blue-600">▶️ Mulai: {{ formatDateTime(task.started_at) }}</div>
+                  <div v-if="task.completed_at" class="text-green-600">✅ Selesai: {{ formatDateTime(task.completed_at) }}</div>
+                  <div v-if="task.notes" class="text-gray-500 italic">"{{ task.notes }}"</div>
                 </div>
                 <div class="flex flex-wrap gap-2 mt-3">
                   <button
@@ -197,7 +187,7 @@
                   Priority
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Assigned To
+                  Waktu Masuk
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Status & Actions
@@ -225,7 +215,18 @@
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ task.assigned_user?.name || $t('housekeeping.unassigned') }}</div>
+                  <div class="text-xs font-semibold text-gray-800">
+                    🕒 {{ formatDateTime(task.created_at) }}
+                  </div>
+                  <div v-if="task.started_at" class="text-[11px] text-blue-600">
+                    ▶️ {{ formatDateTime(task.started_at) }}
+                  </div>
+                  <div v-if="task.completed_at" class="text-[11px] text-green-600">
+                    ✅ {{ formatDateTime(task.completed_at) }}
+                  </div>
+                  <div v-if="task.notes" class="text-[11px] text-gray-400 truncate max-w-[180px]" :title="task.notes">
+                    "{{ task.notes }}"
+                  </div>
                 </td>
                 <td class="px-6 py-4">
                   <div class="mb-2">
@@ -400,19 +401,6 @@
           </div>
 
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.assignTo') }}</label>
-            <select
-              v-model="formData.assigned_to"
-              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">{{ $t('housekeeping.selectStaff') }}</option>
-              <option v-for="user in users" :key="user.id" :value="user.id">
-                {{ user.name }}
-              </option>
-            </select>
-          </div>
-
-          <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('housekeeping.notes') }}</label>
             <textarea
               v-model="formData.notes"
@@ -508,7 +496,6 @@ const taskToDelete = ref(null)
 const filters = ref({
   status: '',
   priority: '',
-  assigned_to: '',
 })
 
 const formData = ref({
@@ -517,7 +504,6 @@ const formData = ref({
   hall_id: '',
   task_type: 'cleaning',
   priority: 'normal',
-  assigned_to: '',
   notes: '',
 })
 
@@ -535,7 +521,6 @@ onMounted(async () => {
   loadTasks()
   loadRooms()
   loadHalls()
-  loadUsers()
   loadStatistics()
 })
 
@@ -545,7 +530,6 @@ async function loadTasks(page = 1) {
     const params = { page }
     if (filters.value.status) params.status = filters.value.status
     if (filters.value.priority) params.priority = filters.value.priority
-    if (filters.value.assigned_to) params.assigned_to = filters.value.assigned_to
 
     const response = await housekeepingApi.getTasks(params)
     
@@ -618,7 +602,6 @@ function openCreateModal() {
     hall_id: '',
     task_type: 'cleaning',
     priority: 'normal',
-    assigned_to: '',
     notes: '',
   }
   error.value = ''
@@ -634,7 +617,6 @@ function openEditModal(task) {
     hall_id: task.hall_id || '',
     task_type: task.task_type,
     priority: task.priority,
-    assigned_to: task.assigned_to || '',
     notes: task.notes || '',
   }
   error.value = ''
@@ -655,7 +637,6 @@ async function saveTask() {
     const payload = {
       task_type: formData.value.task_type,
       priority: formData.value.priority,
-      assigned_to: formData.value.assigned_to || null,
       notes: formData.value.notes || '',
     }
 
@@ -775,5 +756,17 @@ function getTaskTypeLabel(type) {
     setup: t('housekeeping.setup'),
   }
   return labels[type] || type
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '-'
+  const date = new Date(dateStr)
+  return date.toLocaleDateString('id-ID', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 </script>

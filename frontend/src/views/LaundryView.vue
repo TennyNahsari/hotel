@@ -407,7 +407,7 @@ const visiblePages = computed(() => {
 async function loadBookings() {
   try {
     const response = await bookingApi.getBookings({ status: 'checked_in' })
-    bookings.value = response || []
+    bookings.value = Array.isArray(response) ? response : (response?.data || [])
   } catch (error) {
     console.error('Error loading bookings:', error)
     alert(t('laundry.loadBookingsFailed'))

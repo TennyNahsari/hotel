@@ -222,28 +222,88 @@
       <!-- Create Order Tab -->
       <div v-show="activeTab === 'orders'">
         <div class="bg-white rounded-lg shadow p-6">
-          <!-- Select Booking -->
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.selectBooking') }}</label>
-            <select
-              v-model="orderForm.booking_id"
-              @change="loadBookingDetails"
-              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              required
+          <!-- Select Booking Autocomplete -->
+          <div class="mb-6 relative">
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.selectBooking') }} *</label>
+            <div class="relative">
+              <input
+                v-model="bookingSearchQuery"
+                @focus="showBookingDropdown = true"
+                type="text"
+                required
+                placeholder="Cari nomor booking, nama tamu, atau nomor kamar/hall..."
+                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+              />
+              <button
+                v-if="orderForm.booking_id"
+                type="button"
+                @click="clearSelectedBooking"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm font-bold p-1"
+                title="Clear selected booking"
+              >
+                ✕
+              </button>
+            </div>
+
+            <!-- Dropdown Menu -->
+            <div
+              v-if="showBookingDropdown && filteredBookingsList.length > 0"
+              class="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-64 overflow-y-auto"
             >
-              <option value="">{{ $t('restaurant.selectABooking') }}</option>
-              <optgroup v-if="bookings.filter(b => b.type === 'room').length > 0" :label="$t('restaurant.roomBookings')">
-                <option v-for="booking in bookings.filter(b => b.type === 'room')" :key="'room-' + booking.id" :value="'room-' + booking.id">
-                  {{ booking.booking_number }} - {{ booking.guest?.name }} ({{ $t('restaurant.room') }} {{ booking.rooms?.[0]?.room_number }})
-                </option>
-              </optgroup>
-              <optgroup v-if="bookings.filter(b => b.type === 'hall').length > 0" :label="$t('restaurant.hallBookings')">
-                <option v-for="booking in bookings.filter(b => b.type === 'hall')" :key="'hall-' + booking.id" :value="'hall-' + booking.id">
-                  {{ booking.booking_number }} - {{ booking.customer_name }} ({{ booking.hall?.name }})
-                </option>
-              </optgroup>
-            </select>
-            <p v-if="bookings.length === 0" class="text-sm text-gray-500 mt-1">
+              <!-- Room Bookings Group -->
+              <div v-if="filteredBookingsList.filter(b => b.type === 'room').length > 0">
+                <div class="px-3 py-1.5 bg-blue-50 text-blue-800 font-semibold text-xs uppercase tracking-wider sticky top-0 border-b border-blue-100">
+                  🛏️ {{ $t('restaurant.roomBookings') }}
+                </div>
+                <div
+                  v-for="booking in filteredBookingsList.filter(b => b.type === 'room')"
+                  :key="'room-' + booking.id"
+                  @click="selectBookingItem(booking)"
+                  class="px-4 py-2.5 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                >
+                  <div class="flex justify-between items-center">
+                    <span class="font-mono font-bold text-gray-900 text-sm">{{ booking.booking_number }}</span>
+                    <span
+                      :class="booking.status === 'checked_in' ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800'"
+                      class="px-2 py-0.5 text-[10px] font-semibold rounded-full"
+                    >
+                      {{ booking.status === 'checked_in' ? 'Checked-In' : 'Confirmed' }}
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-600 mt-0.5">
+                    👤 {{ booking.guest?.name }} — <span class="font-medium text-gray-800">Kamar {{ booking.rooms?.map(r => r.room_number).join(', ') || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hall Bookings Group -->
+              <div v-if="filteredBookingsList.filter(b => b.type === 'hall').length > 0">
+                <div class="px-3 py-1.5 bg-purple-50 text-purple-800 font-semibold text-xs uppercase tracking-wider sticky top-0 border-b border-purple-100">
+                  🎪 {{ $t('restaurant.hallBookings') }}
+                </div>
+                <div
+                  v-for="booking in filteredBookingsList.filter(b => b.type === 'hall')"
+                  :key="'hall-' + booking.id"
+                  @click="selectBookingItem(booking)"
+                  class="px-4 py-2.5 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                >
+                  <div class="flex justify-between items-center">
+                    <span class="font-mono font-bold text-gray-900 text-sm">{{ booking.booking_number }}</span>
+                    <span
+                      :class="booking.status === 'checked_in' ? 'bg-emerald-100 text-emerald-800' : 'bg-purple-100 text-purple-800'"
+                      class="px-2 py-0.5 text-[10px] font-semibold rounded-full"
+                    >
+                      {{ booking.status === 'checked_in' ? 'Checked-In' : 'Confirmed' }}
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-600 mt-0.5">
+                    👤 {{ booking.customer_name }} — <span class="font-medium text-gray-800">Hall: {{ booking.hall?.name }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <p v-if="bookings.length === 0" class="text-xs text-gray-500 mt-1">
               {{ $t('restaurant.noActiveBookings') }}
             </p>
           </div>
@@ -588,10 +648,10 @@
     <!-- Menu Item Modal -->
     <div
       v-if="showMenuItemModal"
-      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+      class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto"
       @click.self="closeMenuItemModal"
     >
-      <div class="bg-white rounded-lg p-6 w-full max-w-md">
+      <div class="bg-white rounded-xl p-5 md:p-6 w-full max-w-sm md:max-w-md my-auto max-h-[85vh] overflow-y-auto shadow-2xl">
         <h2 class="text-xl font-bold text-gray-900 mb-4">
           {{ editingMenuItem ? $t('restaurant.editMenuItem') : $t('restaurant.addMenuItem') }}
         </h2>
@@ -648,7 +708,7 @@
               v-if="menuItemForm.photo && typeof menuItemForm.photo === 'string'" 
               :src="`${apiUrl}/storage/${menuItemForm.photo}`" 
               alt="Current photo"
-              class="mt-2 h-32 w-32 object-cover rounded"
+              class="mt-2 h-24 w-24 object-cover rounded-lg border border-gray-200 shadow-sm"
             />
           </div>
           <div class="mb-6">
@@ -667,7 +727,7 @@
               @click="closeMenuItemModal"
               class="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
             >
-              {{ $t('breakfast.cancel') }}
+              {{ $t('restaurant.cancel') }}
             </button>
             <button
               type="submit"
@@ -684,7 +744,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { menuItemApi, restaurantOrderApi, bookingApi, hallBookingApi } from '../api'
@@ -715,9 +775,49 @@ const menuItemForm = reactive({
 
 // Orders
 const bookings = ref([])
+const bookingSearchQuery = ref('')
+const showBookingDropdown = ref(false)
 const availableMenuItems = ref([])
 const menuCategoryFilter = ref('')
 const selectedBooking = ref(null)
+
+const filteredBookingsList = computed(() => {
+  const query = bookingSearchQuery.value.trim().toLowerCase()
+  if (!query) return bookings.value
+  return bookings.value.filter(booking => {
+    const num = (booking.booking_number || '').toLowerCase()
+    const guest = (booking.guest?.name || booking.customer_name || '').toLowerCase()
+    const roomOrHall = booking.type === 'room'
+      ? (booking.rooms?.map(r => r.room_number).join(', ') || '').toLowerCase()
+      : (booking.hall?.name || '').toLowerCase()
+    return num.includes(query) || guest.includes(query) || roomOrHall.includes(query)
+  })
+})
+
+function selectBookingItem(booking) {
+  const value = `${booking.type}-${booking.id}`
+  orderForm.booking_id = value
+  const loc = booking.type === 'room'
+    ? `Kamar ${booking.rooms?.map(r => r.room_number).join(', ') || '-'}`
+    : (booking.hall?.name || '-')
+  const guestName = booking.type === 'room' ? booking.guest?.name : booking.customer_name
+  bookingSearchQuery.value = `${booking.booking_number} — ${guestName} (${loc})`
+  showBookingDropdown.value = false
+  loadBookingDetails()
+}
+
+function clearSelectedBooking() {
+  orderForm.booking_id = ''
+  bookingSearchQuery.value = ''
+  selectedBooking.value = null
+  showBookingDropdown.value = true
+}
+
+function handleOutsideClickRestaurant(e) {
+  if (!e.target.closest('.relative')) {
+    showBookingDropdown.value = false
+  }
+}
 const orderForm = reactive({
   booking_id: '',
   booking_type: 'room', // 'room' or 'hall'
@@ -852,18 +952,31 @@ const loadBookings = async () => {
   try {
     const allBookings = []
     
-    // Load room bookings with checked_in status
-    const roomBookings = await bookingApi.getBookings({ status: 'checked_in' })
-    const roomBookingsWithType = (roomBookings || []).map(b => ({
+    // Load room bookings with checked_in or confirmed status
+    const roomCheckedIn = await bookingApi.getBookings({ status: 'checked_in' })
+    const roomConfirmed = await bookingApi.getBookings({ status: 'confirmed' })
+    
+    const roomCheckedInData = Array.isArray(roomCheckedIn) ? roomCheckedIn : (roomCheckedIn?.data || [])
+    const roomConfirmedData = Array.isArray(roomConfirmed) ? roomConfirmed : (roomConfirmed?.data || [])
+    
+    const roomCombinedMap = new Map()
+    ;[...roomCheckedInData, ...roomConfirmedData].forEach(b => roomCombinedMap.set(b.id, b))
+    const roomBookingsWithType = Array.from(roomCombinedMap.values()).map(b => ({
       ...b,
       type: 'room'
     }))
     allBookings.push(...roomBookingsWithType)
     
-    // Load hall bookings with confirmed status
-    const hallBookings = await hallBookingApi.getHallBookings({ status: 'confirmed' })
-    const hallBookingsData = hallBookings.data || hallBookings || []
-    const hallBookingsWithType = hallBookingsData.map(b => ({
+    // Load hall bookings with confirmed or checked_in status (active hall events)
+    const hallConfirmed = await hallBookingApi.getHallBookings({ status: 'confirmed' })
+    const hallCheckedIn = await hallBookingApi.getHallBookings({ status: 'checked_in' })
+    
+    const hallConfirmedData = Array.isArray(hallConfirmed) ? hallConfirmed : (hallConfirmed?.data || [])
+    const hallCheckedInData = Array.isArray(hallCheckedIn) ? hallCheckedIn : (hallCheckedIn?.data || [])
+    
+    const hallCombinedMap = new Map()
+    ;[...hallConfirmedData, ...hallCheckedInData].forEach(b => hallCombinedMap.set(b.id, b))
+    const hallBookingsWithType = Array.from(hallCombinedMap.values()).map(b => ({
       ...b,
       type: 'hall'
     }))
@@ -962,6 +1075,8 @@ const resetOrderForm = () => {
   orderForm.notes = ''
   selectedBooking.value = null
   menuCategoryFilter.value = ''
+  bookingSearchQuery.value = ''
+  showBookingDropdown.value = false
 }
 
 const submitOrder = async () => {
@@ -1105,6 +1220,7 @@ const getCategoryBadgeClass = (category) => {
 
 // Initialize
 onMounted(async () => {
+  document.addEventListener('click', handleOutsideClickRestaurant)
   console.log('RestaurantView mounted, initializing...')
   try {
     await loadMenuItems()
@@ -1135,5 +1251,9 @@ onMounted(async () => {
   }
   
   console.log('All initialization complete')
+})
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleOutsideClickRestaurant)
 })
 </script>

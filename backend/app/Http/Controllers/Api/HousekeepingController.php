@@ -76,15 +76,18 @@ class HousekeepingController extends Controller
             'notes' => $validated['notes'] ?? null,
         ]);
 
-        // Update hall status when task is created
+        // Update hall status when task is created (only if hall is not already dirty/cleaning)
         if ($task->hall_id) {
-            $status = 'occupied';
-            if (in_array($task->task_type, ['cleaning', 'hall_cleaning'])) {
-                $status = 'cleaning';
-            } elseif ($task->task_type === 'maintenance') {
-                $status = 'maintenance';
+            $hall = $task->hall;
+            if ($hall && !in_array($hall->status, ['dirty', 'cleaning', 'maintenance', 'unavailable'])) {
+                $status = 'occupied';
+                if (in_array($task->task_type, ['cleaning', 'hall_cleaning', 'deep_clean'])) {
+                    $status = 'cleaning';
+                } elseif ($task->task_type === 'maintenance') {
+                    $status = 'maintenance';
+                }
+                $hall->update(['status' => $status]);
             }
-            $task->hall->update(['status' => $status]);
         }
 
         return response()->json([
@@ -153,41 +156,50 @@ class HousekeepingController extends Controller
 
         $updates = ['status' => $validated['status']];
 
+        // ── Task starts (in_progress) ────────────────────────────────────────
         if ($validated['status'] === 'in_progress' && !$housekeeping->started_at) {
             $updates['started_at'] = now();
-            
-            // Update room status to cleaning when task starts
+
+            // Room: set to 'cleaning' while being cleaned
             if ($housekeeping->room_id && $housekeeping->room) {
-                if ($housekeeping->task_type === 'cleaning') {
+                if (in_array($housekeeping->task_type, ['cleaning', 'deep_clean', 'inspection'])) {
                     $housekeeping->room->update(['status' => 'cleaning']);
                 }
             }
-            
-            // Update hall status when task starts
+
+            // Hall: set to 'cleaning' while being cleaned
             if ($housekeeping->hall_id && $housekeeping->hall) {
-                $status = 'occupied';
-                if (in_array($housekeeping->task_type, ['cleaning', 'hall_cleaning'])) {
-                    $status = 'cleaning';
+                if (in_array($housekeeping->task_type, ['cleaning', 'hall_cleaning', 'deep_clean'])) {
+                    $housekeeping->hall->update(['status' => 'cleaning']);
                 } elseif ($housekeeping->task_type === 'maintenance') {
-                    $status = 'maintenance';
+                    $housekeeping->hall->update(['status' => 'maintenance']);
                 }
-                $housekeeping->hall->update(['status' => $status]);
             }
         }
 
+        // ── Task completed ───────────────────────────────────────────────────
         if ($validated['status'] === 'completed') {
             $updates['completed_at'] = now();
-            
-            // Update room status based on task type
+
+            // Room: set back to 'available' after cleaning/inspection
             if ($housekeeping->room_id && $housekeeping->room) {
-                if ($housekeeping->task_type === 'cleaning') {
+                if (in_array($housekeeping->task_type, ['cleaning', 'deep_clean', 'inspection'])) {
                     $housekeeping->room->update(['status' => 'available']);
                 }
             }
-            
-            // Update hall status to available when task completed
+
+            // Hall: set back to 'available' after cleaning — completing the full flow:
+            // booking complete → dirty → (task in_progress) cleaning → (task done) available
             if ($housekeeping->hall_id && $housekeeping->hall) {
-                $housekeeping->hall->update(['status' => 'available']);
+                if (in_array($housekeeping->task_type, ['cleaning', 'hall_cleaning', 'deep_clean', 'inspection'])) {
+                    $housekeeping->hall->update(['status' => 'available']);
+                } elseif ($housekeeping->task_type === 'maintenance') {
+                    // After maintenance, check if there are pending bookings
+                    $hasBooked = \App\Models\HallBooking::where('hall_id', $housekeeping->hall_id)
+                        ->whereIn('status', ['pending', 'confirmed'])
+                        ->exists();
+                    $housekeeping->hall->update(['status' => $hasBooked ? 'booked' : 'available']);
+                }
             }
         }
 
@@ -195,9 +207,10 @@ class HousekeepingController extends Controller
 
         return response()->json([
             'message' => 'Task status updated successfully',
-            'data' => $housekeeping->fresh(['room.roomType', 'hall', 'assignedUser'])
+            'data'    => $housekeeping->fresh(['room.roomType', 'hall', 'assignedUser'])
         ]);
     }
+
 
     public function statistics()
     {

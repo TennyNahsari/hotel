@@ -13,7 +13,7 @@ class PaymentController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Payment::with(['booking.guest', 'booking.room', 'hallBooking.hall', 'processedBy']);
+        $query = Payment::with(['booking.guest', 'booking.rooms', 'hallBooking.hall', 'processedBy']);
 
         // Filter by booking
         if ($request->filled('booking_id')) {
@@ -23,6 +23,53 @@ class PaymentController extends Controller
         // Filter by hall booking
         if ($request->filled('hall_booking_id')) {
             $query->where('hall_booking_id', $request->hall_booking_id);
+        }
+
+        // Filter by booking type (room / hall)
+        if ($request->filled('booking_type')) {
+            if ($request->booking_type === 'room') {
+                $query->whereNotNull('booking_id')->whereNull('hall_booking_id');
+            } elseif ($request->booking_type === 'hall') {
+                $query->whereNotNull('hall_booking_id')->whereNull('booking_id');
+            }
+        }
+
+        // Filter by parent booking status
+        // For room bookings: checked_out | For hall bookings: complete
+        if ($request->filled('booking_status')) {
+            $status = $request->booking_status;
+            if ($status === 'checked_out') {
+                // Only room bookings that are checked_out
+                $query->whereNotNull('booking_id')
+                      ->whereNull('hall_booking_id')
+                      ->whereHas('booking', function ($q) use ($status) {
+                          $q->where('status', $status);
+                      });
+            } elseif ($status === 'complete') {
+                // Only hall bookings that are complete
+                $query->whereNotNull('hall_booking_id')
+                      ->whereNull('booking_id')
+                      ->whereHas('hallBooking', function ($q) use ($status) {
+                          $q->where('status', $status);
+                      });
+            } elseif ($status === 'checkout_or_complete') {
+                // Both: room checked_out OR hall complete
+                $query->where(function ($q) {
+                    $q->where(function ($sub) {
+                        $sub->whereNotNull('booking_id')
+                            ->whereNull('hall_booking_id')
+                            ->whereHas('booking', function ($b) {
+                                $b->where('status', 'checked_out');
+                            });
+                    })->orWhere(function ($sub) {
+                        $sub->whereNotNull('hall_booking_id')
+                            ->whereNull('booking_id')
+                            ->whereHas('hallBooking', function ($hb) {
+                                $hb->where('status', 'complete');
+                            });
+                    });
+                });
+            }
         }
 
         // Filter by payment type
@@ -35,12 +82,21 @@ class PaymentController extends Controller
             $query->where('payment_method', $request->payment_method);
         }
 
-        // Search by payment number
+        // Search by payment number or guest name
         if ($request->filled('search')) {
-            $query->where('payment_number', 'like', '%' . $request->search . '%');
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('payment_number', 'like', '%' . $search . '%')
+                  ->orWhereHas('booking.guest', function ($b) use ($search) {
+                      $b->where('name', 'like', '%' . $search . '%');
+                  })
+                  ->orWhereHas('hallBooking', function ($hb) use ($search) {
+                      $hb->where('customer_name', 'like', '%' . $search . '%');
+                  });
+            });
         }
 
-        $payments = $query->orderBy('created_at', 'desc')->paginate(10);
+        $payments = $query->orderBy('created_at', 'desc')->paginate(15);
 
         return response()->json($payments);
     }
@@ -90,7 +146,7 @@ class PaymentController extends Controller
     public function show(Payment $payment)
     {
         if ($payment->booking_id) {
-            $payment->load(['booking.guest', 'booking.room.roomType', 'processedBy']);
+            $payment->load(['booking.guest', 'booking.rooms.roomType', 'processedBy']);
         } else {
             $payment->load(['hallBooking.hall', 'processedBy']);
         }

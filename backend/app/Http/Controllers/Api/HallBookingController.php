@@ -359,10 +359,12 @@ class HallBookingController extends Controller
 
     /**
      * Mark a hall booking as completed.
+     * Flow: complete → hall status = 'dirty' → auto housekeeping task created.
+     * Hall becomes 'available' again only after the housekeeping task is completed.
      */
     public function complete($id)
     {
-        $booking = HallBooking::findOrFail($id);
+        $booking = HallBooking::with('hall')->findOrFail($id);
 
         if (!in_array($booking->status, ['confirmed', 'checked_in'])) {
             return response()->json([
@@ -372,13 +374,29 @@ class HallBookingController extends Controller
 
         $booking->update(['status' => 'completed']);
         $this->deleteBookingReceipts($booking);
-        $this->updateHallStatus($booking->hall_id);
+
+        // Set hall status to 'dirty' — pending housekeeping cleaning
+        if ($booking->hall) {
+            $booking->hall->update(['status' => 'dirty']);
+        }
+
+        // Auto-create a pending hall_cleaning housekeeping task
+        \App\Models\HousekeepingTask::create([
+            'hall_id'   => $booking->hall_id,
+            'task_type' => 'hall_cleaning',
+            'priority'  => 'high',
+            'status'    => 'pending',
+            'notes'     => 'Auto-generated: Pembersihan hall setelah acara "'
+                           . $booking->event_name . '" ('
+                           . $booking->booking_number . ')',
+        ]);
 
         return response()->json([
-            'message' => 'Hall booking completed successfully',
+            'message' => 'Hall booking completed. Status hall diset ke dirty, tugas kebersihan dibuat otomatis.',
             'booking' => $booking->load(['hall', 'guest', 'bookedBy'])
         ]);
     }
+
 
     /**
      * Get calendar view of hall bookings.
@@ -543,18 +561,20 @@ class HallBookingController extends Controller
 
     /**
      * Helper to update physical hall status based on active bookings.
+     * Does NOT override 'dirty' or 'cleaning' statuses — those are
+     * managed by the housekeeping flow (task completion → available).
      */
     private function updateHallStatus($hallId)
     {
         $hall = Hall::find($hallId);
         if (!$hall) return;
 
-        // Keep administrative statuses
-        if (in_array($hall->status, ['maintenance', 'unavailable'])) {
+        // Keep administrative / housekeeping statuses — do not override
+        if (in_array($hall->status, ['maintenance', 'unavailable', 'dirty', 'cleaning'])) {
             return;
         }
 
-        // Check if event is currently checked in
+        // Check if event is currently checked in → occupied
         $hasCheckedIn = HallBooking::where('hall_id', $hallId)
             ->where('status', 'checked_in')
             ->exists();
@@ -564,7 +584,7 @@ class HallBookingController extends Controller
             return;
         }
 
-        // Check if there is any active pending/confirmed booking
+        // Check if there is any active pending/confirmed booking → booked
         $hasBooked = HallBooking::where('hall_id', $hallId)
             ->whereIn('status', ['pending', 'confirmed'])
             ->exists();
@@ -574,7 +594,7 @@ class HallBookingController extends Controller
             return;
         }
 
-        // Default: hall is available
+        // No active bookings → available
         $hall->update(['status' => 'available']);
     }
 
@@ -593,3 +613,4 @@ class HallBookingController extends Controller
         }
     }
 }
+

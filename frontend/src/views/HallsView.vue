@@ -47,6 +47,8 @@
               <option value="available">{{ $t('halls.available') }}</option>
               <option value="booked">Booked</option>
               <option value="occupied">Occupied</option>
+              <option value="dirty">Dirty</option>
+              <option value="cleaning">Cleaning</option>
               <option value="maintenance">{{ $t('halls.maintenance') }}</option>
               <option value="unavailable">{{ $t('halls.unavailable') }}</option>
             </select>
@@ -79,6 +81,8 @@
                     'bg-green-100 text-green-800': hall.status === 'available',
                     'bg-blue-100 text-blue-800': hall.status === 'booked',
                     'bg-purple-100 text-purple-800': hall.status === 'occupied',
+                    'bg-amber-100 text-amber-800': hall.status === 'dirty',
+                    'bg-cyan-100 text-cyan-800': hall.status === 'cleaning',
                     'bg-yellow-100 text-yellow-800': hall.status === 'maintenance',
                     'bg-red-100 text-red-800': hall.status === 'unavailable',
                   }"
@@ -176,6 +180,8 @@
                       'bg-green-100 text-green-800': hall.status === 'available',
                       'bg-blue-100 text-blue-800': hall.status === 'booked',
                       'bg-purple-100 text-purple-800': hall.status === 'occupied',
+                      'bg-amber-100 text-amber-800': hall.status === 'dirty',
+                      'bg-cyan-100 text-cyan-800': hall.status === 'cleaning',
                       'bg-yellow-100 text-yellow-800': hall.status === 'maintenance',
                       'bg-red-100 text-red-800': hall.status === 'unavailable',
                     }"
@@ -737,6 +743,8 @@ const getStatusBadgeText = (status) => {
     case 'available': return t('halls.available') || 'Available'
     case 'booked': return 'Booked'
     case 'occupied': return 'Occupied'
+    case 'dirty': return 'Dirty (Kotor)'
+    case 'cleaning': return 'Cleaning (Dibersihkan)'
     case 'maintenance': return t('halls.maintenance') || 'Maintenance'
     case 'unavailable': return t('halls.unavailable') || 'Unavailable'
     default: return status
