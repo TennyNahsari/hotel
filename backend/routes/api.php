@@ -45,6 +45,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
+    Route::post('/dashboard/refresh', [DashboardController::class, 'refresh']);
 
     // Room Types Management
     Route::apiResource('room-types', RoomTypeController::class);

@@ -29,6 +29,7 @@ class Booking extends Model
         'special_requests',
         'checked_in_at',
         'checked_out_at',
+        'payment_due_at',
     ];
 
     protected $casts = [
@@ -42,6 +43,7 @@ class Booking extends Model
         'deposit_amount' => 'decimal:2',
         'checked_in_at' => 'datetime',
         'checked_out_at' => 'datetime',
+        'payment_due_at' => 'datetime',
     ];
 
     // Relationships
@@ -81,7 +83,7 @@ class Booking extends Model
         return $this->hasMany(Payment::class);
     }
 
-    // Boot method to auto-generate booking number
+    // Boot method to auto-generate booking number & payment_due_at
     protected static function boot()
     {
         parent::boot();
@@ -89,6 +91,9 @@ class Booking extends Model
         static::creating(function ($booking) {
             if (empty($booking->booking_number)) {
                 $booking->booking_number = 'BK' . date('Ymd') . strtoupper(Str::random(6));
+            }
+            if (empty($booking->payment_due_at)) {
+                $booking->payment_due_at = now()->addHour();
             }
         });
     }

@@ -2,9 +2,21 @@
   <LayoutMain>
     <div class="space-y-6">
       <!-- Header -->
-      <div>
-        <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('dashboard.title') }}</h1>
-        <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('dashboard.subtitle') }}</p>
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('dashboard.title') }}</h1>
+          <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('dashboard.subtitle') }}</p>
+        </div>
+        <button
+          @click="handleRefreshDashboard"
+          :disabled="refreshing || loading"
+          class="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-forest text-white text-xs sm:text-sm font-semibold rounded-lg hover:bg-forest-800 transition-colors shadow disabled:opacity-50"
+        >
+          <svg :class="['w-4 h-4', refreshing ? 'animate-spin' : '']" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>{{ refreshing ? 'Memproses Status...' : 'Refresh Status Booking' }}</span>
+        </button>
       </div>
 
       <!-- Loading State -->
@@ -217,15 +229,26 @@
                   <div class="flex justify-between items-start">
                     <div>
                       <div class="font-medium text-gray-900">{{ booking.guest?.name }}</div>
-                      <div class="text-sm text-gray-500">{{ booking.guest?.email }}</div>
+                      <div class="text-xs text-gray-500">{{ booking.guest?.email }}</div>
                     </div>
-                    <span :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                    <span v-if="isOverdue(booking)" class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
+                      {{ $t('dashboard.overdue') }}
+                    </span>
+                    <span v-else :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
                       {{ getStatusLabel(booking.status) }}
                     </span>
                   </div>
-                  <div class="text-sm text-gray-600">
-                    <div>Room {{ booking.room?.room_number }} - {{ booking.room?.room_type?.name }}</div>
-                    <div class="mt-1">{{ formatDate(booking.check_in_date) }} - {{ formatDate(booking.check_out_date) }}</div>
+                  <div class="text-xs text-gray-600 space-y-1">
+                    <div>Kamar {{ booking.room?.room_number || '-' }} - {{ booking.room?.room_type?.name || '-' }}</div>
+                    <div>{{ formatDate(booking.check_in_date) }} → {{ formatDate(booking.check_out_date) }}</div>
+                    <div v-if="booking.payment_due_at" class="font-mono text-gray-700">
+                      🕒 {{ $t('dashboard.paymentDue') }}: <span :class="isOverdue(booking) ? 'text-red-600 font-bold' : ''">{{ formatDateTime(booking.payment_due_at) }}</span>
+                    </div>
+                    <div v-if="booking.receipt_url" class="pt-1">
+                      <a :href="booking.receipt_url" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-xs font-semibold">
+                        📎 {{ $t('dashboard.paymentReceipt') }}
+                      </a>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -240,6 +263,8 @@
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.room') }}</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.checkIn') }}</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.checkOut') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.paymentDue') }}</th>
+                  <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.paymentReceipt') }}</th>
                   <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">{{ $t('dashboard.status') }}</th>
                 </tr>
               </thead>
@@ -250,8 +275,8 @@
                     <div class="text-sm text-gray-500">{{ booking.guest?.email }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ booking.room?.room_number }}</div>
-                    <div class="text-sm text-gray-500">{{ booking.room?.room_type?.name }}</div>
+                    <div class="text-sm text-gray-900">{{ booking.room?.room_number || '-' }}</div>
+                    <div class="text-sm text-gray-500">{{ booking.room?.room_type?.name || '-' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {{ formatDate(booking.check_in_date) }}
@@ -259,8 +284,40 @@
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {{ formatDate(booking.check_out_date) }}
                   </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">
+                    <span v-if="booking.payment_due_at" :class="isOverdue(booking) ? 'text-red-600 font-bold' : 'text-gray-700'">
+                      {{ formatDateTime(booking.payment_due_at) }}
+                    </span>
+                    <span v-else class="text-gray-400">-</span>
+                  </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <span :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                    <div v-if="booking.receipt_url" class="space-y-1">
+                      <a
+                        :href="booking.receipt_url"
+                        target="_blank"
+                        class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-xs font-semibold hover:bg-emerald-100 transition-colors shadow-2xs"
+                      >
+                        <span>📎</span> Lihat Struk
+                      </a>
+                      <div v-if="booking.reference_number" class="text-[10px] text-gray-500 font-mono">
+                        Ref: {{ booking.reference_number }}
+                      </div>
+                    </div>
+                    <div v-else-if="booking.has_receipt || booking.reference_number" class="space-y-0.5">
+                      <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[11px] font-semibold">
+                        ✓ Ada Pembayaran
+                      </span>
+                      <div v-if="booking.reference_number" class="text-[10px] text-gray-500 font-mono">
+                        Ref: {{ booking.reference_number }}
+                      </div>
+                    </div>
+                    <span v-else class="text-xs text-gray-400 italic">Belum ada</span>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap">
+                    <span v-if="isOverdue(booking)" class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
+                      Telat Bayar
+                    </span>
+                    <span v-else :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
                       {{ getStatusLabel(booking.status) }}
                     </span>
                   </td>
@@ -286,6 +343,7 @@ import axios from 'axios'
 const { t } = useI18n()
 const dashboard = ref({})
 const loading = ref(false)
+const refreshing = ref(false)
 
 onMounted(async () => {
   // Ensure CSRF cookie
@@ -312,6 +370,17 @@ async function loadDashboard() {
   }
 }
 
+async function handleRefreshDashboard() {
+  refreshing.value = true
+  try {
+    dashboard.value = await dashboardApi.refreshDashboard()
+  } catch (err) {
+    console.error('Failed to refresh dashboard:', err)
+  } finally {
+    refreshing.value = false
+  }
+}
+
 function formatCurrency(amount) {
   return new Intl.NumberFormat('id-ID', {
     style: 'currency',
@@ -327,6 +396,28 @@ function formatDate(date) {
     month: 'short',
     day: 'numeric'
   })
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' WIB'
+}
+
+function isOverdue(booking) {
+  if (!booking) return false
+  if (booking.is_overdue) return true
+  if (booking.status === 'pending' && booking.payment_due_at) {
+    return new Date() > new Date(booking.payment_due_at)
+  }
+  return false
 }
 
 function getStatusBadgeClass(status) {

@@ -7,12 +7,25 @@
           <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('hallBookings.title') }}</h1>
           <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('hallBookings.subtitle') }}</p>
         </div>
-        <button
-          @click="openAddModal"
-          class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-600 text-white text-sm md:text-base rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
-        >
-          + {{ $t('hallBookings.newBooking') }}
-        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            @click="fetchBookings(pagination.current_page)"
+            :disabled="loading"
+            class="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+            title="Refresh Data Booking Hall"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Refresh</span>
+          </button>
+          <button
+            @click="openAddModal"
+            class="w-full sm:w-auto px-4 sm:px-6 py-2 bg-blue-600 text-white text-sm md:text-base rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          >
+            + {{ $t('hallBookings.newBooking') }}
+          </button>
+        </div>
       </div>
 
       <!-- Filters -->
@@ -228,17 +241,29 @@
                   <div class="text-xs text-gray-500">{{ booking.duration_hours}} {{ $t('hallBookings.hrs') }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    :class="{
-                      'bg-yellow-100 text-yellow-800': booking.status === 'pending',
-                      'bg-green-100 text-green-800': booking.status === 'confirmed',
-                      'bg-gray-100 text-gray-800': booking.status === 'completed',
-                      'bg-red-100 text-red-800': booking.status === 'cancelled',
-                    }"
-                    class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
-                  >
-                    {{ booking.status }}
-                  </span>
+                  <div class="space-y-1">
+                    <span
+                      v-if="booking.status === 'pending' && booking.payment_due_at && new Date() > new Date(booking.payment_due_at)"
+                      class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800 border border-red-200"
+                    >
+                      Telat Bayar
+                    </span>
+                    <span
+                      v-else
+                      :class="{
+                        'bg-yellow-100 text-yellow-800': booking.status === 'pending',
+                        'bg-green-100 text-green-800': booking.status === 'confirmed',
+                        'bg-gray-100 text-gray-800': booking.status === 'completed',
+                        'bg-red-100 text-red-800': booking.status === 'cancelled',
+                      }"
+                      class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
+                    >
+                      {{ booking.status }}
+                    </span>
+                    <div v-if="booking.payment_due_at" class="text-[11px] font-mono text-gray-500">
+                      🕒 Batas: {{ formatDateTime(booking.payment_due_at) }}
+                    </div>
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div class="flex gap-2">
@@ -938,6 +963,19 @@ const formatDate = (date) => {
     month: 'long',
     day: 'numeric'
   })
+}
+
+const formatDateTime = (dateStr) => {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' WIB'
 }
 
 // Get receipt path & URL

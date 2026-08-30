@@ -17,6 +17,9 @@ class HallBookingController extends Controller
      */
     public function index(Request $request)
     {
+        // Auto process overdue cancellations
+        app(\App\Http\Controllers\Api\DashboardController::class)->processOverdueBookings();
+
         $query = HallBooking::with(['hall', 'guest', 'bookedBy', 'payments']);
 
         // Filter by status

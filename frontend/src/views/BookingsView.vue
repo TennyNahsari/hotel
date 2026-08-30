@@ -7,12 +7,25 @@
           <h1 class="text-xl sm:text-2xl md:text-3xl font-bold text-gray-900">{{ $t('bookings.title') }}</h1>
           <p class="text-gray-600 mt-1 text-xs sm:text-sm md:text-base">{{ $t('bookings.subtitle') }}</p>
         </div>
-        <button
-          @click="openCreateModal"
-          class="w-full sm:w-auto px-4 py-2 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
-        >
-          + {{ $t('bookings.newBooking') }}
-        </button>
+        <div class="flex items-center gap-2 w-full sm:w-auto">
+          <button
+            @click="loadBookings"
+            :disabled="loading"
+            class="px-3 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
+            title="Refresh Data Booking"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>Refresh</span>
+          </button>
+          <button
+            @click="openCreateModal"
+            class="w-full sm:w-auto px-4 py-2 text-sm md:text-base bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+          >
+            + {{ $t('bookings.newBooking') }}
+          </button>
+        </div>
       </div>
 
       <!-- Filters -->
@@ -285,10 +298,18 @@
                   </div>
                 </td>
                 <td class="px-6 py-4">
-                  <div class="mb-2">
-                    <span :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
-                      {{ getStatusLabel(booking.status) }}
-                    </span>
+                  <div class="mb-2 space-y-1">
+                    <div class="flex items-center gap-1">
+                      <span v-if="booking.status === 'pending' && booking.payment_due_at && new Date() > new Date(booking.payment_due_at)" class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800 border border-red-200">
+                        Telat Bayar
+                      </span>
+                      <span v-else :class="getStatusBadgeClass(booking.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                        {{ getStatusLabel(booking.status) }}
+                      </span>
+                    </div>
+                    <div v-if="booking.payment_due_at" class="text-[11px] font-mono text-gray-500">
+                      🕒 Batas Bayar: {{ formatDateTime(booking.payment_due_at) }}
+                    </div>
                   </div>
                   <div class="flex flex-wrap gap-2">
                     <button
@@ -1103,11 +1124,25 @@ function getStatusLabel(status) {
 }
 
 function formatDate(date) {
+  if (!date) return '-'
   return new Date(date).toLocaleDateString('id-ID', {
     day: '2-digit',
     month: 'short',
     year: 'numeric'
   })
+}
+
+function formatDateTime(dateStr) {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' WIB'
 }
 
 function formatCurrency(amount) {

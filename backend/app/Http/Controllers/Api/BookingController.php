@@ -18,6 +18,9 @@ class BookingController extends Controller
 {
     public function index(Request $request)
     {
+        // Auto process overdue cancellations
+        app(\App\Http\Controllers\Api\DashboardController::class)->processOverdueBookings();
+
         $query = Booking::with(['guest', 'rooms.roomType', 'payments', 'createdBy']);
 
         // Filter by status
@@ -611,7 +614,7 @@ class BookingController extends Controller
 
         // Check if it's a hall booking (HB-...)
         if (str_starts_with(strtoupper($bookingNumber), 'HB-')) {
-            $hallBooking = \App\Models\HallBooking::with(['hall', 'guest'])
+            $hallBooking = \App\Models\HallBooking::with(['hall', 'guest', 'payments'])
                 ->where('booking_number', $bookingNumber)
                 ->where(function($q) use ($contact) {
                     $q->where('customer_email', $contact)
@@ -624,20 +627,30 @@ class BookingController extends Controller
 
             if ($hallBooking) {
                 $eventDateStr = is_string($hallBooking->event_date) ? substr($hallBooking->event_date, 0, 10) : $hallBooking->event_date->format('Y-m-d');
+                $dueAt = $hallBooking->payment_due_at ? $hallBooking->payment_due_at->toIso8601String() : null;
+                $isOverdue = $hallBooking->status === 'pending' && $hallBooking->payment_due_at && now()->gt($hallBooking->payment_due_at);
+
                 return response()->json([
                     'data' => [
+                        'id' => $hallBooking->id,
                         'booking_number' => $hallBooking->booking_number,
+                        'booking_type' => 'hall',
                         'status' => $hallBooking->status,
+                        'event_name' => $hallBooking->event_name,
+                        'hall_name' => $hallBooking->hall ? $hallBooking->hall->name : '-',
                         'check_in_date' => $eventDateStr . ' (' . $hallBooking->start_time . ')',
                         'check_out_date' => $eventDateStr . ' (' . $hallBooking->end_time . ')',
-                        'total_amount' => $hallBooking->total_amount,
+                        'total_amount' => (float)$hallBooking->total_amount,
                         'deposit_amount' => 0,
                         'source' => 'Website (Hall)',
+                        'payment_due_at' => $dueAt,
+                        'is_overdue' => $isOverdue,
                         'guest' => [
                             'name' => $hallBooking->customer_name,
                             'email' => $hallBooking->customer_email,
                             'phone' => $hallBooking->customer_phone,
-                        ]
+                        ],
+                        'payments' => $hallBooking->payments
                     ]
                 ]);
             }
@@ -657,8 +670,13 @@ class BookingController extends Controller
             ], 404);
         }
 
+        $bookingData = $booking->toArray();
+        $bookingData['booking_type'] = 'room';
+        $bookingData['payment_due_at'] = $booking->payment_due_at ? $booking->payment_due_at->toIso8601String() : null;
+        $bookingData['is_overdue'] = $booking->status === 'pending' && $booking->payment_due_at && now()->gt($booking->payment_due_at);
+
         return response()->json([
-            'data' => $booking
+            'data' => $bookingData
         ]);
     }
 

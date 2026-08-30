@@ -29,6 +29,7 @@ class HallBooking extends Model
         'special_requests',
         'notes',
         'booked_by',
+        'payment_due_at',
     ];
 
     protected $casts = [
@@ -36,9 +37,21 @@ class HallBooking extends Model
         'duration_hours' => 'decimal:2',
         'attendees' => 'integer',
         'total_amount' => 'decimal:2',
+        'payment_due_at' => 'datetime',
     ];
 
     protected $appends = ['booking_type'];
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($booking) {
+            if (empty($booking->payment_due_at)) {
+                $booking->payment_due_at = now()->addHour();
+            }
+        });
+    }
 
     /**
      * Get the hall for this booking.

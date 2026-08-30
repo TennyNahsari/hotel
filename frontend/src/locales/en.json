@@ -62,7 +62,12 @@
     "confirmed": "Confirmed",
     "checkedIn": "Checked In",
     "checkedOut": "Checked Out",
-    "cancelled": "Cancelled"
+    "cancelled": "Cancelled",
+    "paymentDue": "Payment Due",
+    "paymentReceipt": "Payment Receipt",
+    "overdue": "Overdue",
+    "refreshStatus": "Refresh Booking Status",
+    "processingStatus": "Processing Status..."
   },
   "aiPredictions": {
     "title": "AI Predictions",

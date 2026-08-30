@@ -68,6 +68,13 @@
           </button>
 
           <button
+            @click="openHallBookingModal()"
+            class="px-4 py-2.5 bg-gold/90 text-forest hover:bg-gold text-xs font-bold uppercase tracking-wider rounded transition-all shadow-sm"
+          >
+            Pesan Hall
+          </button>
+
+          <button
             @click="openBookingModal()"
             class="px-5 py-2.5 bg-forest text-white text-xs font-semibold uppercase tracking-widest rounded hover:bg-forest-800 transition-all shadow-sm hover:shadow"
           >
@@ -166,13 +173,19 @@
         <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
             @click="openBookingModal()"
-            class="w-full sm:w-auto px-8 py-4 bg-forest text-white text-sm font-semibold uppercase tracking-widest rounded hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            class="w-full sm:w-auto px-7 py-4 bg-forest text-white text-sm font-semibold uppercase tracking-widest rounded hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
           >
             {{ $t('landing.hero.bookStay') }}
           </button>
           <button
+            @click="openHallBookingModal()"
+            class="w-full sm:w-auto px-7 py-4 bg-gold text-forest text-sm font-bold uppercase tracking-widest rounded hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+          >
+            Pesan Hall
+          </button>
+          <button
             @click="openTrackModal()"
-            class="w-full sm:w-auto px-8 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium uppercase tracking-widest rounded transition-all"
+            class="w-full sm:w-auto px-7 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium uppercase tracking-widest rounded transition-all"
           >
             Cek Status Pesanan
           </button>
@@ -1161,6 +1174,14 @@
                 <span class="font-bold text-charcoal text-sm">{{ formatCurrency(bookingSuccessData.data?.total_amount) }}</span>
               </div>
 
+              <!-- Payment Deadline Info -->
+              <div v-if="bookingSuccessData.data?.payment_due_at" class="flex items-center justify-between text-xs p-2.5 bg-amber-50 rounded border border-amber-200">
+                <span class="text-amber-800 font-semibold flex items-center gap-1">
+                  <span>🕒</span> Batas Waktu Pembayaran:
+                </span>
+                <span class="font-bold text-amber-950 font-mono">{{ formatDateTime(bookingSuccessData.data.payment_due_at) }}</span>
+              </div>
+
               <!-- Rooms Breakdown in Booking Success Screen -->
               <div v-if="bookingSuccessData.data?.rooms && bookingSuccessData.data.rooms.length > 0" class="pt-2 border-t border-sand/20 space-y-1.5">
                 <div class="flex items-center justify-between text-xs">
@@ -1409,60 +1430,22 @@
                 </div>
               </div>
 
-              <!-- HYBRID PAYMENT OPTIONS -->
-              <div class="space-y-2 pt-2 border-t border-sand/30">
+              <!-- GUARANTEED 50% DEPOSIT PAYMENT OPTION -->
+              <div class="space-y-3 pt-2 border-t border-sand/30">
                 <label class="block text-xs uppercase tracking-wider font-semibold text-charcoal">{{ $t('landing.bookingModal.paymentChoice') }}</label>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <!-- Option A: Pay at Hotel -->
-                  <label
-                    :class="[
-                      'p-3.5 rounded border cursor-pointer transition-all flex flex-col justify-between space-y-2',
-                      bookingForm.payment_option === 'pay_at_hotel'
-                        ? 'border-forest bg-forest/5 ring-1 ring-forest'
-                        : 'border-sand/40 bg-white hover:border-sand'
-                    ]"
-                  >
-                    <div class="flex items-start space-x-2">
-                      <input
-                        type="radio"
-                        v-model="bookingForm.payment_option"
-                        value="pay_at_hotel"
-                        class="mt-0.5 text-forest focus:ring-forest"
-                      />
-                      <div>
-                        <span class="block text-xs font-bold text-forest">{{ $t('landing.bookingModal.payAtHotel') }}</span>
-                        <span class="block text-[11px] text-taupe leading-snug">{{ $t('landing.bookingModal.payAtHotelOption') }}</span>
-                      </div>
-                    </div>
-                  </label>
-
-                  <!-- Option B: Bank Transfer Guaranteed -->
-                  <label
-                    :class="[
-                      'p-3.5 rounded border cursor-pointer transition-all flex flex-col justify-between space-y-2',
-                      bookingForm.payment_option === 'transfer_guaranteed'
-                        ? 'border-forest bg-forest/5 ring-1 ring-forest'
-                        : 'border-sand/40 bg-white hover:border-sand'
-                    ]"
-                  >
-                    <div class="flex items-start space-x-2">
-                      <input
-                        type="radio"
-                        v-model="bookingForm.payment_option"
-                        value="transfer_guaranteed"
-                        class="mt-0.5 text-forest focus:ring-forest"
-                      />
-                      <div>
-                        <span class="block text-xs font-bold text-forest">{{ $t('landing.bookingModal.guaranteedDP') }}</span>
-                        <span class="block text-[11px] text-taupe leading-snug">{{ $t('landing.bookingModal.transferGuaranteedOption') }}</span>
-                      </div>
-                    </div>
-                  </label>
+                <div class="p-3.5 rounded border border-forest bg-forest/5 ring-1 ring-forest space-y-2">
+                  <div class="flex items-center space-x-2">
+                    <span class="w-2 h-2 rounded-full bg-forest"></span>
+                    <span class="text-xs font-bold text-forest">{{ $t('landing.bookingModal.guaranteedDP') }}</span>
+                  </div>
+                  <p class="text-[11px] text-taupe leading-relaxed">
+                    Pemesanan via website wajib membayar DP Jaminan sebesar 50% melalui Transfer Bank / QRIS dalam batas waktu 1 jam.
+                  </p>
                 </div>
 
-                <!-- Additional details if Bank Transfer is selected -->
-                <div v-if="bookingForm.payment_option === 'transfer_guaranteed'" class="p-3.5 bg-white border border-sand/40 rounded space-y-3 mt-2 animate-fade-in">
+                <!-- Additional details for Bank Transfer & QRIS -->
+                <div class="p-3.5 bg-white border border-sand/40 rounded space-y-3 mt-2 animate-fade-in">
                   <div class="text-xs space-y-2">
                     <span class="font-bold text-forest uppercase tracking-wider block">{{ $t('landing.bookingModal.bankDestination') }}</span>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-taupe">
@@ -1639,6 +1622,7 @@
               <span
                 :class="[
                   'px-3 py-1 rounded text-xs font-bold uppercase tracking-wider',
+                  trackResult.is_overdue ? 'bg-red-100 text-red-800 border border-red-300' :
                   trackResult.status === 'confirmed' ? 'bg-green-100 text-green-800' :
                   trackResult.status === 'checked_in' ? 'bg-blue-100 text-blue-800' :
                   trackResult.status === 'checked_out' ? 'bg-gray-100 text-gray-800' :
@@ -1647,6 +1631,7 @@
                 ]"
               >
                 {{
+                  trackResult.is_overdue ? 'Telat Bayar' :
                   trackResult.status === 'confirmed' ? $t('landing.trackModal.confirmed') :
                   trackResult.status === 'checked_in' ? $t('landing.trackModal.checkedIn') :
                   trackResult.status === 'checked_out' ? $t('landing.trackModal.checkedOut') :
@@ -1654,6 +1639,27 @@
                   $t('landing.trackModal.pending')
                 }}
               </span>
+            </div>
+
+            <!-- Overdue Alert Banner if Late -->
+            <div v-if="trackResult.is_overdue" class="p-3 bg-red-50 border border-red-200 rounded text-xs text-red-800 space-y-1">
+              <div class="font-bold flex items-center gap-1 text-red-900">
+                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>Perhatian: Melebihi Batas Waktu Pembayaran (Telat Bayar)</span>
+              </div>
+              <p class="text-[11px] text-red-700 leading-relaxed">
+                Pemesanan Anda telah melewati batas waktu pembayaran. Harap segera lakukan pembayaran dan konfirmasi via WhatsApp untuk mengamankan pesanan Anda.
+              </p>
+            </div>
+
+            <!-- Payment Deadline Row in Track Modal -->
+            <div v-if="trackResult.payment_due_at" class="p-2.5 rounded border text-xs flex items-center justify-between" :class="trackResult.is_overdue ? 'bg-red-100/70 border-red-200 text-red-900' : 'bg-amber-50 border-amber-200 text-amber-900'">
+              <span class="font-semibold flex items-center gap-1">
+                <span>🕒</span> Batas Waktu Pembayaran:
+              </span>
+              <span class="font-mono font-bold">{{ formatDateTime(trackResult.payment_due_at) }}</span>
             </div>
 
             <div class="grid grid-cols-2 gap-3 text-xs">
@@ -1854,6 +1860,11 @@
           <div class="flex justify-between">
             <span class="text-taupe">Estimasi Biaya:</span>
             <span class="font-bold text-forest">{{ formatCurrency(hallBookingSuccessData.total_amount) }}</span>
+          </div>
+          <!-- Payment Deadline in Hall Success Box -->
+          <div v-if="hallBookingSuccessData.payment_due_at" class="flex items-center justify-between border-t border-sand/20 pt-2 text-amber-900 font-medium">
+            <span>🕒 Batas Waktu Pembayaran:</span>
+            <span class="font-bold font-mono text-amber-950">{{ formatDateTime(hallBookingSuccessData.payment_due_at) }}</span>
           </div>
         </div>
 
@@ -2303,7 +2314,7 @@ const bookingForm = ref({
   adults: 2,
   children: 0,
   room_type_id: null,
-  payment_option: 'pay_at_hotel',
+  payment_option: 'transfer_guaranteed',
   bank_name: 'BCA',
   sender_name: '',
   reference_number: '',
@@ -2317,20 +2328,26 @@ function formatCurrency(val) {
   return 'Rp ' + num.toLocaleString('id-ID')
 }
 
-function formatDate(dateStr) {
+function formatDate(date) {
+  if (!date) return '-'
+  return new Date(date).toLocaleDateString('id-ID', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+function formatDateTime(dateStr) {
   if (!dateStr) return '-'
-  try {
-    const cleanStr = String(dateStr).split('T')[0]
-    const d = new Date(cleanStr)
-    if (isNaN(d.getTime())) return dateStr
-    return d.toLocaleDateString('id-ID', {
-      day: 'numeric',
-      month: 'short',
-      year: 'numeric'
-    })
-  } catch (e) {
-    return dateStr
-  }
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  }) + ' WIB'
 }
 
 // Hall Booking & List State
@@ -2584,6 +2601,7 @@ function openBookingModal(presetRoom = null) {
   selectedRoom.value = null
   bookingSuccessData.value = null
   bookingErrorMessage.value = ''
+  bookingForm.value.payment_option = 'transfer_guaranteed'
   
   if (presetRoom) {
     if (presetRoom.id && typeof presetRoom.id === 'number') {

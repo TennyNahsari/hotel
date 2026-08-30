@@ -228,6 +228,10 @@ export const dashboardApi = {
     const response = await api.get('/dashboard')
     return response.data
   },
+  async refreshDashboard() {
+    const response = await api.post('/dashboard/refresh')
+    return response.data
+  },
 }
 
 export const userApi = {

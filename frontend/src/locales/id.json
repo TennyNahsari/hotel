@@ -62,7 +62,12 @@
     "confirmed": "Dikonfirmasi",
     "checkedIn": "Sudah Check-in",
     "checkedOut": "Sudah Check-out",
-    "cancelled": "Dibatalkan"
+    "cancelled": "Dibatalkan",
+    "paymentDue": "Batas Bayar",
+    "paymentReceipt": "Bukti Pembayaran",
+    "overdue": "Telat Bayar",
+    "refreshStatus": "Refresh Status Booking",
+    "processingStatus": "Memproses Status..."
   },
   "aiPredictions": {
     "title": "Prediksi AI",
