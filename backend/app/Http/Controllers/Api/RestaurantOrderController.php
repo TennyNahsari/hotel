@@ -47,16 +47,17 @@ class RestaurantOrderController extends Controller
         $validated = $request->validate([
             'booking_id' => 'nullable|exists:bookings,id',
             'hall_booking_id' => 'nullable|exists:hall_bookings,id',
+            'customer_name' => 'nullable|string|max:100',
             'items' => 'required|array|min:1',
             'items.*.menu_item_id' => 'required|exists:menu_items,id',
             'items.*.quantity' => 'required|integer|min:1',
             'notes' => 'nullable|string',
         ]);
 
-        // Validate that at least one booking type is provided
-        if (empty($validated['booking_id']) && empty($validated['hall_booking_id'])) {
+        // Validate that either a booking or customer_name for walk-in guest is provided
+        if (empty($validated['booking_id']) && empty($validated['hall_booking_id']) && empty($validated['customer_name'])) {
             return response()->json([
-                'message' => 'Either booking_id or hall_booking_id is required'
+                'message' => 'Pilih booking (Kamar / Hall) atau masukkan Nama Pemesan / Tamu Luar'
             ], 422);
         }
 
@@ -73,6 +74,7 @@ class RestaurantOrderController extends Controller
             $order = RestaurantOrder::create([
                 'booking_id' => $validated['booking_id'] ?? null,
                 'hall_booking_id' => $validated['hall_booking_id'] ?? null,
+                'customer_name' => $validated['customer_name'] ?? null,
                 'status' => 'pending',
                 'notes' => $validated['notes'] ?? null,
                 'created_by' => auth()->id(),
@@ -106,8 +108,10 @@ class RestaurantOrderController extends Controller
             // Load appropriate relationships based on booking type
             if ($order->booking_id) {
                 $order->load(['booking.guest', 'booking.rooms', 'orderItems.menuItem']);
-            } else {
+            } elseif ($order->hall_booking_id) {
                 $order->load(['hallBooking.hall', 'orderItems.menuItem']);
+            } else {
+                $order->load(['orderItems.menuItem']);
             }
 
             return response()->json($order, 201);
@@ -121,8 +125,10 @@ class RestaurantOrderController extends Controller
     {
         if ($restaurantOrder->booking_id) {
             $restaurantOrder->load(['booking.guest', 'booking.rooms', 'orderItems.menuItem', 'createdBy']);
-        } else {
+        } elseif ($restaurantOrder->hall_booking_id) {
             $restaurantOrder->load(['hallBooking.hall', 'orderItems.menuItem', 'createdBy']);
+        } else {
+            $restaurantOrder->load(['orderItems.menuItem', 'createdBy']);
         }
         return response()->json($restaurantOrder);
     }
@@ -134,7 +140,33 @@ class RestaurantOrderController extends Controller
         ]);
 
         $restaurantOrder->update($validated);
-        $restaurantOrder->load(['booking.guest', 'booking.rooms', 'orderItems.menuItem']);
+
+        // Standalone Walk-In Restaurant Order Payment Creation on Delivered
+        if ($validated['status'] === 'delivered' && empty($restaurantOrder->booking_id) && empty($restaurantOrder->hall_booking_id)) {
+            $notesSearch = 'Order #' . $restaurantOrder->order_number;
+            $existingPayment = \App\Models\Payment::where('notes', 'like', "%{$notesSearch}%")->first();
+            if (!$existingPayment) {
+                \App\Models\Payment::create([
+                    'booking_id'         => null,
+                    'hall_booking_id'    => null,
+                    'payment_type'       => 'full',
+                    'payment_method'     => 'cash',
+                    'amount'             => 0,
+                    'restaurant_charges' => (float) $restaurantOrder->total_amount,
+                    'laundry_charges'    => 0,
+                    'notes'              => 'Pembayaran Order Restoran Mandiri (' . ($restaurantOrder->customer_name ?? 'Tamu Luar') . ' - Order #' . $restaurantOrder->order_number . ')',
+                    'processed_by'       => auth()->id(),
+                ]);
+            }
+        }
+
+        if ($restaurantOrder->booking_id) {
+            $restaurantOrder->load(['booking.guest', 'booking.rooms', 'orderItems.menuItem']);
+        } elseif ($restaurantOrder->hall_booking_id) {
+            $restaurantOrder->load(['hallBooking.hall', 'orderItems.menuItem']);
+        } else {
+            $restaurantOrder->load(['orderItems.menuItem']);
+        }
 
         return response()->json($restaurantOrder);
     }

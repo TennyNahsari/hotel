@@ -119,16 +119,20 @@
         :class="{
           'bg-emerald-50 border border-emerald-200': filters.booking_status === 'checked_out',
           'bg-purple-50 border border-purple-200': filters.booking_status === 'complete',
+          'bg-amber-50 border border-amber-200': filters.booking_status === 'walk_in',
           'bg-indigo-50 border border-indigo-200': filters.booking_status === 'checkout_or_complete',
         }"
       >
         <span class="text-2xl">
-          {{ filters.booking_status === 'checked_out' ? '🛏️' : filters.booking_status === 'complete' ? '🎪' : '✅' }}
+          {{ filters.booking_status === 'checked_out' ? '🛏️' :
+             filters.booking_status === 'complete' ? '🎪' :
+             filters.booking_status === 'walk_in' ? '🍽️' : '✅' }}
         </span>
         <div>
           <div class="font-semibold text-sm text-gray-800">
             {{ filters.booking_status === 'checked_out' ? $t('payments.roomCheckout') :
                filters.booking_status === 'complete' ? $t('payments.hallCompleted') :
+               filters.booking_status === 'walk_in' ? ($t('payments.restaurantWalkIn') || 'Restoran Walk-In') :
                $t('payments.checkoutAndCompleted') }}
           </div>
           <div class="text-xs text-gray-600">{{ pagination.total }} {{ $t('payments.paymentsFound') }}</div>
@@ -271,14 +275,15 @@
                 <td class="px-4 py-3 whitespace-nowrap">
                   <div class="flex items-center gap-1.5 mb-0.5">
                     <span v-if="payment.booking_id" class="px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-bold">{{ $t('payments.eposRoom') }}</span>
-                    <span v-else class="px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-bold">{{ $t('payments.eposHall') }}</span>
+                    <span v-else-if="payment.hall_booking_id" class="px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded text-xs font-bold">{{ $t('payments.eposHall') }}</span>
+                    <span v-else class="px-1.5 py-0.5 bg-amber-100 text-amber-800 rounded text-xs font-bold">Restoran / Walk-in</span>
                     <span class="text-sm font-medium text-gray-900">
                       {{ payment.booking_id
                         ? (payment.booking?.guest?.name || '-')
-                        : (payment.hall_booking?.customer_name || '-') }}
+                        : (payment.hall_booking_id ? (payment.hall_booking?.customer_name || '-') : extractWalkInGuestName(payment.notes)) }}
                     </span>
                   </div>
-                  <div v-if="!payment.booking_id" class="text-xs text-gray-500">
+                  <div v-if="payment.hall_booking_id" class="text-xs text-gray-500">
                     {{ payment.hall_booking?.customer_phone || '' }}
                   </div>
                 </td>
@@ -286,14 +291,20 @@
                   <div v-if="payment.booking_id" class="text-sm text-gray-700">
                     {{ $t('payments.eposRoom') }} {{ getBookingRooms(payment) }}
                   </div>
-                  <div v-else class="text-sm text-gray-700">
+                  <div v-else-if="payment.hall_booking_id" class="text-sm text-gray-700">
                     {{ payment.hall_booking?.hall?.name || '-' }}
+                  </div>
+                  <div v-else class="text-sm font-medium text-purple-700">
+                    Order Restoran Mandiri
                   </div>
                   <div v-if="payment.booking_id" class="text-xs text-gray-400">
                     {{ payment.booking?.booking_number }}
                   </div>
-                  <div v-else class="text-xs text-gray-400">
+                  <div v-else-if="payment.hall_booking_id" class="text-xs text-gray-400">
                     {{ payment.hall_booking?.booking_number }}
+                  </div>
+                  <div v-else class="text-xs text-gray-500 font-mono truncate max-w-[200px]" :title="payment.notes">
+                    {{ payment.notes || 'Pembayaran Direct' }}
                   </div>
                 </td>
                 <td class="px-4 py-3 whitespace-nowrap">
@@ -684,6 +695,7 @@ const bookingStatusTabs = computed(() => [
   { value: '',                  label: '📋 ' + t('payments.allPayments') },
   { value: 'checked_out',       label: '🛏️ ' + t('payments.roomCheckout') },
   { value: 'complete',          label: '🎪 ' + t('payments.hallCompleted') },
+  { value: 'walk_in',           label: '🍽️ ' + (t('payments.restaurantWalkIn') || 'Restoran Walk-In') },
   { value: 'checkout_or_complete', label: '✅ ' + t('payments.checkoutAndCompleted') },
 ])
 
@@ -792,6 +804,12 @@ async function loadPayments(page = 1) {
   } finally {
     loading.value = false
   }
+}
+
+function extractWalkInGuestName(notes) {
+  if (!notes) return 'Tamu Luar'
+  const match = notes.match(/\((.*?)\)/)
+  return match ? match[1] : 'Tamu Luar'
 }
 
 async function loadBookings() {

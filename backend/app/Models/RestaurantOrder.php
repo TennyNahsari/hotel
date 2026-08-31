@@ -14,6 +14,7 @@ class RestaurantOrder extends Model
         'order_number',
         'booking_id',
         'hall_booking_id',
+        'customer_name',
         'total_amount',
         'status',
         'notes',

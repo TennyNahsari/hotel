@@ -23,9 +23,9 @@ return new class extends Migration
             $table->foreign('booking_id')->references('id')->on('bookings')->onDelete('restrict');
         });
 
-        // Add check constraint: must have either booking_id or hall_booking_id (drop first if exists)
+        // Add check constraint: cannot have both booking_id and hall_booking_id at the same time (drop first if exists)
         DB::statement('ALTER TABLE payments DROP CONSTRAINT IF EXISTS payments_booking_check');
-        DB::statement('ALTER TABLE payments ADD CONSTRAINT payments_booking_check CHECK ((booking_id IS NOT NULL AND hall_booking_id IS NULL) OR (booking_id IS NULL AND hall_booking_id IS NOT NULL))');
+        DB::statement('ALTER TABLE payments ADD CONSTRAINT payments_booking_check CHECK (NOT (booking_id IS NOT NULL AND hall_booking_id IS NOT NULL))');
     }
 
     /**

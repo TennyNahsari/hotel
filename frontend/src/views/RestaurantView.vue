@@ -222,8 +222,21 @@
       <!-- Create Order Tab -->
       <div v-show="activeTab === 'orders'">
         <div class="bg-white rounded-lg shadow p-6">
-          <!-- Select Booking Autocomplete -->
-          <div class="mb-6 relative">
+          <!-- Selection Mode Toggle: Tamu Hotel vs Tamu Luar / Walk-in -->
+          <div class="mb-5 flex flex-wrap gap-4 items-center bg-gray-50 p-3.5 rounded-lg border border-gray-200">
+            <span class="text-xs sm:text-sm font-semibold text-gray-700">{{ $t('restaurant.customerType') || 'Tipe Pemesan / Customer' }}:</span>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" v-model="orderForm.order_target" value="booking" class="form-radio text-blue-600 focus:ring-blue-500">
+              <span class="ml-2 text-xs sm:text-sm font-medium text-gray-800">🛏️ / 🎪 {{ $t('restaurant.hotelGuest') || 'Tamu Hotel (Room / Hall Booking)' }}</span>
+            </label>
+            <label class="inline-flex items-center cursor-pointer">
+              <input type="radio" v-model="orderForm.order_target" value="walk_in" class="form-radio text-purple-600 focus:ring-purple-500">
+              <span class="ml-2 text-xs sm:text-sm font-medium text-gray-800">👤 {{ $t('restaurant.walkInGuest') || 'Tamu Luar / Walk-In (Tanpa Booking)' }}</span>
+            </label>
+          </div>
+
+          <!-- Option A: Select Booking Autocomplete -->
+          <div v-if="orderForm.order_target === 'booking'" class="mb-6 relative">
             <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.selectBooking') }} *</label>
             <div class="relative">
               <input
@@ -306,6 +319,18 @@
             <p v-if="bookings.length === 0" class="text-xs text-gray-500 mt-1">
               {{ $t('restaurant.noActiveBookings') }}
             </p>
+          </div>
+
+          <!-- Option B: Customer Name for Walk-In -->
+          <div v-else class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">{{ $t('restaurant.customerNameLabel') || 'Nama Pemesan / Tamu Luar' }} *</label>
+            <input
+              v-model="orderForm.customer_name"
+              type="text"
+              required
+              placeholder="Masukkan nama pemesan (misal: Budi, Pak Ahmad, dsb)..."
+              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm"
+            />
           </div>
 
           <!-- Booking Details (if booking selected) -->
@@ -489,7 +514,7 @@
             </button>
             <button
               @click="submitOrder"
-              :disabled="!orderForm.booking_id || orderForm.items.length === 0 || submitting"
+              :disabled="(orderForm.order_target === 'booking' ? !orderForm.booking_id : !orderForm.customer_name.trim()) || orderForm.items.length === 0 || submitting"
               class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {{ submitting ? $t('restaurant.creating') : $t('restaurant.createOrder') }}
@@ -566,12 +591,18 @@
                 </td>
                 <td class="px-6 py-4">
                   <template v-if="order.booking_id">
-                    <div class="text-sm font-medium text-gray-900">{{ order.booking?.booking_number }}</div>
-                    <div class="text-sm text-gray-500">{{ order.booking?.guest?.name }}</div>
+                    <div class="text-sm font-bold font-mono text-gray-900">{{ order.booking?.booking_number }}</div>
+                    <div class="text-xs text-gray-500">👤 {{ order.booking?.guest?.name || '-' }} (Kamar {{ order.booking?.rooms?.map(r => r.room_number).join(', ') || '-' }})</div>
+                  </template>
+                  <template v-else-if="order.hall_booking_id">
+                    <div class="text-sm font-bold font-mono text-purple-900">{{ order.hall_booking?.booking_number }}</div>
+                    <div class="text-xs text-purple-700">👤 {{ order.hall_booking?.customer_name || '-' }} (Hall: {{ order.hall_booking?.hall?.name || '-' }})</div>
                   </template>
                   <template v-else>
-                    <div class="text-sm font-medium text-gray-900">{{ order.hall_booking?.booking_number }}</div>
-                    <div class="text-sm text-gray-500">{{ order.hall_booking?.customer_name }}</div>
+                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-full bg-purple-100 text-purple-800 uppercase tracking-wider">
+                      Tamu Luar / Walk-in
+                    </span>
+                    <div class="text-sm font-semibold text-gray-900 mt-0.5">👤 {{ order.customer_name || 'Tamu Luar' }}</div>
                   </template>
                 </td>
                 <td class="px-6 py-4 text-sm text-gray-900">
@@ -819,8 +850,10 @@ function handleOutsideClickRestaurant(e) {
   }
 }
 const orderForm = reactive({
+  order_target: 'booking', // 'booking' or 'walk_in'
   booking_id: '',
   booking_type: 'room', // 'room' or 'hall'
+  customer_name: '',
   items: [],
   notes: ''
 })
@@ -1073,8 +1106,10 @@ const calculateTotal = () => {
 }
 
 const resetOrderForm = () => {
+  orderForm.order_target = 'booking'
   orderForm.booking_id = ''
   orderForm.booking_type = 'room'
+  orderForm.customer_name = ''
   orderForm.items = []
   orderForm.notes = ''
   selectedBooking.value = null
@@ -1084,22 +1119,37 @@ const resetOrderForm = () => {
 }
 
 const submitOrder = async () => {
-  if (!orderForm.booking_id || orderForm.items.length === 0) {
+  if (orderForm.order_target === 'walk_in') {
+    if (!orderForm.customer_name || !orderForm.customer_name.trim()) {
+      alert('Silakan masukkan Nama Pemesan / Tamu Luar')
+      return
+    }
+  } else {
+    if (!orderForm.booking_id) {
+      alert(t('restaurant.selectBookingAndItems'))
+      return
+    }
+  }
+
+  if (orderForm.items.length === 0) {
     alert(t('restaurant.selectBookingAndItems'))
     return
   }
+
   try {
     submitting.value = true
     
-    // Parse booking_id to get actual id (remove type prefix)
-    const [type, id] = orderForm.booking_id.split('-')
-    
-    // Create payload with actual booking id
-    const payload = {
-      booking_id: type === 'room' ? id : null,
-      hall_booking_id: type === 'hall' ? id : null,
+    let payload = {
       items: orderForm.items,
       notes: orderForm.notes
+    }
+
+    if (orderForm.order_target === 'walk_in') {
+      payload.customer_name = orderForm.customer_name.trim()
+    } else {
+      const [type, id] = orderForm.booking_id.split('-')
+      payload.booking_id = type === 'room' ? id : null
+      payload.hall_booking_id = type === 'hall' ? id : null
     }
     
     await restaurantOrderApi.createOrder(payload)

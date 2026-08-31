@@ -34,26 +34,27 @@ class PaymentController extends Controller
             }
         }
 
-        // Filter by parent booking status
-        // For room bookings: checked_out | For hall bookings: complete
+        // Enforce strict rules on which payments appear:
+        // 1. Room payments: room booking status MUST be 'checked_out'
+        // 2. Hall payments: hall booking status MUST be 'complete' or 'completed'
+        // 3. Standalone Walk-In Restaurant payments: booking_id IS NULL AND hall_booking_id IS NULL
         if ($request->filled('booking_status')) {
             $status = $request->booking_status;
             if ($status === 'checked_out') {
-                // Only room bookings that are checked_out
                 $query->whereNotNull('booking_id')
                       ->whereNull('hall_booking_id')
-                      ->whereHas('booking', function ($q) use ($status) {
-                          $q->where('status', $status);
+                      ->whereHas('booking', function ($q) {
+                          $q->where('status', 'checked_out');
                       });
             } elseif ($status === 'complete') {
-                // Only hall bookings that are complete
                 $query->whereNotNull('hall_booking_id')
                       ->whereNull('booking_id')
-                      ->whereHas('hallBooking', function ($q) use ($status) {
-                          $q->where('status', $status);
+                      ->whereHas('hallBooking', function ($q) {
+                          $q->whereIn('status', ['complete', 'completed']);
                       });
+            } elseif ($status === 'walk_in' || $status === 'restaurant_walkin') {
+                $query->whereNull('booking_id')->whereNull('hall_booking_id');
             } elseif ($status === 'checkout_or_complete') {
-                // Both: room checked_out OR hall complete
                 $query->where(function ($q) {
                     $q->where(function ($sub) {
                         $sub->whereNotNull('booking_id')
@@ -65,11 +66,33 @@ class PaymentController extends Controller
                         $sub->whereNotNull('hall_booking_id')
                             ->whereNull('booking_id')
                             ->whereHas('hallBooking', function ($hb) {
-                                $hb->where('status', 'complete');
+                                $hb->whereIn('status', ['complete', 'completed']);
                             });
+                    })->orWhere(function ($sub) {
+                        $sub->whereNull('booking_id')->whereNull('hall_booking_id');
                     });
                 });
             }
+        } else {
+            // Default filter when viewing all payments:
+            // Include checked_out room payments, complete hall payments, and walk-in standalone payments
+            $query->where(function ($q) {
+                $q->where(function ($sub) {
+                    $sub->whereNotNull('booking_id')
+                        ->whereNull('hall_booking_id')
+                        ->whereHas('booking', function ($b) {
+                            $b->where('status', 'checked_out');
+                        });
+                })->orWhere(function ($sub) {
+                    $sub->whereNotNull('hall_booking_id')
+                        ->whereNull('booking_id')
+                        ->whereHas('hallBooking', function ($hb) {
+                            $hb->whereIn('status', ['complete', 'completed']);
+                        });
+                })->orWhere(function ($sub) {
+                    $sub->whereNull('booking_id')->whereNull('hall_booking_id');
+                });
+            });
         }
 
         // Filter by payment type

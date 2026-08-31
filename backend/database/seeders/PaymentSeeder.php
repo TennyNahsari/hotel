@@ -16,13 +16,24 @@ class PaymentSeeder extends Seeder
     public function run(): void
     {
         $user = User::first();
-        $bookings = Booking::with('guest')->take(5)->get();
-        $hallBookings = HallBooking::with('hall')->take(3)->get();
+        $allBookings = Booking::with('guest')->get();
+        $allHallBookings = HallBooking::with('hall')->get();
 
-        if ($bookings->isEmpty() && $hallBookings->isEmpty()) {
+        if ($allBookings->isEmpty() && $allHallBookings->isEmpty()) {
             $this->command->warn('⚠️  No bookings or hall bookings found. Please run BookingSeeder and HallBookingSeeder first.');
             return;
         }
+
+        // Ensure at least sample checked_out room booking & completed hall booking exist
+        if ($allBookings->where('status', 'checked_out')->isEmpty() && $allBookings->isNotEmpty()) {
+            $allBookings->first()->update(['status' => 'checked_out']);
+        }
+        if ($allHallBookings->whereIn('status', ['completed', 'complete'])->isEmpty() && $allHallBookings->isNotEmpty()) {
+            $allHallBookings->first()->update(['status' => 'completed']);
+        }
+
+        $bookings = Booking::where('status', 'checked_out')->get();
+        $hallBookings = HallBooking::whereIn('status', ['completed', 'complete'])->get();
 
         if (!$user) {
             $this->command->warn('⚠️  No users found. Please run UserSeeder first.');
