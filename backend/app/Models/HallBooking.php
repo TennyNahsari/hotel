@@ -128,7 +128,7 @@ class HallBooking extends Model
     public static function isAvailable($hallId, $eventDate, $startTime, $endTime, $excludeBookingId = null)
     {
         $hall = Hall::find($hallId);
-        if (!$hall || $hall->status !== 'available') {
+        if (!$hall || in_array($hall->status, ['maintenance', 'unavailable'])) {
             return false;
         }
 

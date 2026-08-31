@@ -584,17 +584,7 @@ class HallBookingController extends Controller
             return;
         }
 
-        // Check if there is any active pending/confirmed booking → booked
-        $hasBooked = HallBooking::where('hall_id', $hallId)
-            ->whereIn('status', ['pending', 'confirmed'])
-            ->exists();
-
-        if ($hasBooked) {
-            $hall->update(['status' => 'booked']);
-            return;
-        }
-
-        // No active bookings → available
+        // No event currently checked in → available
         $hall->update(['status' => 'available']);
     }
 

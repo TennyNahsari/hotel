@@ -1,6 +1,6 @@
 <template>
   <LayoutMain>
-    <div class="px-3 sm:px-4 md:px-6 lg:px-8">
+    <div class="px-3 sm:px-4 md:px-6 lg:px-8" @click="handleOutsideClickLaundry">
       <div class="sm:flex sm:items-center">
         <div class="sm:flex-auto">
           <h1 class="text-xl sm:text-2xl md:text-3xl font-semibold leading-6 text-gray-900">{{ $t('laundry.title') }}</h1>
@@ -42,20 +42,92 @@
           <div class="px-3 py-4 sm:px-4 sm:py-5 md:p-6">
             <h3 class="text-base font-semibold leading-6 text-gray-900 mb-4">{{ $t('laundry.newOrder') }}</h3>
             <form @submit.prevent="submitOrder" class="space-y-3 md:space-y-4">
-              <!-- Booking Selection -->
-              <div>
-                <label for="booking" class="block text-xs sm:text-sm font-medium text-gray-700">{{ $t('laundry.booking') }}</label>
-                <select
-                  id="booking"
-                  v-model="orderForm.booking_id"
-                  required
-                  class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+              <!-- Booking Selection Autocomplete -->
+              <div class="relative">
+                <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">
+                  {{ $t('laundry.booking') }} *
+                </label>
+                <div class="relative">
+                  <input
+                    v-model="bookingSearchQuery"
+                    @focus="showBookingDropdown = true"
+                    type="text"
+                    required
+                    placeholder="Cari kode booking, nomor kamar, nama tamu, atau hall..."
+                    class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+                  />
+                  <button
+                    v-if="orderForm.booking_id || orderForm.hall_booking_id"
+                    type="button"
+                    @click="clearSelectedBooking"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 text-sm font-bold p-1"
+                    title="Clear selected booking"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <!-- Autocomplete Dropdown List -->
+                <div
+                  v-if="showBookingDropdown && filteredBookingsList.length > 0"
+                  class="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-64 overflow-y-auto"
                 >
-                  <option value="">{{ $t('laundry.selectBooking') }}</option>
-                  <option v-for="booking in bookings" :key="booking.id" :value="booking.id">
-                    {{ booking.booking_number }} - {{ booking.guest?.full_name }} (Room {{ booking.room?.room_number }})
-                  </option>
-                </select>
+                  <!-- Room Bookings Group -->
+                  <div v-if="filteredBookingsList.filter(b => b.booking_type === 'room').length > 0">
+                    <div class="px-3 py-1.5 bg-blue-50 text-blue-800 font-semibold text-xs uppercase tracking-wider sticky top-0 border-b border-blue-100">
+                      🛏️ Booking Kamar
+                    </div>
+                    <div
+                      v-for="b in filteredBookingsList.filter(b => b.booking_type === 'room')"
+                      :key="'room-' + b.id"
+                      @click="selectBookingItem(b)"
+                      class="px-4 py-2.5 hover:bg-blue-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                    >
+                      <div class="flex justify-between items-center">
+                        <span class="font-mono font-bold text-gray-900 text-sm">{{ b.booking_number }}</span>
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-blue-100 text-blue-800 font-medium">
+                          {{ b.status === 'checked_in' ? 'Check In' : 'Confirmed' }}
+                        </span>
+                      </div>
+                      <div class="text-xs text-gray-600 mt-1 flex justify-between items-center">
+                        <span>👤 {{ b.guest?.name || b.guest?.full_name || b.customer_name || 'Guest' }}</span>
+                        <span class="font-medium text-blue-700">Kamar {{ b.rooms?.map(r => r.room_number).join(', ') || b.room?.room_number || '-' }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Hall Bookings Group -->
+                  <div v-if="filteredBookingsList.filter(b => b.booking_type === 'hall').length > 0">
+                    <div class="px-3 py-1.5 bg-purple-50 text-purple-800 font-semibold text-xs uppercase tracking-wider sticky top-0 border-b border-purple-100">
+                      🎪 Booking Hall
+                    </div>
+                    <div
+                      v-for="b in filteredBookingsList.filter(b => b.booking_type === 'hall')"
+                      :key="'hall-' + b.id"
+                      @click="selectBookingItem(b)"
+                      class="px-4 py-2.5 hover:bg-purple-50 cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors"
+                    >
+                      <div class="flex justify-between items-center">
+                        <span class="font-mono font-bold text-gray-900 text-sm">{{ b.booking_number }}</span>
+                        <span class="px-2 py-0.5 text-xs rounded-full bg-purple-100 text-purple-800 font-medium">
+                          {{ b.status === 'checked_in' ? 'Check In' : 'Confirmed' }}
+                        </span>
+                      </div>
+                      <div class="text-xs text-gray-600 mt-1 flex justify-between items-center">
+                        <span>👤 {{ b.customer_name || b.guest?.name || b.guest?.full_name || 'Customer' }}</span>
+                        <span class="font-medium text-purple-700">Hall: {{ b.hall?.name || '-' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- No match state -->
+                <div
+                  v-if="showBookingDropdown && bookingSearchQuery.trim() && filteredBookingsList.length === 0"
+                  class="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl p-4 text-center text-sm text-gray-500"
+                >
+                  Tidak ditemukan booking kamar atau hall dengan kata kunci "{{ bookingSearchQuery }}"
+                </div>
               </div>
 
               <!-- Weight (kg) -->
@@ -112,7 +184,7 @@
               <div class="flex justify-end">
                 <button
                   type="submit"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitting || (!orderForm.booking_id && !orderForm.hall_booking_id)"
                   class="inline-flex justify-center rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {{ isSubmitting ? $t('laundry.creating') : $t('laundry.createOrder') }}
@@ -174,7 +246,7 @@
                 <div class="flex justify-between items-start">
                   <div>
                     <div class="font-medium text-gray-900">{{ order.order_number }}</div>
-                    <div class="text-sm text-gray-600">{{ order.booking?.booking_number }}</div>
+                    <div class="text-sm text-gray-600">{{ getOrderBookingNumber(order) }}</div>
                   </div>
                   <div class="text-right">
                     <div class="font-semibold text-gray-900">Rp {{ parseFloat(order.total_amount).toLocaleString('id-ID') }}</div>
@@ -183,7 +255,7 @@
                 <div class="text-sm space-y-1">
                   <div>
                     <span class="text-gray-500">{{ $t('laundry.guest') }}:</span>
-                    <span class="text-gray-900 ml-1">{{ order.booking?.guest?.full_name }}</span>
+                    <span class="text-gray-900 ml-1">{{ getOrderGuestName(order) }}</span>
                   </div>
                   <div>
                     <span class="text-gray-500">{{ $t('laundry.weight') }}:</span>
@@ -235,10 +307,10 @@
                   {{ order.order_number }}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {{ order.booking?.booking_number }}
+                  {{ getOrderBookingNumber(order) }}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  {{ order.booking?.guest?.full_name }}
+                  {{ getOrderGuestName(order) }}
                 </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {{ order.weight_kg }}
@@ -338,14 +410,17 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
-import { bookingApi, laundryOrderApi } from '../api'
+import { bookingApi, hallBookingApi, laundryOrderApi } from '../api'
 
 const { t } = useI18n()
 const activeTab = ref('create')
 
-// Create Order Form
+// Create Order Form & Booking Autocomplete
+const bookingSearchQuery = ref('')
+const showBookingDropdown = ref(false)
 const orderForm = ref({
-  booking_id: '',
+  booking_id: null,
+  hall_booking_id: null,
   weight_kg: '',
   price_per_kg: '',
   notes: ''
@@ -379,6 +454,26 @@ const calculatedTotal = computed(() => {
   return weight * price
 })
 
+// Filtered bookings for autocomplete search (by booking number, room number, guest name, or hall name)
+const filteredBookingsList = computed(() => {
+  const query = bookingSearchQuery.value.trim().toLowerCase()
+  if (!query) return bookings.value
+
+  return bookings.value.filter(b => {
+    const bookingNum = (b.booking_number || '').toLowerCase()
+    const guestName = (b.guest?.name || b.guest?.full_name || b.customer_name || '').toLowerCase()
+    const roomNumbers = b.booking_type === 'room'
+      ? (b.rooms?.map(r => r.room_number).join(', ') || b.room?.room_number || '').toString().toLowerCase()
+      : ''
+    const hallName = b.booking_type === 'hall' ? (b.hall?.name || '').toLowerCase() : ''
+
+    return bookingNum.includes(query) ||
+           guestName.includes(query) ||
+           roomNumbers.includes(query) ||
+           hallName.includes(query)
+  })
+})
+
 // Visible pages for pagination
 const visiblePages = computed(() => {
   const current = pagination.value.current_page
@@ -403,11 +498,64 @@ const visiblePages = computed(() => {
   return pages
 })
 
-// Load bookings
+function selectBookingItem(b) {
+  if (b.booking_type === 'hall') {
+    orderForm.value.hall_booking_id = b.id
+    orderForm.value.booking_id = null
+    const name = b.customer_name || b.guest?.name || b.guest?.full_name || 'Guest'
+    const hall = b.hall?.name || 'Hall'
+    bookingSearchQuery.value = `${b.booking_number} — ${name} (${hall})`
+  } else {
+    orderForm.value.booking_id = b.id
+    orderForm.value.hall_booking_id = null
+    const name = b.guest?.name || b.guest?.full_name || b.customer_name || 'Guest'
+    const rooms = b.rooms?.map(r => r.room_number).join(', ') || b.room?.room_number || '-'
+    bookingSearchQuery.value = `${b.booking_number} — ${name} (Kamar ${rooms})`
+  }
+  showBookingDropdown.value = false
+}
+
+function clearSelectedBooking() {
+  orderForm.value.booking_id = null
+  orderForm.value.hall_booking_id = null
+  bookingSearchQuery.value = ''
+  showBookingDropdown.value = true
+}
+
+function handleOutsideClickLaundry(e) {
+  if (!e.target.closest('.relative')) {
+    showBookingDropdown.value = false
+  }
+}
+
+// Load bookings (Room & Hall bookings in confirmed or checked_in status)
 async function loadBookings() {
   try {
-    const response = await bookingApi.getBookings({ status: 'checked_in' })
-    bookings.value = Array.isArray(response) ? response : (response?.data || [])
+    const allBookings = []
+
+    // Room bookings (confirmed & checked_in)
+    const roomConfirmed = await bookingApi.getBookings({ status: 'confirmed' })
+    const roomCheckedIn = await bookingApi.getBookings({ status: 'checked_in' })
+    const roomConfirmedData = Array.isArray(roomConfirmed) ? roomConfirmed : (roomConfirmed?.data || [])
+    const roomCheckedInData = Array.isArray(roomCheckedIn) ? roomCheckedIn : (roomCheckedIn?.data || [])
+
+    const roomMap = new Map()
+    ;[...roomConfirmedData, ...roomCheckedInData].forEach(b => roomMap.set(b.id, b))
+    const roomBookings = Array.from(roomMap.values()).map(b => ({ ...b, booking_type: 'room' }))
+    allBookings.push(...roomBookings)
+
+    // Hall bookings (confirmed & checked_in)
+    const hallConfirmed = await hallBookingApi.getHallBookings({ status: 'confirmed' })
+    const hallCheckedIn = await hallBookingApi.getHallBookings({ status: 'checked_in' })
+    const hallConfirmedData = Array.isArray(hallConfirmed) ? hallConfirmed : (hallConfirmed?.data || [])
+    const hallCheckedInData = Array.isArray(hallCheckedIn) ? hallCheckedIn : (hallCheckedIn?.data || [])
+
+    const hallMap = new Map()
+    ;[...hallConfirmedData, ...hallCheckedInData].forEach(b => hallMap.set(b.id, b))
+    const hallBookings = Array.from(hallMap.values()).map(b => ({ ...b, booking_type: 'hall' }))
+    allBookings.push(...hallBookings)
+
+    bookings.value = allBookings
   } catch (error) {
     console.error('Error loading bookings:', error)
     alert(t('laundry.loadBookingsFailed'))
@@ -416,19 +564,29 @@ async function loadBookings() {
 
 // Submit order
 async function submitOrder() {
-  if (!orderForm.value.booking_id || !orderForm.value.weight_kg || !orderForm.value.price_per_kg) {
+  if ((!orderForm.value.booking_id && !orderForm.value.hall_booking_id) || !orderForm.value.weight_kg || !orderForm.value.price_per_kg) {
     alert(t('laundry.requiredFields'))
     return
   }
 
   isSubmitting.value = true
   try {
-    await laundryOrderApi.createOrder(orderForm.value)
+    const payload = {
+      weight_kg: orderForm.value.weight_kg,
+      price_per_kg: orderForm.value.price_per_kg,
+      notes: orderForm.value.notes
+    }
+    if (orderForm.value.booking_id) payload.booking_id = orderForm.value.booking_id
+    if (orderForm.value.hall_booking_id) payload.hall_booking_id = orderForm.value.hall_booking_id
+
+    await laundryOrderApi.createOrder(payload)
     alert(t('laundry.orderCreated'))
     
     // Reset form
+    clearSelectedBooking()
     orderForm.value = {
-      booking_id: '',
+      booking_id: null,
+      hall_booking_id: null,
       weight_kg: '',
       price_per_kg: '',
       notes: ''
@@ -443,6 +601,21 @@ async function submitOrder() {
   } finally {
     isSubmitting.value = false
   }
+}
+
+function getOrderBookingNumber(order) {
+  if (order.hall_booking || order.hallBooking) {
+    return (order.hall_booking || order.hallBooking).booking_number + ' (Hall)'
+  }
+  return order.booking?.booking_number ? order.booking.booking_number + ' (Room)' : '-'
+}
+
+function getOrderGuestName(order) {
+  if (order.hall_booking || order.hallBooking) {
+    const hb = order.hall_booking || order.hallBooking
+    return hb.customer_name || hb.guest?.name || hb.guest?.full_name || '-'
+  }
+  return order.booking?.guest?.name || order.booking?.guest?.full_name || order.booking?.customer_name || '-'
 }
 
 // Load orders

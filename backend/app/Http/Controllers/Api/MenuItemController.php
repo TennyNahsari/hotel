@@ -19,13 +19,17 @@ class MenuItemController extends Controller
         }
 
         // Filter by availability
-        if ($request->has('is_available')) {
+        if ($request->filled('is_available')) {
             $query->where('is_available', $request->boolean('is_available'));
         }
 
-        // Search by name
+        // Search by name & description (case-insensitive)
         if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
+            $search = strtolower(trim($request->search));
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(name) LIKE ?', ['%' . $search . '%'])
+                  ->orWhereRaw('LOWER(description) LIKE ?', ['%' . $search . '%']);
+            });
         }
 
         $menuItems = $query->orderBy('category', 'asc')

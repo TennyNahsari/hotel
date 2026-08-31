@@ -11,7 +11,7 @@ class HallController extends Controller
 {
     public function publicIndex()
     {
-        $halls = Hall::where('status', 'available')->orderBy('id', 'asc')->get();
+        $halls = Hall::whereNotIn('status', ['maintenance', 'unavailable'])->orderBy('id', 'asc')->get();
         return response()->json($halls);
     }
 

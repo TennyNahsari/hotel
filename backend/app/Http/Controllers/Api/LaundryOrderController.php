@@ -14,20 +14,28 @@ class LaundryOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = LaundryOrder::with(['booking.guest', 'createdBy']);
+        $query = LaundryOrder::with(['booking.guest', 'hallBooking.hall', 'createdBy']);
 
         // Filter by booking
         if ($request->filled('booking_id')) {
             $query->where('booking_id', $request->booking_id);
         }
 
-        // Search by order number or booking number
+        // Filter by hall booking
+        if ($request->filled('hall_booking_id')) {
+            $query->where('hall_booking_id', $request->hall_booking_id);
+        }
+
+        // Search by order number, room booking number, or hall booking number
         if ($request->filled('search')) {
-            $search = $request->search;
+            $search = strtolower(trim($request->search));
             $query->where(function($q) use ($search) {
-                $q->where('order_number', 'like', "%{$search}%")
-                  ->orWhereHas('booking', function($q) use ($search) {
-                      $q->where('booking_number', 'like', "%{$search}%");
+                $q->whereRaw('LOWER(order_number) LIKE ?', ["%{$search}%"])
+                  ->orWhereHas('booking', function($bq) use ($search) {
+                      $bq->whereRaw('LOWER(booking_number) LIKE ?', ["%{$search}%"]);
+                  })
+                  ->orWhereHas('hallBooking', function($hq) use ($search) {
+                      $hq->whereRaw('LOWER(booking_number) LIKE ?', ["%{$search}%"]);
                   });
             });
         }
@@ -40,11 +48,24 @@ class LaundryOrderController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'booking_id' => 'required|exists:bookings,id',
+            'booking_id' => 'nullable|exists:bookings,id',
+            'hall_booking_id' => 'nullable|exists:hall_bookings,id',
             'weight_kg' => 'required|numeric|min:0.1',
             'price_per_kg' => 'required|numeric|min:0',
             'notes' => 'nullable|string',
         ]);
+
+        if (empty($validated['booking_id']) && empty($validated['hall_booking_id'])) {
+            return response()->json([
+                'message' => 'Either booking_id or hall_booking_id is required'
+            ], 422);
+        }
+
+        if (!empty($validated['booking_id']) && !empty($validated['hall_booking_id'])) {
+            return response()->json([
+                'message' => 'Cannot specify both booking_id and hall_booking_id'
+            ], 422);
+        }
 
         try {
             DB::beginTransaction();
@@ -54,7 +75,8 @@ class LaundryOrderController extends Controller
 
             // Create laundry order
             $laundryOrder = LaundryOrder::create([
-                'booking_id' => $validated['booking_id'],
+                'booking_id' => $validated['booking_id'] ?? null,
+                'hall_booking_id' => $validated['hall_booking_id'] ?? null,
                 'weight_kg' => $validated['weight_kg'],
                 'price_per_kg' => $validated['price_per_kg'],
                 'total_amount' => $totalAmount,
@@ -64,7 +86,8 @@ class LaundryOrderController extends Controller
 
             // Create payment with laundry charges
             $payment = Payment::create([
-                'booking_id' => $validated['booking_id'],
+                'booking_id' => $validated['booking_id'] ?? null,
+                'hall_booking_id' => $validated['hall_booking_id'] ?? null,
                 'payment_type' => 'partial',
                 'payment_method' => 'cash',
                 'amount' => 0,
@@ -77,7 +100,7 @@ class LaundryOrderController extends Controller
 
             return response()->json([
                 'message' => 'Laundry order created successfully',
-                'data' => $laundryOrder->load(['booking.guest', 'createdBy']),
+                'data' => $laundryOrder->load(['booking.guest', 'hallBooking.hall', 'createdBy']),
                 'payment' => $payment
             ], 201);
 
@@ -93,7 +116,7 @@ class LaundryOrderController extends Controller
     public function show(LaundryOrder $laundryOrder)
     {
         return response()->json(
-            $laundryOrder->load(['booking.guest', 'createdBy'])
+            $laundryOrder->load(['booking.guest', 'hallBooking.hall', 'createdBy'])
         );
     }
 
@@ -106,8 +129,16 @@ class LaundryOrderController extends Controller
         ]);
     }
 
-    public function getBookingCharges($bookingId)
+    public function getBookingCharges(Request $request, $bookingId)
     {
+        if ($request->get('type') === 'hall') {
+            $total = LaundryOrder::where('hall_booking_id', $bookingId)->sum('total_amount');
+            return response()->json([
+                'hall_booking_id' => $bookingId,
+                'laundry_charges' => $total
+            ]);
+        }
+
         $total = LaundryOrder::where('booking_id', $bookingId)->sum('total_amount');
 
         return response()->json([

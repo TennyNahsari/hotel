@@ -849,9 +849,9 @@ const loadMenuItems = async (url = null) => {
   try {
     const params = {}
     // Only include filter params if they have values
-    if (filters.search) params.search = filters.search
+    if (filters.search && filters.search.trim()) params.search = filters.search.trim()
     if (filters.category) params.category = filters.category
-    if (filters.is_available !== '') params.is_available = filters.is_available
+    if (filters.is_available !== '' && filters.is_available !== null) params.is_available = filters.is_available
     
     if (url) {
       const urlObj = new URL(url)
@@ -870,9 +870,13 @@ const loadMenuItems = async (url = null) => {
 }
 
 // Watch filters
-watch(filters, () => {
-  loadMenuItems()
-})
+watch(
+  () => [filters.search, filters.category, filters.is_available],
+  () => {
+    loadMenuItems()
+  },
+  { deep: true }
+)
 
 // Pagination
 const changePage = (url) => {

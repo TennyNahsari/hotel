@@ -194,11 +194,10 @@ class HousekeepingController extends Controller
                 if (in_array($housekeeping->task_type, ['cleaning', 'hall_cleaning', 'deep_clean', 'inspection'])) {
                     $housekeeping->hall->update(['status' => 'available']);
                 } elseif ($housekeeping->task_type === 'maintenance') {
-                    // After maintenance, check if there are pending bookings
-                    $hasBooked = \App\Models\HallBooking::where('hall_id', $housekeeping->hall_id)
-                        ->whereIn('status', ['pending', 'confirmed'])
+                    $hasCheckedIn = \App\Models\HallBooking::where('hall_id', $housekeeping->hall_id)
+                        ->where('status', 'checked_in')
                         ->exists();
-                    $housekeeping->hall->update(['status' => $hasBooked ? 'booked' : 'available']);
+                    $housekeeping->hall->update(['status' => $hasCheckedIn ? 'occupied' : 'available']);
                 }
             }
         }
