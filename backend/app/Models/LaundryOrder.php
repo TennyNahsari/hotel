@@ -17,6 +17,7 @@ class LaundryOrder extends Model
         'weight_kg',
         'price_per_kg',
         'total_amount',
+        'status',
         'notes',
         'created_by',
     ];

@@ -25,6 +25,7 @@ class HallBooking extends Model
         'duration_hours',
         'attendees',
         'total_amount',
+        'deposit_amount',
         'status',
         'special_requests',
         'notes',
@@ -37,6 +38,7 @@ class HallBooking extends Model
         'duration_hours' => 'decimal:2',
         'attendees' => 'integer',
         'total_amount' => 'decimal:2',
+        'deposit_amount' => 'decimal:2',
         'payment_due_at' => 'datetime',
     ];
 
@@ -128,13 +130,13 @@ class HallBooking extends Model
     public static function isAvailable($hallId, $eventDate, $startTime, $endTime, $excludeBookingId = null)
     {
         $hall = Hall::find($hallId);
-        if (!$hall || in_array($hall->status, ['maintenance', 'unavailable'])) {
+        if (!$hall || in_array($hall->status, ['maintenance', 'unavailable', 'dirty', 'cleaning'])) {
             return false;
         }
 
         $query = self::where('hall_id', $hallId)
             ->where('event_date', $eventDate)
-            ->whereNotIn('status', ['cancelled'])
+            ->whereNotIn('status', ['cancelled', 'completed'])
             ->where(function ($q) use ($startTime, $endTime) {
                 $q->where('start_time', '<', $endTime)
                   ->where('end_time', '>', $startTime);

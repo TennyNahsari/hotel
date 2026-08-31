@@ -7,6 +7,9 @@ use App\Models\Booking;
 use App\Models\Room;
 use App\Models\Guest;
 use App\Models\Payment;
+use App\Models\HousekeepingTask;
+use App\Models\RestaurantOrder;
+use App\Models\LaundryOrder;
 use App\Exports\BookingsExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -272,14 +275,47 @@ class BookingController extends Controller
             ], 422);
         }
 
+        // Consolidated Payment: Delete any split/earlier payment entries for this booking
+        Payment::where('booking_id', $booking->id)->delete();
+
+        $roomAmount = (float) $booking->total_amount;
+
+        $restaurantCharges = (float) RestaurantOrder::where('booking_id', $booking->id)
+            ->where('status', 'delivered')
+            ->sum('total_amount');
+
+        $laundryCharges = (float) LaundryOrder::where('booking_id', $booking->id)
+            ->where('status', 'delivered')
+            ->sum('total_amount');
+
+        // Create EXACTLY 1 single master payment record combining room + restaurant + extra charges
+        Payment::create([
+            'booking_id'         => $booking->id,
+            'payment_type'       => 'full',
+            'payment_method'     => 'cash',
+            'amount'             => $roomAmount,
+            'restaurant_charges' => $restaurantCharges,
+            'laundry_charges'    => $laundryCharges,
+            'notes'              => 'Pelunasan gabungan saat Check-out (Kamar: Rp ' . number_format($roomAmount, 0, ',', '.') . ' + Restoran: Rp ' . number_format($restaurantCharges, 0, ',', '.') . ')',
+            'processed_by'       => auth()->id(),
+        ]);
+
         $booking->update([
             'status' => 'checked_out',
             'checked_out_at' => now(),
         ]);
 
-        // Update room status to dirty
+        // Update room status to dirty and auto-create housekeeping task
         foreach ($booking->rooms as $room) {
             $room->update(['status' => 'dirty']);
+
+            HousekeepingTask::create([
+                'room_id'   => $room->id,
+                'task_type' => 'cleaning',
+                'priority'  => 'high',
+                'status'    => 'pending',
+                'notes'     => 'Auto-generated: Pembersihan kamar ' . $room->room_number . ' setelah checkout (' . $booking->booking_number . ')',
+            ]);
         }
 
         // Delete associated receipt files from storage upon checkout

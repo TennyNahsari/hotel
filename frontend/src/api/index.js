@@ -495,6 +495,11 @@ export const laundryOrderApi = {
     return response.data
   },
 
+  async updateOrderStatus(orderId, status) {
+    const response = await api.patch(`/laundry-orders/${orderId}/status`, { status })
+    return response.data
+  },
+
   async getBookingCharges(bookingId) {
     const response = await api.get(`/bookings/${bookingId}/laundry-charges`)
     return response.data

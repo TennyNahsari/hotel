@@ -237,8 +237,18 @@
                   <div class="text-xs text-gray-500">{{ booking.start_time }} - {{ booking.end_time }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-semibold text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
+                  <div class="text-sm font-bold text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
                   <div class="text-xs text-gray-500">{{ booking.duration_hours}} {{ $t('hallBookings.hrs') }}</div>
+                  <div v-if="getBookingDeposit(booking) > 0" class="text-xs text-gray-500">
+                    {{ $t('hallBookings.deposit') }}: {{ formatCurrency(getBookingDeposit(booking)) }}
+                  </div>
+                  <!-- Pelunasan Gedung info -->
+                  <div v-if="['checked_in', 'completed'].includes(booking.status)" class="text-xs text-emerald-700 font-semibold mt-0.5">
+                    {{ $t('hallBookings.settlement') }}: {{ formatCurrency(Math.max(0, (booking.total_amount || 0) - getBookingDeposit(booking))) }} ({{ $t('hallBookings.settled') }})
+                  </div>
+                  <div v-else-if="['pending', 'confirmed'].includes(booking.status)" class="text-xs text-amber-700 font-medium mt-0.5">
+                    {{ $t('hallBookings.remainingSettlement') }}: {{ formatCurrency(Math.max(0, (booking.total_amount || 0) - getBookingDeposit(booking))) }}
+                  </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="space-y-1">
@@ -606,10 +616,22 @@
             </div>
           </div>
 
-          <div class="bg-gray-50 p-4 rounded-lg">
-            <div class="flex justify-between items-center text-lg">
-              <span class="font-semibold">{{ $t('hallBookings.totalAmount') }}</span>
+          <div class="bg-gray-50 p-4 rounded-lg space-y-2">
+            <div class="flex justify-between items-center text-base">
+              <span class="font-semibold text-gray-800">{{ $t('hallBookings.totalAmount') }}</span>
               <span class="font-bold text-blue-600">{{ formatCurrency(viewData.total_amount) }}</span>
+            </div>
+            <div v-if="getBookingDeposit(viewData) > 0" class="flex justify-between items-center text-xs text-gray-600">
+              <span>{{ $t('hallBookings.deposit') }} (50%)</span>
+              <span class="font-semibold text-gray-800">{{ formatCurrency(getBookingDeposit(viewData)) }}</span>
+            </div>
+            <div class="flex justify-between items-center text-sm pt-1.5 border-t border-gray-200">
+              <span class="font-semibold text-gray-700">
+                {{ ['checked_in', 'completed'].includes(viewData.status) ? `${$t('hallBookings.settlement')} (${$t('hallBookings.settled')})` : $t('hallBookings.remainingSettlement') }}
+              </span>
+              <span :class="['checked_in', 'completed'].includes(viewData.status) ? 'text-emerald-600 font-bold' : 'text-amber-600 font-bold'">
+                {{ formatCurrency(Math.max(0, (viewData.total_amount || 0) - getBookingDeposit(viewData))) }}
+              </span>
             </div>
           </div>
 
@@ -807,6 +829,21 @@ const calculateTotal = () => {
     calculatedDuration.value = hours.toFixed(2)
     calculatedTotal.value = hours * selectedHall.value.price_per_hour
   }
+}
+
+const getBookingDeposit = (booking) => {
+  if (!booking) return 0
+  if (booking.deposit_amount && parseFloat(booking.deposit_amount) > 0) {
+    return parseFloat(booking.deposit_amount)
+  }
+  const paidFromPayments = (booking.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0)
+  if (paidFromPayments > 0) {
+    return paidFromPayments
+  }
+  if (!booking.booked_by || (booking.notes || '').includes('Website')) {
+    return parseFloat(booking.total_amount || 0) * 0.5
+  }
+  return 0
 }
 
 // Save booking

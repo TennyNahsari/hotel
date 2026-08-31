@@ -878,6 +878,10 @@ async function selectBooking(booking) {
       const lc = await laundryOrderApi.getBookingCharges(booking.id)
       formData.value.laundry_charges = parseFloat(lc.laundry_charges || 0)
     } catch { formData.value.laundry_charges = 0 }
+
+    // Calculate remaining room balance (total_amount minus payments already recorded)
+    const paidAmount = (booking.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0)
+    formData.value.amount = Math.max(0, parseFloat(booking.total_amount || 0) - paidAmount)
   } else {
     formData.value.hall_booking_id = booking.id
     formData.value.booking_id      = ''
@@ -885,9 +889,11 @@ async function selectBooking(booking) {
     formData.value.laundry_charges    = 0
     const guest = booking.customer_name || booking.guest?.name || 'N/A'
     bookingSearch.value = `${booking.booking_number} — ${guest}`
+
+    const paidAmount = (booking.payments || []).reduce((sum, p) => sum + parseFloat(p.amount || 0), 0)
+    formData.value.amount = Math.max(0, parseFloat(booking.total_amount || 0) - paidAmount)
   }
 
-  if (booking.total_amount) formData.value.amount = parseFloat(booking.total_amount)
   showBookingDropdown.value = false
 }
 

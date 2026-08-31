@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\HallBooking;
 use App\Models\Hall;
+use App\Models\Payment;
+use App\Models\RestaurantOrder;
+use App\Models\LaundryOrder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -133,6 +136,7 @@ class HallBookingController extends Controller
                 'duration_hours' => $duration,
                 'attendees' => $request->attendees,
                 'total_amount' => $total,
+                'deposit_amount' => $request->deposit_amount ?? 0,
                 'status' => 'pending',
                 'special_requests' => $request->special_requests,
                 'notes' => $request->notes,
@@ -372,6 +376,31 @@ class HallBookingController extends Controller
             ], 400);
         }
 
+        // Consolidated Payment: Delete any split/earlier payment entries for this hall booking
+        Payment::where('hall_booking_id', $booking->id)->delete();
+
+        $hallAmount = (float) $booking->total_amount;
+
+        $restaurantCharges = (float) RestaurantOrder::where('hall_booking_id', $booking->id)
+            ->where('status', 'delivered')
+            ->sum('total_amount');
+
+        $laundryCharges = (float) LaundryOrder::where('hall_booking_id', $booking->id)
+            ->where('status', 'delivered')
+            ->sum('total_amount');
+
+        // Create EXACTLY 1 single master payment record combining hall + restaurant + laundry charges
+        Payment::create([
+            'hall_booking_id'    => $booking->id,
+            'payment_type'       => 'full',
+            'payment_method'     => 'cash',
+            'amount'             => $hallAmount,
+            'restaurant_charges' => $restaurantCharges,
+            'laundry_charges'    => $laundryCharges,
+            'notes'              => 'Pelunasan gabungan saat Acara Selesai/Complete (Hall: Rp ' . number_format($hallAmount, 0, ',', '.') . ' + Restoran: Rp ' . number_format($restaurantCharges, 0, ',', '.') . ')',
+            'processed_by'       => auth()->id(),
+        ]);
+
         $booking->update(['status' => 'completed']);
         $this->deleteBookingReceipts($booking);
 
@@ -495,6 +524,8 @@ class HallBookingController extends Controller
         try {
             $duration = HallBooking::calculateDuration($startTime, $endTime);
             $total = HallBooking::calculateTotal($request->hall_id, $duration);
+            $isGuaranteed = in_array($request->payment_option, ['guaranteed', 'dp', 'transfer_dp']);
+            $depositAmount = $isGuaranteed ? ($total * 0.5) : 0;
 
             $guest = \App\Models\Guest::where('email', $request->customer_email)
                 ->orWhere('phone', $request->customer_phone)
@@ -523,11 +554,23 @@ class HallBookingController extends Controller
                 'duration_hours' => $duration,
                 'attendees' => $request->attendees,
                 'total_amount' => $total,
+                'deposit_amount' => $depositAmount,
                 'status' => 'pending',
                 'special_requests' => $request->special_requests,
                 'notes' => 'Pemesanan Hall via Website (' . ($request->payment_option ?? 'pay_at_hotel') . ')',
                 'booked_by' => null,
             ]);
+
+            if ($isGuaranteed) {
+                Payment::create([
+                    'hall_booking_id' => $booking->id,
+                    'payment_type' => 'deposit',
+                    'payment_method' => 'transfer',
+                    'amount' => $depositAmount,
+                    'notes' => 'Pemesanan Hall Jaminan via Website - Menunggu Verifikasi Staf',
+                    'processed_by' => null,
+                ]);
+            }
 
             $this->updateHallStatus($booking->hall_id);
 

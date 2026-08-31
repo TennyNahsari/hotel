@@ -154,10 +154,21 @@ class RestaurantOrderController extends Controller
     /**
      * Get total restaurant charges for a booking (for auto-fill in payment)
      */
-    public function getBookingCharges($bookingId)
+    public function getBookingCharges(Request $request, $bookingId)
     {
+        if ($request->get('type') === 'hall') {
+            $total = RestaurantOrder::where('hall_booking_id', $bookingId)
+                ->where('status', 'delivered')
+                ->sum('total_amount');
+
+            return response()->json([
+                'hall_booking_id' => $bookingId,
+                'restaurant_charges' => $total
+            ]);
+        }
+
         $total = RestaurantOrder::where('booking_id', $bookingId)
-            ->whereIn('status', ['pending', 'preparing', 'delivered'])
+            ->where('status', 'delivered')
             ->sum('total_amount');
 
         return response()->json([

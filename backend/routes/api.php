@@ -118,6 +118,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Laundry Management
     Route::get('/bookings/{booking}/laundry-charges', [LaundryOrderController::class, 'getBookingCharges']);
     Route::get('/laundry-orders/export', [LaundryOrderController::class, 'export']);
+    Route::patch('/laundry-orders/{laundryOrder}/status', [LaundryOrderController::class, 'updateStatus']);
     Route::apiResource('laundry-orders', LaundryOrderController::class)->only(['index', 'store', 'show', 'destroy']);
 
     // ML/AI Predictions

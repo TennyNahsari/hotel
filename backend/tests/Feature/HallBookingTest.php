@@ -13,6 +13,14 @@ class HallBookingTest extends TestCase
     public function test_hall_booking_non_overlapping_and_cleaning_flow()
     {
         // 1. Create test Hall
+        $oldHall = Hall::where('name', 'Test Hall Alpha')->first();
+        if ($oldHall) {
+            $hbIds = HallBooking::where('hall_id', $oldHall->id)->pluck('id');
+            \App\Models\Payment::whereIn('hall_booking_id', $hbIds)->delete();
+            \App\Models\HousekeepingTask::where('hall_id', $oldHall->id)->delete();
+            HallBooking::where('hall_id', $oldHall->id)->delete();
+            $oldHall->delete();
+        }
         $hall = Hall::create([
             'name' => 'Test Hall Alpha',
             'hall_type' => 'Ballroom',
@@ -101,6 +109,7 @@ class HallBookingTest extends TestCase
 
         // Clean up test data
         $task->delete();
+        \App\Models\Payment::whereIn('hall_booking_id', [$booking1->id, $booking2->id])->delete();
         $booking1->delete();
         $booking2->delete();
         $hall->delete();

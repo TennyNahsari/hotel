@@ -205,6 +205,17 @@
             :placeholder="$t('laundry.searchPlaceholder')"
             class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
           />
+          <select
+            v-model="historyFilters.status"
+            @change="loadOrders"
+            class="block rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          >
+            <option value="">Semua Status</option>
+            <option value="pending">Pending</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
           <input
             v-model="historyFilters.start_date"
             type="date"
@@ -250,6 +261,9 @@
                   </div>
                   <div class="text-right">
                     <div class="font-semibold text-gray-900">Rp {{ parseFloat(order.total_amount).toLocaleString('id-ID') }}</div>
+                    <span :class="getStatusBadgeClass(order.status)" class="px-2 py-0.5 text-xs font-semibold rounded-full inline-block mt-1">
+                      {{ getStatusLabel(order.status) }}
+                    </span>
                   </div>
                 </div>
                 <div class="text-sm space-y-1">
@@ -267,12 +281,34 @@
                     <span class="text-gray-900 ml-1">{{ new Date(order.created_at).toLocaleDateString('id-ID') }}</span>
                   </div>
                 </div>
-                <div class="pt-2">
+                <div class="pt-2 flex gap-2">
                   <button
-                    @click="deleteOrder(order.id)"
-                    class="w-full text-xs px-3 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                    v-if="order.status === 'pending'"
+                    @click="updateOrderStatus(order.id, 'confirmed')"
+                    class="flex-1 text-xs px-2 py-1.5 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium"
                   >
-                    {{ $t('laundry.delete') }}
+                    Confirm
+                  </button>
+                  <button
+                    v-if="order.status === 'confirmed'"
+                    @click="updateOrderStatus(order.id, 'delivered')"
+                    class="flex-1 text-xs px-2 py-1.5 bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium"
+                  >
+                    Deliver
+                  </button>
+                  <button
+                    v-if="['pending', 'confirmed'].includes(order.status)"
+                    @click="updateOrderStatus(order.id, 'cancelled')"
+                    class="text-xs px-2 py-1.5 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    v-if="order.status === 'pending'"
+                    @click="deleteOrder(order.id)"
+                    class="text-xs px-2 py-1.5 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >
+                    Delete
                   </button>
                 </div>
               </div>
@@ -281,7 +317,7 @@
         </div>
 
         <!-- Orders Desktop Table -->
-        <div class="hidden md:block bg-white shadow sm:rounded-lg overflow-hidden">
+        <div class="hidden md:block bg-white shadow sm:rounded-lg overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-300">
             <thead class="bg-gray-50">
               <tr>
@@ -291,16 +327,17 @@
                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.weight') }}</th>
                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.pricePerKgShort') }}</th>
                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.total') }}</th>
+                <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status</th>
                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.date') }}</th>
                 <th class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">{{ $t('laundry.actions') }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200 bg-white">
               <tr v-if="loadingOrders">
-                <td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">{{ $t('laundry.loading') }}</td>
+                <td colspan="9" class="px-3 py-4 text-center text-sm text-gray-500">{{ $t('laundry.loading') }}</td>
               </tr>
               <tr v-else-if="orders.length === 0">
-                <td colspan="8" class="px-3 py-4 text-center text-sm text-gray-500">{{ $t('laundry.noOrders') }}</td>
+                <td colspan="9" class="px-3 py-4 text-center text-sm text-gray-500">{{ $t('laundry.noOrders') }}</td>
               </tr>
               <tr v-else v-for="order in orders" :key="order.id">
                 <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">
@@ -321,15 +358,42 @@
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   Rp {{ parseFloat(order.total_amount).toLocaleString('id-ID') }}
                 </td>
+                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                  <span :class="getStatusBadgeClass(order.status)" class="px-2 py-1 text-xs font-semibold rounded-full">
+                    {{ getStatusLabel(order.status) }}
+                  </span>
+                </td>
                 <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                   {{ new Date(order.created_at).toLocaleDateString('id-ID') }}
                 </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm">
+                <td class="whitespace-nowrap px-3 py-4 text-sm space-x-1.5">
                   <button
-                    @click="deleteOrder(order.id)"
-                    class="text-red-600 hover:text-red-900"
+                    v-if="order.status === 'pending'"
+                    @click="updateOrderStatus(order.id, 'confirmed')"
+                    class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded hover:bg-blue-200 font-medium"
                   >
-                    {{ $t('laundry.delete') }}
+                    Confirm
+                  </button>
+                  <button
+                    v-if="order.status === 'confirmed'"
+                    @click="updateOrderStatus(order.id, 'delivered')"
+                    class="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 font-medium"
+                  >
+                    Deliver
+                  </button>
+                  <button
+                    v-if="['pending', 'confirmed'].includes(order.status)"
+                    @click="updateOrderStatus(order.id, 'cancelled')"
+                    class="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded hover:bg-gray-200"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    v-if="order.status === 'pending'"
+                    @click="deleteOrder(order.id)"
+                    class="text-xs px-2 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200"
+                  >
+                    Delete
                   </button>
                 </td>
               </tr>
@@ -434,6 +498,7 @@ const loadingOrders = ref(false)
 const exporting = ref(false)
 const historyFilters = ref({
   search: '',
+  status: '',
   start_date: '',
   end_date: '',
   page: 1
@@ -618,6 +683,36 @@ function getOrderGuestName(order) {
   return order.booking?.guest?.name || order.booking?.guest?.full_name || order.booking?.customer_name || '-'
 }
 
+function getStatusBadgeClass(status) {
+  switch (status) {
+    case 'pending': return 'bg-yellow-100 text-yellow-800'
+    case 'confirmed': return 'bg-blue-100 text-blue-800'
+    case 'delivered': return 'bg-green-100 text-green-800'
+    case 'cancelled': return 'bg-red-100 text-red-800'
+    default: return 'bg-gray-100 text-gray-800'
+  }
+}
+
+function getStatusLabel(status) {
+  switch (status) {
+    case 'pending': return 'Pending'
+    case 'confirmed': return 'Confirmed'
+    case 'delivered': return 'Delivered'
+    case 'cancelled': return 'Cancelled'
+    default: return status || 'Pending'
+  }
+}
+
+async function updateOrderStatus(orderId, newStatus) {
+  try {
+    await laundryOrderApi.updateOrderStatus(orderId, newStatus)
+    loadOrders()
+  } catch (error) {
+    console.error('Error updating order status:', error)
+    alert(error.response?.data?.message || 'Gagal memperbarui status order')
+  }
+}
+
 // Load orders
 async function loadOrders() {
   loadingOrders.value = true
@@ -628,6 +723,10 @@ async function loadOrders() {
     
     if (historyFilters.value.search) {
       params.search = historyFilters.value.search
+    }
+
+    if (historyFilters.value.status) {
+      params.status = historyFilters.value.status
     }
     
     const response = await laundryOrderApi.getOrders(params)

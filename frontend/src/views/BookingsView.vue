@@ -287,9 +287,16 @@
                   <div class="text-xs text-gray-500 mt-1">{{ booking.adults }} {{ $t('bookings.adults') }}, {{ booking.children }} {{ $t('bookings.children') }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm font-medium text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
+                  <div class="text-sm font-bold text-gray-900">{{ formatCurrency(booking.total_amount) }}</div>
                   <div v-if="booking.deposit_amount > 0" class="text-xs text-gray-500">
                     {{ $t('bookings.deposit') }}: {{ formatCurrency(booking.deposit_amount) }}
+                  </div>
+                  <!-- Pelunasan / Status bayar info -->
+                  <div v-if="['checked_in', 'checked_out'].includes(booking.status)" class="text-xs text-emerald-700 font-semibold mt-0.5">
+                    Pelunasan: {{ formatCurrency(Math.max(0, (booking.total_amount || 0) - (booking.deposit_amount || 0))) }} (Lunas)
+                  </div>
+                  <div v-else-if="booking.deposit_amount > 0" class="text-xs text-amber-700 font-medium mt-0.5">
+                    Sisa Pelunasan: {{ formatCurrency(Math.max(0, (booking.total_amount || 0) - (booking.deposit_amount || 0))) }}
                   </div>
                   <div v-if="getBookingRefNumber(booking)" class="mt-1">
                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-mono font-semibold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap">
@@ -733,6 +740,12 @@
             <div v-if="selectedBookingDetail.deposit_amount > 0" class="flex justify-between items-center text-sm">
               <span class="text-gray-600">DP Jaminan Terbayar</span>
               <span class="font-bold text-blue-700">{{ formatCurrency(selectedBookingDetail.deposit_amount) }}</span>
+            </div>
+            <div v-if="['checked_in', 'checked_out'].includes(selectedBookingDetail.status)" class="flex justify-between items-center text-sm pt-1 border-t border-gray-200">
+              <span class="text-gray-600 font-medium">Pelunasan Kamar saat Check-In</span>
+              <span class="font-bold text-emerald-700">
+                {{ formatCurrency(Math.max(0, (selectedBookingDetail.total_amount || 0) - (selectedBookingDetail.deposit_amount || 0))) }} (Lunas)
+              </span>
             </div>
 
             <!-- Reference Number -->

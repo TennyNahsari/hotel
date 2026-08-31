@@ -12,6 +12,22 @@ class HousekeepingController extends Controller
 {
     public function index(Request $request)
     {
+        // Auto-heal: Ensure any room with status 'dirty' has an active pending/in_progress housekeeping task
+        $dirtyRoomsWithoutTasks = Room::where('status', 'dirty')
+            ->whereDoesntHave('housekeepingTasks', function ($q) {
+                $q->whereIn('status', ['pending', 'in_progress']);
+            })->get();
+
+        foreach ($dirtyRoomsWithoutTasks as $dRoom) {
+            HousekeepingTask::create([
+                'room_id'   => $dRoom->id,
+                'task_type' => 'cleaning',
+                'priority'  => 'high',
+                'status'    => 'pending',
+                'notes'     => 'Auto-generated: Pembersihan kamar ' . $dRoom->room_number . ' (Status Dirty)',
+            ]);
+        }
+
         $query = HousekeepingTask::with(['room.roomType', 'hall', 'assignedUser']);
 
         // Filter by status
