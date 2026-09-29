@@ -230,18 +230,33 @@
                 {{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }} {{ $t('breakfast.of') }} 
                 {{ pagination.total }} {{ $t('breakfast.bookings') }}
               </div>
-              <div class="flex gap-2">
+              <div class="flex gap-1 items-center">
                 <button
                   @click="changePage(pagination.current_page - 1)"
                   :disabled="pagination.current_page === 1"
-                  class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {{ $t('breakfast.previous') }}
                 </button>
+                <template v-for="page in visiblePages" :key="page">
+                  <span v-if="page === '...'" class="px-2 py-1 text-sm text-gray-500">...</span>
+                  <button
+                    v-else
+                    @click="changePage(page)"
+                    :class="[
+                      'px-3 py-1 border rounded text-sm',
+                      pagination.current_page === page
+                        ? 'bg-blue-600 text-white border-blue-600'
+                        : 'border-gray-300 hover:bg-gray-50'
+                    ]"
+                  >
+                    {{ page }}
+                  </button>
+                </template>
                 <button
                   @click="changePage(pagination.current_page + 1)"
                   :disabled="pagination.current_page === pagination.last_page"
-                  class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  class="px-3 py-1 border rounded hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {{ $t('breakfast.next') }}
                 </button>
@@ -272,6 +287,13 @@ const pagination = ref({
   last_page: 1,
   per_page: 15,
   total: 0
+})
+
+const visiblePages = computed(() => {
+  const last = pagination.value.last_page
+  if (!last || last <= 1) return [1]
+  if (last <= 5) return Array.from({ length: last }, (_, i) => i + 1)
+  return [1, 2, '...', last - 1, last]
 })
 
 const filters = ref({

@@ -217,22 +217,37 @@
       </div>
 
       <!-- Pagination -->
-      <div v-if="pagination.total > 15" class="bg-white rounded-lg shadow p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
+      <div v-if="pagination.total > 0 && pagination.last_page > 1" class="bg-white rounded-lg shadow p-3 md:p-4 flex flex-col sm:flex-row justify-between items-center gap-3">
         <div class="text-xs sm:text-sm text-gray-700">
           {{ $t('halls.showing') }} {{ pagination.from }} {{ $t('halls.to') }} {{ pagination.to }} {{ $t('halls.of') }} {{ pagination.total }} {{ $t('halls.halls') }}
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-1 items-center">
           <button
             @click="changePage(pagination.current_page - 1)"
             :disabled="pagination.current_page === 1"
-            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
           >
             {{ $t('halls.previous') }}
           </button>
+          <template v-for="page in visiblePages" :key="page">
+            <span v-if="page === '...'" class="px-2 py-1 text-xs sm:text-sm text-gray-500">...</span>
+            <button
+              v-else
+              @click="changePage(page)"
+              :class="[
+                'px-3 py-1.5 rounded-lg text-xs sm:text-sm border transition-colors',
+                page === pagination.current_page
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'border-gray-300 hover:bg-gray-50'
+              ]"
+            >
+              {{ page }}
+            </button>
+          </template>
           <button
             @click="changePage(pagination.current_page + 1)"
             :disabled="pagination.current_page === pagination.last_page"
-            class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed text-xs sm:text-sm"
           >
             {{ $t('halls.next') }}
           </button>
@@ -486,6 +501,13 @@ const pagination = ref({
   total: 0,
   from: 0,
   to: 0
+})
+
+const visiblePages = computed(() => {
+  const last = pagination.value.last_page
+  if (!last || last <= 1) return [1]
+  if (last <= 5) return Array.from({ length: last }, (_, i) => i + 1)
+  return [1, 2, '...', last - 1, last]
 })
 
 const filters = ref({

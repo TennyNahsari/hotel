@@ -198,23 +198,40 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="menuItems.meta" class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div v-if="menuItems.meta && menuItems.meta.last_page > 1" class="mt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
           <div class="text-xs sm:text-sm text-gray-700">
             {{ $t('restaurant.showing') }} {{ menuItems.meta.from }} {{ $t('restaurant.to') }} {{ menuItems.meta.to }} {{ $t('restaurant.of') }} {{ menuItems.meta.total }} {{ $t('restaurant.results') }}
           </div>
-          <div class="flex gap-2 overflow-x-auto">
+          <div class="flex gap-1 items-center">
             <button
-              v-for="link in menuItems.meta.links"
-              :key="link.label"
-              @click="changePage(link.url)"
-              :disabled="!link.url"
-              :class="[
-                'px-2 sm:px-3 py-1 rounded text-xs sm:text-sm',
-                link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
-                !link.url && 'opacity-50 cursor-not-allowed'
-              ]"
-              v-html="link.label"
-            ></button>
+              @click="changePageByNumber(menuItems.meta.current_page - 1)"
+              :disabled="menuItems.meta.current_page === 1"
+              class="px-3 py-1 border rounded text-xs sm:text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ← Prev
+            </button>
+            <template v-for="page in visibleMenuItemsPages" :key="page">
+              <span v-if="page === '...'" class="px-2 py-1 text-xs sm:text-sm text-gray-500">...</span>
+              <button
+                v-else
+                @click="changePageByNumber(page)"
+                :class="[
+                  'px-3 py-1 border rounded text-xs sm:text-sm',
+                  page === menuItems.meta.current_page
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                {{ page }}
+              </button>
+            </template>
+            <button
+              @click="changePageByNumber(menuItems.meta.current_page + 1)"
+              :disabled="menuItems.meta.current_page === menuItems.meta.last_page"
+              class="px-3 py-1 border rounded text-xs sm:text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next →
+            </button>
           </div>
         </div>
       </div>
@@ -654,23 +671,40 @@
         </div>
 
         <!-- Pagination -->
-        <div v-if="orders.meta" class="mt-4 flex items-center justify-between">
+        <div v-if="orders.meta && orders.meta.last_page > 1" class="mt-4 flex items-center justify-between">
           <div class="text-sm text-gray-700">
             {{ $t('restaurant.showing') }} {{ orders.meta.from }} {{ $t('restaurant.to') }} {{ orders.meta.to }} {{ $t('restaurant.of') }} {{ orders.meta.total }} {{ $t('restaurant.results') }}
           </div>
-          <div class="flex gap-2">
+          <div class="flex gap-1 items-center">
             <button
-              v-for="link in orders.meta.links"
-              :key="link.label"
-              @click="changeOrderPage(link.url)"
-              :disabled="!link.url"
-              :class="[
-                'px-3 py-1 rounded',
-                link.active ? 'bg-blue-600 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
-                !link.url && 'opacity-50 cursor-not-allowed'
-              ]"
-              v-html="link.label"
-            ></button>
+              @click="changeOrderPageByNumber(orders.meta.current_page - 1)"
+              :disabled="orders.meta.current_page === 1"
+              class="px-3 py-1 border rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              ← Prev
+            </button>
+            <template v-for="page in visibleOrdersPages" :key="page">
+              <span v-if="page === '...'" class="px-2 py-1 text-sm text-gray-500">...</span>
+              <button
+                v-else
+                @click="changeOrderPageByNumber(page)"
+                :class="[
+                  'px-3 py-1 border rounded text-sm',
+                  page === orders.meta.current_page
+                    ? 'bg-blue-600 text-white border-blue-600'
+                    : 'border-gray-300 hover:bg-gray-50'
+                ]"
+              >
+                {{ page }}
+              </button>
+            </template>
+            <button
+              @click="changeOrderPageByNumber(orders.meta.current_page + 1)"
+              :disabled="orders.meta.current_page === orders.meta.last_page"
+              class="px-3 py-1 border rounded text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Next →
+            </button>
           </div>
         </div>
       </div>
@@ -912,6 +946,36 @@ watch(
 )
 
 // Pagination
+const visibleMenuItemsPages = computed(() => {
+  const meta = menuItems.value?.meta
+  if (!meta || !meta.last_page) return []
+  const last = meta.last_page
+  if (last <= 1) return [1]
+  if (last <= 5) return Array.from({ length: last }, (_, i) => i + 1)
+  return [1, 2, '...', last - 1, last]
+})
+
+const visibleOrdersPages = computed(() => {
+  const meta = orders.value?.meta
+  if (!meta || !meta.last_page) return []
+  const last = meta.last_page
+  if (last <= 1) return [1]
+  if (last <= 5) return Array.from({ length: last }, (_, i) => i + 1)
+  return [1, 2, '...', last - 1, last]
+})
+
+const changePageByNumber = (page) => {
+  if (page === '...') return
+  const path = menuItems.value?.meta?.path || '/api/public/restaurant/menu-items'
+  loadMenuItems(`${path}?page=${page}`)
+}
+
+const changeOrderPageByNumber = (page) => {
+  if (page === '...') return
+  const path = orders.value?.meta?.path || '/api/public/restaurant/orders'
+  loadOrders(`${path}?page=${page}`)
+}
+
 const changePage = (url) => {
   if (url) loadMenuItems(url)
 }

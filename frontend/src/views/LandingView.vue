@@ -267,11 +267,11 @@
           </div>
 
           <!-- Horizontal Pagination Controls for Rooms -->
-          <div v-if="totalRoomsPages > 1" class="flex items-center space-x-3 self-start md:self-end">
+          <div v-if="totalRoomsPages > 1" class="flex items-center space-x-1.5 self-start md:self-end">
             <button
               @click="prevRoomsPage"
               :disabled="roomsPage === 1"
-              class="px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-ivory border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
+              class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-ivory border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -279,14 +279,26 @@
               <span>{{ $t('landing.halls.prev') }}</span>
             </button>
 
-            <span class="text-xs text-taupe font-medium px-2">
-              {{ $t('landing.halls.page') }} {{ roomsPage }} {{ $t('landing.halls.of') }} {{ totalRoomsPages }}
-            </span>
+            <template v-for="p in visibleRoomsPages" :key="p">
+              <span v-if="p === '...'" class="px-2 py-1 text-xs text-taupe font-medium">...</span>
+              <button
+                v-else
+                @click="roomsPage = p"
+                :class="[
+                  'px-3 py-1.5 text-xs font-semibold rounded transition-all',
+                  roomsPage === p
+                    ? 'bg-forest text-white shadow-sm'
+                    : 'bg-ivory border border-sand/40 text-forest hover:bg-forest/10'
+                ]"
+              >
+                {{ p }}
+              </button>
+            </template>
 
             <button
               @click="nextRoomsPage"
               :disabled="roomsPage === totalRoomsPages"
-              class="px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-ivory border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
+              class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-ivory border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
             >
               <span>{{ $t('landing.halls.next') }}</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,11 +438,11 @@
           </div>
 
           <!-- Horizontal Pagination Controls -->
-          <div class="flex items-center space-x-3 self-start md:self-end">
+          <div v-if="totalHallsPages > 1" class="flex items-center space-x-1.5 self-start md:self-end">
             <button
               @click="prevHallsPage"
               :disabled="hallsPage === 1"
-              class="px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-white border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
+              class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-white border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
@@ -438,14 +450,26 @@
               <span>{{ $t('landing.halls.prev') }}</span>
             </button>
 
-            <span class="text-xs text-taupe font-medium px-2">
-              {{ $t('landing.halls.page') }} {{ hallsPage }} {{ $t('landing.halls.of') }} {{ totalHallsPages }}
-            </span>
+            <template v-for="p in visibleHallsPages" :key="p">
+              <span v-if="p === '...'" class="px-2 py-1 text-xs text-taupe font-medium">...</span>
+              <button
+                v-else
+                @click="hallsPage = p"
+                :class="[
+                  'px-3 py-1.5 text-xs font-semibold rounded transition-all',
+                  hallsPage === p
+                    ? 'bg-forest text-white shadow-sm'
+                    : 'bg-white border border-sand/40 text-forest hover:bg-forest/10'
+                ]"
+              >
+                {{ p }}
+              </button>
+            </template>
 
             <button
               @click="nextHallsPage"
               :disabled="hallsPage === totalHallsPages"
-              class="px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-white border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
+              class="px-3 py-1.5 text-xs font-semibold uppercase tracking-wider bg-white border border-sand/40 text-forest rounded shadow-sm hover:bg-forest hover:text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center space-x-1"
             >
               <span>{{ $t('landing.halls.next') }}</span>
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2373,6 +2397,13 @@ const totalHallsPages = computed(() => {
   return Math.ceil(hallsList.value.length / hallsPerPage.value)
 })
 
+const visibleHallsPages = computed(() => {
+  const total = totalHallsPages.value
+  if (!total || total <= 1) return [1]
+  if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1)
+  return [1, 2, '...', total - 1, total]
+})
+
 const paginatedHalls = computed(() => {
   const start = (hallsPage.value - 1) * hallsPerPage.value
   return hallsList.value.slice(start, start + hallsPerPage.value)
@@ -2696,6 +2727,13 @@ const roomsPerPage = ref(3)
 const totalRoomsPages = computed(() => {
   const totalItems = roomTypesList.value?.length || 3
   return Math.ceil(totalItems / roomsPerPage.value)
+})
+
+const visibleRoomsPages = computed(() => {
+  const total = totalRoomsPages.value
+  if (!total || total <= 1) return [1]
+  if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1)
+  return [1, 2, '...', total - 1, total]
 })
 
 const paginatedRoomTypes = computed(() => {

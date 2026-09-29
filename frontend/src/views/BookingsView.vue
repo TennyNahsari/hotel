@@ -413,20 +413,13 @@
               <span class="font-medium">{{ pagination.total }}</span>
               {{ $t('bookings.results') }}
             </div>
-            <div class="flex gap-1">
-              <button
-                @click="changePage(1)"
-                :disabled="pagination.current_page === 1"
-                class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                ««
-              </button>
+            <div class="flex gap-1 items-center">
               <button
                 @click="changePage(pagination.current_page - 1)"
                 :disabled="pagination.current_page === 1"
                 class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                «
+                ← Prev
               </button>
               
               <template v-for="page in getPageNumbers()" :key="page">
@@ -450,14 +443,7 @@
                 :disabled="pagination.current_page === pagination.last_page"
                 class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                »
-              </button>
-              <button
-                @click="changePage(pagination.last_page)"
-                :disabled="pagination.current_page === pagination.last_page"
-                class="px-3 py-1 border border-gray-300 rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
-              >
-                »»
+                Next →
               </button>
             </div>
           </div>
@@ -1197,40 +1183,10 @@ function formatCurrency(amount) {
 }
 
 function getPageNumbers() {
-  const pages = []
-  const current = pagination.value.current_page
   const last = pagination.value.last_page
-  
-  if (last <= 7) {
-    // Show all pages if 7 or less
-    for (let i = 1; i <= last; i++) {
-      pages.push(i)
-    }
-  } else {
-    // Always show first page
-    pages.push(1)
-    
-    if (current > 3) {
-      pages.push('...')
-    }
-    
-    // Show pages around current
-    const start = Math.max(2, current - 1)
-    const end = Math.min(last - 1, current + 1)
-    
-    for (let i = start; i <= end; i++) {
-      pages.push(i)
-    }
-    
-    if (current < last - 2) {
-      pages.push('...')
-    }
-    
-    // Always show last page
-    pages.push(last)
-  }
-  
-  return pages
+  if (!last || last <= 1) return [1]
+  if (last <= 5) return Array.from({ length: last }, (_, i) => i + 1)
+  return [1, 2, '...', last - 1, last]
 }
 
 function formatWaLink(phone) {

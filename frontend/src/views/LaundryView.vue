@@ -437,19 +437,21 @@
                       <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
                     </svg>
                   </button>
-                  <button
-                    v-for="page in visiblePages"
-                    :key="page"
-                    @click="changePage(page)"
-                    :class="[
-                      page === pagination.current_page
-                        ? 'z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
-                        : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50',
-                      'relative inline-flex items-center px-4 py-2 text-sm font-semibold'
-                    ]"
-                  >
-                    {{ page }}
-                  </button>
+                  <template v-for="page in visiblePages" :key="page">
+                    <span v-if="page === '...'" class="relative inline-flex items-center px-3 py-2 text-sm font-semibold text-gray-500 ring-1 ring-inset ring-gray-300">...</span>
+                    <button
+                      v-else
+                      @click="changePage(page)"
+                      :class="[
+                        page === pagination.current_page
+                          ? 'z-10 bg-indigo-600 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600'
+                          : 'text-gray-900 ring-1 ring-inset ring-gray-300 hover:bg-gray-50',
+                        'relative inline-flex items-center px-4 py-2 text-sm font-semibold'
+                      ]"
+                    >
+                      {{ page }}
+                    </button>
+                  </template>
                   <button
                     @click="changePage(pagination.current_page + 1)"
                     :disabled="pagination.current_page === pagination.last_page"
@@ -541,26 +543,10 @@ const filteredBookingsList = computed(() => {
 
 // Visible pages for pagination
 const visiblePages = computed(() => {
-  const current = pagination.value.current_page
   const last = pagination.value.last_page
-  const pages = []
-  
-  let start = Math.max(1, current - 2)
-  let end = Math.min(last, current + 2)
-  
-  if (end - start < 4) {
-    if (start === 1) {
-      end = Math.min(last, start + 4)
-    } else if (end === last) {
-      start = Math.max(1, end - 4)
-    }
-  }
-  
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
-  }
-  
-  return pages
+  if (!last || last <= 1) return [1]
+  if (last <= 5) return Array.from({ length: last }, (_, i) => i + 1)
+  return [1, 2, '...', last - 1, last]
 })
 
 function selectBookingItem(b) {

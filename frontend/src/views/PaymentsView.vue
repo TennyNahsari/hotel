@@ -726,19 +726,9 @@ const formData = ref({
 // ─── Computed ─────────────────────────────────────────────────────────────────
 const visiblePages = computed(() => {
   const total = pagination.value.last_page
-  const cur   = pagination.value.current_page
-  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
-  const pages = []
-  if (cur <= 4) {
-    for (let i = 1; i <= 5; i++) pages.push(i)
-    pages.push('...', total)
-  } else if (cur >= total - 3) {
-    pages.push(1, '...')
-    for (let i = total - 4; i <= total; i++) pages.push(i)
-  } else {
-    pages.push(1, '...', cur - 1, cur, cur + 1, '...', total)
-  }
-  return pages
+  if (!total || total <= 1) return [1]
+  if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1)
+  return [1, 2, '...', total - 1, total]
 })
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
