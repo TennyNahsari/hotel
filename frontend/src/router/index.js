@@ -117,6 +117,14 @@ const router = createRouter({
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
+  if (!authStore.isAuthenticated) {
+    try {
+      await authStore.checkAuth()
+    } catch (e) {
+      // User is not authenticated or session expired
+    }
+  }
+
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     next({ name: 'login' })
   } else if (to.meta.requiresGuest && authStore.isAuthenticated) {

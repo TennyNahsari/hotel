@@ -4,8 +4,8 @@
       <!-- Header Section -->
       <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 class="text-2xl font-serif font-bold text-forest">Manajemen Cabang Hotel</h1>
-          <p class="text-sm text-taupe mt-1">Kelola seluruh lokasi dan unit cabang AURA Hotel Group</p>
+          <h1 class="text-2xl font-serif font-bold text-forest">{{ $t('branches.title') }}</h1>
+          <p class="text-sm text-taupe mt-1">{{ $t('branches.subtitle') }}</p>
         </div>
         <button
           @click="openAddModal"
@@ -14,7 +14,7 @@
           <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Tambah Cabang Baru
+          {{ $t('branches.addNew') }}
         </button>
       </div>
 
@@ -25,7 +25,7 @@
             🏢
           </div>
           <div>
-            <p class="text-xs text-taupe font-semibold uppercase tracking-wider">Total Cabang</p>
+            <p class="text-xs text-taupe font-semibold uppercase tracking-wider">{{ $t('branches.totalBranches') }}</p>
             <p class="text-2xl font-bold text-forest mt-0.5">{{ branches.length }}</p>
           </div>
         </div>
@@ -34,7 +34,7 @@
             🛏️
           </div>
           <div>
-            <p class="text-xs text-taupe font-semibold uppercase tracking-wider">Total Kamar Seluruh Cabang</p>
+            <p class="text-xs text-taupe font-semibold uppercase tracking-wider">{{ $t('branches.totalRooms') }}</p>
             <p class="text-2xl font-bold text-forest mt-0.5">{{ totalRoomsCount }}</p>
           </div>
         </div>
@@ -43,7 +43,7 @@
             🏛️
           </div>
           <div>
-            <p class="text-xs text-taupe font-semibold uppercase tracking-wider">Total Hall Seluruh Cabang</p>
+            <p class="text-xs text-taupe font-semibold uppercase tracking-wider">{{ $t('branches.totalHalls') }}</p>
             <p class="text-2xl font-bold text-forest mt-0.5">{{ totalHallsCount }}</p>
           </div>
         </div>
@@ -52,11 +52,11 @@
       <!-- Branch Cards List -->
       <div v-if="loading" class="text-center py-12">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-forest border-t-transparent"></div>
-        <p class="text-taupe text-sm mt-3">Memuat data cabang hotel...</p>
+        <p class="text-taupe text-sm mt-3">{{ $t('branches.loading') }}</p>
       </div>
 
       <div v-else-if="branches.length === 0" class="bg-white rounded-xl p-8 text-center border border-sand/40">
-        <p class="text-taupe">Belum ada cabang hotel yang terdaftar.</p>
+        <p class="text-taupe">{{ $t('branches.empty') }}</p>
       </div>
 
       <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -78,7 +78,7 @@
                   branch.is_active ? 'bg-emerald-500 text-white' : 'bg-gray-400 text-white'
                 ]"
               >
-                {{ branch.is_active ? 'Aktif' : 'Non-Aktif' }}
+                {{ branch.is_active ? $t('branches.active') : $t('branches.inactive') }}
               </span>
             </div>
           </div>
@@ -90,7 +90,7 @@
                 <span class="text-xs text-taupe font-mono">Slug: {{ branch.slug }}</span>
               </div>
               <h3 class="text-lg font-serif font-bold text-forest mt-1">{{ branch.name }}</h3>
-              <p class="text-xs text-taupe line-clamp-2 mt-2 leading-relaxed">{{ branch.description || 'Tidak ada deskripsi' }}</p>
+              <p class="text-xs text-taupe line-clamp-2 mt-2 leading-relaxed">{{ branch.description || $t('branches.noDescription') }}</p>
 
               <div class="mt-4 pt-4 border-t border-sand/30 space-y-2 text-xs text-charcoal">
                 <div class="flex items-center text-taupe">
@@ -112,11 +112,11 @@
               <!-- Metrics -->
               <div class="mt-4 grid grid-cols-2 gap-2 text-center text-xs">
                 <div class="bg-ivory p-2 rounded-lg border border-sand/30">
-                  <span class="text-taupe block font-medium">Kamar</span>
+                  <span class="text-taupe block font-medium">{{ $t('branches.roomsUnit') }}</span>
                   <span class="text-forest font-bold text-sm">{{ branch.rooms_count || 0 }} Unit</span>
                 </div>
                 <div class="bg-ivory p-2 rounded-lg border border-sand/30">
-                  <span class="text-taupe block font-medium">Hall</span>
+                  <span class="text-taupe block font-medium">{{ $t('branches.hallsUnit') }}</span>
                   <span class="text-forest font-bold text-sm">{{ branch.halls_count || 0 }} Unit</span>
                 </div>
               </div>
@@ -127,19 +127,19 @@
                 @click="switchToBranch(branch)"
                 class="flex-1 px-3 py-1.5 bg-sand/30 hover:bg-forest hover:text-white text-forest text-xs font-semibold rounded-md transition-colors"
               >
-                Pilih Cabang Ini
+                {{ $t('branches.selectBranch') }}
               </button>
               <button
                 @click="openEditModal(branch)"
                 class="px-3 py-1.5 bg-amber-50 text-amber-700 hover:bg-amber-100 text-xs font-semibold rounded-md transition-colors"
               >
-                Edit
+                {{ $t('branches.edit') }}
               </button>
               <button
                 @click="deleteBranch(branch)"
                 class="px-3 py-1.5 bg-rose-50 text-rose-700 hover:bg-rose-100 text-xs font-semibold rounded-md transition-colors"
               >
-                Hapus
+                {{ $t('branches.delete') }}
               </button>
             </div>
           </div>
@@ -151,14 +151,14 @@
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6 space-y-4 my-8">
           <div class="flex items-center justify-between border-b border-sand/30 pb-3">
             <h3 class="text-lg font-serif font-bold text-forest">
-              {{ isEditing ? 'Edit Cabang Hotel' : 'Tambah Cabang Hotel Baru' }}
+              {{ isEditing ? $t('branches.editModalTitle') : $t('branches.addModalTitle') }}
             </h3>
             <button @click="showModal = false" class="text-taupe hover:text-charcoal text-xl font-bold">&times;</button>
           </div>
 
           <form @submit.prevent="saveBranch" class="space-y-3 text-sm">
             <div>
-              <label class="block text-xs font-semibold text-charcoal mb-1">Nama Cabang Hotel *</label>
+              <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.branchName') }} *</label>
               <input
                 v-model="form.name"
                 type="text"
@@ -170,7 +170,7 @@
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-charcoal mb-1">Kota / Lokasi *</label>
+                <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.city') }} *</label>
                 <input
                   v-model="form.city"
                   type="text"
@@ -180,18 +180,18 @@
                 />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-charcoal mb-1">Slug URL</label>
+                <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.slug') }}</label>
                 <input
                   v-model="form.slug"
                   type="text"
-                  placeholder="bali (otomatis jika kosong)"
+                  :placeholder="$t('branches.slugPlaceholder')"
                   class="w-full px-3 py-2 border border-sand/60 rounded-md focus:ring-2 focus:ring-forest/30 focus:outline-none"
                 />
               </div>
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-charcoal mb-1">Alamat Lengkap</label>
+              <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.address') }}</label>
               <textarea
                 v-model="form.address"
                 rows="2"
@@ -202,7 +202,7 @@
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-semibold text-charcoal mb-1">Nomor Telepon</label>
+                <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.phone') }}</label>
                 <input
                   v-model="form.phone"
                   type="text"
@@ -211,7 +211,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-charcoal mb-1">Email Resmi</label>
+                <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.email') }}</label>
                 <input
                   v-model="form.email"
                   type="email"
@@ -222,7 +222,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-charcoal mb-1">URL Foto Cabang</label>
+              <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.imageUrl') }}</label>
               <input
                 v-model="form.image"
                 type="url"
@@ -232,18 +232,18 @@
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-charcoal mb-1">Deskripsi Singkat</label>
+              <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.description') }}</label>
               <textarea
                 v-model="form.description"
                 rows="2"
-                placeholder="Fasilitas dan keunggulan cabang hotel ini..."
+                placeholder="..."
                 class="w-full px-3 py-2 border border-sand/60 rounded-md focus:ring-2 focus:ring-forest/30 focus:outline-none"
               ></textarea>
             </div>
 
             <div class="flex items-center space-x-2 pt-2">
               <input v-model="form.is_active" type="checkbox" id="is_active" class="rounded text-forest focus:ring-forest" />
-              <label for="is_active" class="text-xs font-semibold text-charcoal cursor-pointer">Cabang Aktif & Siap Menerima Reservasi</label>
+              <label for="is_active" class="text-xs font-semibold text-charcoal cursor-pointer">{{ $t('branches.isActive') }}</label>
             </div>
 
             <div class="pt-4 border-t border-sand/30 flex justify-end space-x-2">
@@ -252,14 +252,14 @@
                 @click="showModal = false"
                 class="px-4 py-2 bg-sand/30 hover:bg-sand/50 text-charcoal text-xs font-semibold rounded-md"
               >
-                Batal
+                {{ $t('branches.cancel') }}
               </button>
               <button
                 type="submit"
                 :disabled="saving"
                 class="px-4 py-2 bg-forest hover:bg-forest/90 text-gold text-xs font-semibold rounded-md shadow-xs"
               >
-                {{ saving ? 'Menyimpan...' : 'Simpan Cabang' }}
+                {{ saving ? $t('branches.saving') : $t('branches.save') }}
               </button>
             </div>
           </form>
@@ -271,10 +271,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { branchApi } from '../api'
 import { useBranchStore } from '../stores/branch'
 
+const { t } = useI18n()
 const branchStore = useBranchStore()
 const branches = ref([])
 const loading = ref(true)
@@ -368,7 +370,7 @@ async function saveBranch() {
 }
 
 async function deleteBranch(branch) {
-  if (confirm(`Apakah Anda yakin ingin menghapus cabang hotel '${branch.name}'?`)) {
+  if (confirm(`${t('branches.deleteConfirm')} '${branch.name}'?`)) {
     try {
       await branchApi.deleteBranch(branch.id)
       await fetchBranches()

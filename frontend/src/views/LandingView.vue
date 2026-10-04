@@ -85,7 +85,7 @@
             @click="openHallBookingModal()"
             class="px-4 py-2.5 bg-gold/90 text-forest hover:bg-gold text-xs font-bold uppercase tracking-wider rounded transition-all shadow-sm"
           >
-            Pesan Hall
+            {{ $t('landing.nav.bookHall') }}
           </button>
 
           <button
@@ -113,6 +113,20 @@
 
       <!-- Mobile Menu Dropdown -->
       <div v-if="mobileMenuOpen" class="lg:hidden bg-forest text-white px-6 py-6 space-y-4 shadow-xl border-t border-gold/20">
+        <!-- Mobile Branch Selector -->
+        <div class="flex items-center justify-between pb-3 border-b border-forest-600">
+          <span class="text-xs uppercase tracking-widest text-sand">🏢 {{ $t('landing.nav.selectBranch') }}</span>
+          <select
+            :value="branchStore.activeBranchId"
+            @change="selectBranchById($event.target.value)"
+            class="bg-forest-800 border border-gold/40 text-gold text-xs font-bold rounded px-2.5 py-1 focus:outline-none cursor-pointer"
+          >
+            <option v-for="b in branchStore.branches" :key="b.id" :value="b.id" class="bg-forest text-white">
+              {{ b.name }}
+            </option>
+          </select>
+        </div>
+
         <!-- Mobile Language Switcher -->
         <div class="flex items-center justify-between pb-3 border-b border-forest-600">
           <span class="text-xs uppercase tracking-widest text-sand">Language / Bahasa</span>
