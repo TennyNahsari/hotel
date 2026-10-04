@@ -19,37 +19,42 @@ class AuthController extends Controller
         ]);
 
         $email = mb_strtolower(trim($request->email));
-        $user = User::whereRaw('LOWER(email) = ?', [$email])->first();
 
-        if (! $user) {
+        $userExists = User::whereRaw('LOWER(email) = ?', [$email])->first();
+        if (!$userExists) {
             throw ValidationException::withMessages([
                 'email' => ['Email user tidak terdaftar pada sistem.'],
             ]);
         }
 
-        if (! Hash::check($request->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'password' => ['Password yang Anda masukkan salah.'],
+        if (Auth::attempt(['email' => $userExists->email, 'password' => $request->password])) {
+            if ($request->hasSession()) {
+                $request->session()->regenerate();
+            }
+
+            $user = Auth::user();
+
+            if (!$user->is_active) {
+                Auth::logout();
+                throw ValidationException::withMessages([
+                    'email' => ['Akun Anda dalam status non-aktif.'],
+                ]);
+            }
+
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'role' => $user->role,
+                ],
             ]);
         }
 
-        if (! $user->is_active) {
-            throw ValidationException::withMessages([
-                'email' => ['Your account is inactive.'],
-            ]);
-        }
-
-        Auth::login($user);
-
-        return response()->json([
-            'message' => 'Login successful',
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone,
-                'role' => $user->role,
-            ],
+        throw ValidationException::withMessages([
+            'password' => ['Password yang Anda masukkan salah.'],
         ]);
     }
 
