@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
             'name' => 'Admin Owner',
             'email' => 'owner@hotel.com',
             'phone' => '081234567890',
-            'password' => 'password',
+            'password' => Hash::make('password'),
             'is_active' => true,
         ]);
 
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
             'name' => 'Front Desk',
             'email' => 'frontdesk@hotel.com',
             'phone' => '081234567891',
-            'password' => 'password',
+            'password' => Hash::make('password'),
             'is_active' => true,
         ]);
 
@@ -42,7 +42,7 @@ class UserSeeder extends Seeder
             'name' => 'Housekeeping Staff',
             'email' => 'housekeeping@hotel.com',
             'phone' => '081234567892',
-            'password' => 'password',
+            'password' => Hash::make('password'),
             'is_active' => true,
         ]);
     }
