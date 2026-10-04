@@ -102,6 +102,8 @@ async function handleLogin() {
   } catch (err) {
     if (err.response?.data?.errors?.email) {
       error.value = err.response.data.errors.email[0]
+    } else if (err.response?.data?.errors?.password) {
+      error.value = err.response.data.errors.password[0]
     } else {
       error.value = err.response?.data?.message || 'Login failed. Please check your credentials.'
     }
