@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Carbon\Carbon;
+use App\Traits\BelongsToBranch;
 
 class HallBooking extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToBranch;
 
     protected $fillable = [
+        'hotel_branch_id',
         'booking_number',
         'hall_id',
         'guest_id',

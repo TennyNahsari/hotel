@@ -304,6 +304,18 @@
             </svg>
             {{ $t('nav.settings') }}
           </router-link>
+
+          <!-- Cabang Hotel -->
+          <router-link
+            to="/branches"
+            class="flex items-center px-3.5 py-2.5 text-sm text-charcoal rounded-md hover:bg-sand/20 hover:text-forest transition-colors"
+            active-class="bg-forest/10 text-forest font-semibold border-l-4 border-gold"
+          >
+            <svg class="w-5 h-5 mr-3 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0h4m-4 0v3" />
+            </svg>
+            Cabang Hotel
+          </router-link>
         </nav>
 
         <!-- User section -->
@@ -337,8 +349,33 @@
     </div>
 
     <!-- Main content -->
-    <div class="md:ml-64">
-      <main class="p-4 pt-16 md:pt-8 md:p-8">
+    <div class="md:ml-64 flex flex-col min-h-screen">
+      <!-- Top Header Bar for Branch Switcher -->
+      <header class="bg-white border-b border-sand/30 px-6 py-3.5 flex items-center justify-between shadow-xs sticky top-0 z-10">
+        <div class="flex items-center space-x-3">
+          <span class="text-xs font-bold text-forest uppercase tracking-wider flex items-center">
+            <svg class="w-4 h-4 mr-1.5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0h4m-4 0V11m0 0h4m-4 0v3" />
+            </svg>
+            Konteks Cabang:
+          </span>
+          <select
+            v-model="selectedBranchId"
+            @change="handleBranchChange"
+            class="bg-ivory border border-sand/60 text-forest text-sm font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all cursor-pointer shadow-2xs"
+          >
+            <option v-for="b in branchStore.branches" :key="b.id" :value="b.id">
+              🏢 {{ b.name }} ({{ b.city }})
+            </option>
+          </select>
+        </div>
+        <div class="hidden sm:flex items-center space-x-2 text-xs font-medium text-taupe bg-ivory/80 px-3 py-1.5 rounded-full border border-sand/40">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span>Aktif: <strong class="text-forest">{{ branchStore.activeBranchName }}</strong></span>
+        </div>
+      </header>
+
+      <main class="p-4 pt-4 md:p-8 flex-1">
         <slot />
       </main>
     </div>
@@ -346,17 +383,20 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useBranchStore } from '../stores/branch'
 import { useI18n } from 'vue-i18n'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
+const branchStore = useBranchStore()
 const { locale } = useI18n()
 
 const currentLocale = computed(() => locale.value)
+const selectedBranchId = ref(branchStore.activeBranchId)
 
 const sidebarOpen = ref(false)
 const roomMenuOpen = ref(true) // Default open
@@ -364,6 +404,21 @@ const hallMenuOpen = ref(true) // Default open
 const servicesOpen = ref(true) // Default open
 
 const user = computed(() => authStore.user)
+
+onMounted(async () => {
+  await branchStore.fetchAdminBranches()
+  selectedBranchId.value = branchStore.activeBranchId
+})
+
+watch(() => branchStore.activeBranchId, (newId) => {
+  selectedBranchId.value = newId
+})
+
+function handleBranchChange() {
+  branchStore.selectBranchById(selectedBranchId.value)
+  // Reload current route component so it fetches fresh branch-scoped data
+  router.go(0)
+}
 
 // Close sidebar on mobile when route changes
 watch(() => route.path, () => {

@@ -19,6 +19,7 @@ use App\Http\Controllers\Api\RestaurantOrderController;
 use App\Http\Controllers\Api\LaundryOrderController;
 use App\Http\Controllers\Api\MLController;
 use App\Http\Controllers\Api\SettingController;
+use App\Http\Controllers\Api\HotelBranchController;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,6 +29,7 @@ use App\Http\Controllers\Api\SettingController;
 
 // Public routes
 Route::post('/login', [AuthController::class, 'login']);
+Route::get('/public/branches', [HotelBranchController::class, 'publicIndex']);
 Route::post('/public/bookings', [BookingController::class, 'publicStore']);
 Route::post('/public/bookings/upload-receipt', [BookingController::class, 'uploadReceipt']);
 Route::get('/public/bookings/search', [BookingController::class, 'publicSearch']);
@@ -46,6 +48,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index']);
     Route::post('/dashboard/refresh', [DashboardController::class, 'refresh']);
+
+    // Branches Management
+    Route::apiResource('branches', HotelBranchController::class);
 
     // Room Types Management
     Route::apiResource('room-types', RoomTypeController::class);

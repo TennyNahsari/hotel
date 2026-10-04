@@ -5,12 +5,14 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Traits\BelongsToBranch;
 
 class RestaurantOrder extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToBranch;
 
     protected $fillable = [
+        'hotel_branch_id',
         'order_number',
         'booking_id',
         'hall_booking_id',

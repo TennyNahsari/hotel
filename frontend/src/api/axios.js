@@ -15,6 +15,10 @@ api.interceptors.request.use(
   (config) => {
     // Don't set Referer header - it's unsafe and browser won't allow it
     // Sanctum will work with CORS and credentials already configured
+    const activeBranchId = localStorage.getItem('active_branch_id')
+    if (activeBranchId) {
+      config.headers['X-Branch-ID'] = activeBranchId
+    }
     return config
   },
   (error) => {

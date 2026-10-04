@@ -53,10 +53,20 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function hotelBranches()
+    {
+        return $this->belongsToMany(HotelBranch::class, 'user_hotel_branches');
+    }
+
     // Helper methods
     public function hasRole($roleName)
     {
         return $this->role && $this->role->name === $roleName;
+    }
+
+    public function isSuperAdmin()
+    {
+        return $this->hasRole('Super Admin') || $this->hasRole('admin');
     }
 
     public function bookings()

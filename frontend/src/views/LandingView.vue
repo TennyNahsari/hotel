@@ -34,6 +34,20 @@
 
         <!-- CTAs & Language Switcher -->
         <div class="hidden sm:flex items-center space-x-3">
+          <!-- Branch Selector -->
+          <div class="flex items-center space-x-1.5 bg-black/30 backdrop-blur-md px-3 py-1 rounded border border-gold/40">
+            <span class="text-xs text-gold font-bold">🏢</span>
+            <select
+              :value="branchStore.activeBranchId"
+              @change="selectBranchById($event.target.value)"
+              class="bg-transparent text-white text-xs font-semibold focus:outline-none cursor-pointer"
+            >
+              <option v-for="b in branchStore.branches" :key="b.id" :value="b.id" class="text-charcoal bg-white">
+                {{ b.name }}
+              </option>
+            </select>
+          </div>
+
           <!-- Language Switcher -->
           <div class="flex items-center space-x-1 mr-1 bg-black/10 backdrop-blur-xs p-1 rounded border border-white/20">
             <button
@@ -199,6 +213,42 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7-7-7" />
         </svg>
       </a>
+    </section>
+
+    <!-- 02.5 BRANCH SELECTION SECTION -->
+    <section class="bg-forest text-white py-10 border-y border-gold/40 relative z-20 shadow-lg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row items-center justify-between gap-6">
+          <div>
+            <div class="flex items-center space-x-2 text-gold text-xs font-bold uppercase tracking-widest">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+              </svg>
+              <span>Lokasi & Cabang AURA Hotel</span>
+            </div>
+            <h2 class="font-serif text-2xl sm:text-3xl font-bold mt-1 text-white">Pilih Cabang Hotel Pilihan Anda</h2>
+            <p class="text-sand/80 text-xs sm:text-sm mt-1">Kamar & hall yang ditampilkan akan otomatis menyesuaikan dengan lokasi cabang yang Anda pilih.</p>
+          </div>
+
+          <!-- Branch Pills -->
+          <div class="flex flex-wrap items-center gap-3">
+            <button
+              v-for="b in branchStore.branches"
+              :key="b.id"
+              @click="selectBranch(b)"
+              :class="[
+                'px-5 py-3 rounded-lg text-xs font-bold uppercase tracking-wider transition-all flex items-center space-x-2 border shadow-sm cursor-pointer',
+                branchStore.activeBranchId === b.id
+                  ? 'bg-gold text-forest border-yellow-300 shadow-md ring-2 ring-gold/50 scale-105'
+                  : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-gold/50'
+              ]"
+            >
+              <span>🏢 {{ b.name }}</span>
+              <span v-if="branchStore.activeBranchId === b.id" class="text-xs">✓</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- 03. HOTEL INTRODUCTION -->
@@ -2197,10 +2247,12 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted, h } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useBranchStore } from '../stores/branch'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 
 const authStore = useAuthStore()
+const branchStore = useBranchStore()
 const { t, locale } = useI18n()
 
 const currentLocale = computed(() => locale.value)
@@ -2488,7 +2540,8 @@ async function submitHallBooking() {
   hallBookingSuccessData.value = null
 
   try {
-    const res = await axios.post('http://localhost:8000/api/public/hall-bookings', hallBookingForm.value)
+    const payload = { ...hallBookingForm.value, hotel_branch_id: branchStore.activeBranchId }
+    const res = await axios.post('http://localhost:8000/api/public/hall-bookings', payload)
     if (res.data && (res.data.data || res.data.booking_number)) {
       const dataPayload = res.data.data || res.data
       const selectedHallObj = hallsList.value.find(h => h.id == hallBookingForm.value.hall_id)
@@ -2550,6 +2603,7 @@ const socialSettings = ref({
 
 onMounted(async () => {
   window.addEventListener('scroll', handleScroll)
+  await branchStore.fetchPublicBranches()
   await fetchRoomTypes()
   await fetchHalls()
   await fetchPaymentSettings()
@@ -2604,7 +2658,9 @@ async function fetchPaymentSettings() {
 
 async function fetchRoomTypes() {
   try {
-    const res = await axios.get('http://localhost:8000/api/public/room-types')
+    const res = await axios.get('http://localhost:8000/api/public/room-types', {
+      params: { hotel_branch_id: branchStore.activeBranchId }
+    })
     if (res.data) {
       roomTypesList.value = res.data
     }
@@ -2615,13 +2671,27 @@ async function fetchRoomTypes() {
 
 async function fetchHalls() {
   try {
-    const res = await axios.get('http://localhost:8000/api/public/halls')
+    const res = await axios.get('http://localhost:8000/api/public/halls', {
+      params: { hotel_branch_id: branchStore.activeBranchId }
+    })
     if (res.data && Array.isArray(res.data)) {
       hallsList.value = res.data
     }
   } catch (err) {
     console.error('Failed to load halls:', err)
   }
+}
+
+function selectBranch(branch) {
+  branchStore.selectBranch(branch)
+  fetchRoomTypes()
+  fetchHalls()
+}
+
+function selectBranchById(id) {
+  branchStore.selectBranchById(id)
+  fetchRoomTypes()
+  fetchHalls()
 }
 
 function openRoomModal(room) {
@@ -2700,7 +2770,8 @@ async function submitBooking() {
   bookingErrorMessage.value = ''
   
   try {
-    const res = await axios.post('http://localhost:8000/api/public/bookings', bookingForm.value)
+    const payload = { ...bookingForm.value, hotel_branch_id: branchStore.activeBranchId }
+    const res = await axios.post('http://localhost:8000/api/public/bookings', payload)
     if (res.status === 201 || res.data) {
       bookingSuccessData.value = res.data
     }

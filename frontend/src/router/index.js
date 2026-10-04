@@ -104,6 +104,12 @@ const router = createRouter({
       component: () => import('../views/SettingsView.vue'),
       meta: { requiresAuth: true },
     },
+    {
+      path: '/branches',
+      name: 'branches',
+      component: () => import('../views/BranchesView.vue'),
+      meta: { requiresAuth: true },
+    },
   ],
 })
 

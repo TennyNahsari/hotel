@@ -4,19 +4,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Traits\BelongsToBranch;
 
 class Setting extends Model
 {
-    use HasFactory;
+    use HasFactory, BelongsToBranch;
 
     protected $fillable = [
+        'hotel_branch_id',
         'key',
         'value',
     ];
 
-    public static function get($key, $default = null)
+    public static function get($key, $default = null, $branchId = null)
     {
-        $setting = static::where('key', $key)->first();
+        $query = static::where('key', $key);
+        if ($branchId) {
+            $query->where('hotel_branch_id', $branchId);
+        }
+        $setting = $query->first();
         if (!$setting) {
             return $default;
         }
@@ -25,11 +31,11 @@ class Setting extends Model
         return (json_last_error() === JSON_ERROR_NONE) ? $decoded : $setting->value;
     }
 
-    public static function set($key, $value)
+    public static function set($key, $value, $branchId = null)
     {
         $encoded = is_array($value) || is_object($value) ? json_encode($value) : $value;
         return static::updateOrCreate(
-            ['key' => $key],
+            ['key' => $key, 'hotel_branch_id' => $branchId],
             ['value' => $encoded]
         );
     }

@@ -12,6 +12,11 @@ class RoomTypeController extends Controller
     {
         $query = RoomType::withCount('rooms');
 
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
+        if ($branchId) {
+            $query->forBranch($branchId);
+        }
+
         // Only active room types by default
         if (!$request->has('include_inactive')) {
             $query->where('is_active', true);
@@ -25,12 +30,17 @@ class RoomTypeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:100|unique:room_types,name',
+            'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
+            'name' => 'required|string|max:100',
             'description' => 'nullable|string',
             'base_price' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1',
             'facilities' => 'nullable|array',
         ]);
+
+        if (empty($validated['hotel_branch_id'])) {
+            $validated['hotel_branch_id'] = $request->header('X-Branch-ID', 1);
+        }
 
         $roomType = RoomType::create($validated);
 

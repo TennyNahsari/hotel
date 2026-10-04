@@ -26,6 +26,11 @@ class BookingController extends Controller
 
         $query = Booking::with(['guest', 'rooms.roomType', 'payments', 'createdBy']);
 
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
+        if ($branchId) {
+            $query->forBranch($branchId);
+        }
+
         // Filter by status — use filled() so empty string doesn't wrongly filter
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -455,6 +460,10 @@ class BookingController extends Controller
 
         // Find an available room matching room_type_id or any room
         $roomQuery = Room::with('roomType')->where('is_active', true)->where('status', '!=', 'out_of_order');
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
+        if ($branchId) {
+            $roomQuery->forBranch($branchId);
+        }
         if (!empty($validated['room_type_id'])) {
             $roomQuery->where('room_type_id', $validated['room_type_id']);
         }
@@ -593,6 +602,7 @@ class BookingController extends Controller
         $combinedNotes = trim($paymentNotes . " " . ($validated['special_requests'] ?? ''));
 
         $booking = Booking::create([
+            'hotel_branch_id' => $selectedRoom ? $selectedRoom->hotel_branch_id : ($branchId ?: 1),
             'booking_number' => $this->generateBookingNumber(),
             'guest_id' => $guest->id,
             'created_by' => null,

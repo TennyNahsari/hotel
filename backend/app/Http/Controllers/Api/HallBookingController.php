@@ -25,6 +25,11 @@ class HallBookingController extends Controller
 
         $query = HallBooking::with(['hall', 'guest', 'bookedBy', 'payments']);
 
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
+        if ($branchId) {
+            $query->forBranch($branchId);
+        }
+
         // Filter by status
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -540,6 +545,7 @@ class HallBookingController extends Controller
             }
 
             $booking = HallBooking::create([
+                'hotel_branch_id' => $hall->hotel_branch_id ?? ($request->get('hotel_branch_id', $request->header('X-Branch-ID', 1))),
                 'booking_number' => HallBooking::generateBookingNumber(),
                 'hall_id' => $request->hall_id,
                 'guest_id' => $guest->id,

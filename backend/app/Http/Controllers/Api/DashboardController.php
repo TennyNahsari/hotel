@@ -12,27 +12,38 @@ use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $today = Carbon::today();
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
 
         // Room statistics
-        $totalRooms = Room::count();
-        $availableRooms = Room::where('status', 'available')->count();
-        $occupiedRooms = Room::where('status', 'occupied')->count();
-        $maintenanceRooms = Room::where('status', 'maintenance')->count();
+        $roomQuery = Room::query();
+        if ($branchId) {
+            $roomQuery->forBranch($branchId);
+        }
+
+        $totalRooms = (clone $roomQuery)->count();
+        $availableRooms = (clone $roomQuery)->where('status', 'available')->count();
+        $occupiedRooms = (clone $roomQuery)->where('status', 'occupied')->count();
+        $maintenanceRooms = (clone $roomQuery)->where('status', 'maintenance')->count();
 
         // Booking statistics
-        $todayCheckIns = Booking::whereDate('check_in_date', $today)
+        $bookingQuery = Booking::query();
+        if ($branchId) {
+            $bookingQuery->forBranch($branchId);
+        }
+
+        $todayCheckIns = (clone $bookingQuery)->whereDate('check_in_date', $today)
             ->where('status', 'confirmed')
             ->count();
         
-        $todayCheckOuts = Booking::whereDate('check_out_date', $today)
+        $todayCheckOuts = (clone $bookingQuery)->whereDate('check_out_date', $today)
             ->where('status', 'checked_in')
             ->count();
 
-        $activeBookings = Booking::where('status', 'checked_in')->count();
-        $pendingBookings = Booking::where('status', 'pending')->count();
+        $activeBookings = (clone $bookingQuery)->where('status', 'checked_in')->count();
+        $pendingBookings = (clone $bookingQuery)->where('status', 'pending')->count();
 
         // Revenue statistics - only from FULL payments
         $todayFullPayments = Payment::whereDate('created_at', $today)
@@ -60,11 +71,19 @@ class DashboardController extends Controller
             ->keyBy('payment_type');
 
         // Housekeeping statistics
-        $pendingTasks = HousekeepingTask::where('status', 'pending')->count();
-        $inProgressTasks = HousekeepingTask::where('status', 'in_progress')->count();
+        $hkQuery = HousekeepingTask::query();
+        if ($branchId) {
+            $hkQuery->forBranch($branchId);
+        }
+        $pendingTasks = (clone $hkQuery)->where('status', 'pending')->count();
+        $inProgressTasks = (clone $hkQuery)->where('status', 'in_progress')->count();
 
         // Recent room bookings
-        $recentRoomBookings = Booking::with(['guest', 'room.roomType', 'payments'])
+        $recentRoomQuery = Booking::with(['guest', 'room.roomType', 'payments']);
+        if ($branchId) {
+            $recentRoomQuery->forBranch($branchId);
+        }
+        $recentRoomBookings = $recentRoomQuery
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()
@@ -95,7 +114,11 @@ class DashboardController extends Controller
             });
 
         // Recent hall bookings
-        $recentHallBookings = \App\Models\HallBooking::with(['hall', 'guest', 'payments'])
+        $recentHallQuery = \App\Models\HallBooking::with(['hall', 'guest', 'payments']);
+        if ($branchId) {
+            $recentHallQuery->forBranch($branchId);
+        }
+        $recentHallBookings = $recentHallQuery
             ->orderBy('created_at', 'desc')
             ->limit(5)
             ->get()

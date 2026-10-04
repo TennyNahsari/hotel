@@ -9,9 +9,14 @@ use Illuminate\Support\Facades\Validator;
 
 class HallController extends Controller
 {
-    public function publicIndex()
+    public function publicIndex(Request $request)
     {
-        $halls = Hall::whereNotIn('status', ['maintenance', 'unavailable'])->orderBy('id', 'asc')->get();
+        $query = Hall::whereNotIn('status', ['maintenance', 'unavailable']);
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
+        if ($branchId) {
+            $query->forBranch($branchId);
+        }
+        $halls = $query->orderBy('id', 'asc')->get();
         return response()->json($halls);
     }
 
@@ -20,16 +25,12 @@ class HallController extends Controller
      */
     public function index(Request $request)
     {
-        // Simple test: return all halls without pagination
-        $allHalls = Hall::all();
-        if ($allHalls->isEmpty()) {
-            return response()->json([
-                'message' => 'No halls found in database',
-                'total_count' => Hall::count()
-            ]);
-        }
-
         $query = Hall::query();
+
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
+        if ($branchId) {
+            $query->forBranch($branchId);
+        }
 
         // Filter by status
         if ($request->filled('status')) {
@@ -62,7 +63,8 @@ class HallController extends Controller
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'name' => 'required|string|max:100|unique:halls',
+            'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
+            'name' => 'required|string|max:100',
             'hall_type' => 'required|string|max:50',
             'floor' => 'nullable|string|max:20',
             'capacity' => 'required|integer|min:1',
@@ -78,7 +80,12 @@ class HallController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $hall = Hall::create($request->all());
+        $data = $request->all();
+        if (empty($data['hotel_branch_id'])) {
+            $data['hotel_branch_id'] = $request->header('X-Branch-ID', 1);
+        }
+
+        $hall = Hall::create($data);
 
         return response()->json([
             'message' => 'Hall created successfully',

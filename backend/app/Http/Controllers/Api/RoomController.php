@@ -15,6 +15,11 @@ class RoomController extends Controller
     {
         $query = Room::with('roomType');
 
+        $branchId = $request->get('hotel_branch_id', $request->header('X-Branch-ID'));
+        if ($branchId) {
+            $query->forBranch($branchId);
+        }
+
         // Filter by status
         if ($request->has('status')) {
             $query->where('status', $request->status);
@@ -43,11 +48,16 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
             'room_type_id' => 'required|exists:room_types,id',
             'room_number' => 'required|unique:rooms,room_number',
             'floor' => 'nullable|string|max:10',
             'notes' => 'nullable|string',
         ]);
+
+        if (empty($validated['hotel_branch_id'])) {
+            $validated['hotel_branch_id'] = $request->header('X-Branch-ID', 1);
+        }
 
         $room = Room::create($validated);
 

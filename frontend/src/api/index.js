@@ -1,5 +1,37 @@
 import api from './axios'
 
+export const branchApi = {
+  async getPublicBranches() {
+    const response = await api.get('/public/branches')
+    return response.data
+  },
+
+  async getBranches(params = {}) {
+    const response = await api.get('/branches', { params })
+    return response.data
+  },
+
+  async getBranch(id) {
+    const response = await api.get(`/branches/${id}`)
+    return response.data
+  },
+
+  async createBranch(data) {
+    const response = await api.post('/branches', data)
+    return response.data
+  },
+
+  async updateBranch(id, data) {
+    const response = await api.put(`/branches/${id}`, data)
+    return response.data
+  },
+
+  async deleteBranch(id) {
+    const response = await api.delete(`/branches/${id}`)
+    return response.data
+  },
+}
+
 export const authApi = {
   async login(credentials) {
     // Get CSRF cookie first
