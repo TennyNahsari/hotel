@@ -25,7 +25,8 @@ export const useBranchStore = defineStore('branch', {
       this.loading = true
       try {
         const response = await api.get('/public/branches')
-        this.branches = response.data.data || []
+        const rawData = response.data?.data || response.data
+        this.branches = Array.isArray(rawData) ? rawData : []
         
         // Auto select branch from localStorage or first branch
         const savedId = localStorage.getItem('active_branch_id')
@@ -50,7 +51,16 @@ export const useBranchStore = defineStore('branch', {
       this.loading = true
       try {
         const response = await api.get('/branches')
-        this.branches = response.data.data || []
+        const rawData = response.data?.data || response.data
+        const list = Array.isArray(rawData) ? rawData : []
+
+        if (list.length > 0) {
+          this.branches = list
+        } else {
+          // Fallback to public branches if admin query returned empty
+          await this.fetchPublicBranches()
+          return
+        }
 
         const savedId = localStorage.getItem('active_branch_id')
         if (savedId && this.branches.length > 0) {
@@ -65,6 +75,8 @@ export const useBranchStore = defineStore('branch', {
         }
       } catch (err) {
         this.error = err.message
+        // Fallback to public branches if admin endpoint failed
+        await this.fetchPublicBranches()
       } finally {
         this.loading = false
       }

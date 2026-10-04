@@ -309,9 +309,23 @@ async function fetchBranches() {
   loading.value = true
   try {
     const res = await branchApi.getBranches()
-    branches.value = res.data || []
+    const rawData = res?.data || res
+    branches.value = Array.isArray(rawData) ? rawData : []
+    
+    if (branches.value.length === 0) {
+      const publicRes = await branchApi.getPublicBranches()
+      const rawPublic = publicRes?.data || publicRes
+      branches.value = Array.isArray(rawPublic) ? rawPublic : []
+    }
   } catch (err) {
     console.error('Failed to load branches:', err)
+    try {
+      const publicRes = await branchApi.getPublicBranches()
+      const rawPublic = publicRes?.data || publicRes
+      branches.value = Array.isArray(rawPublic) ? rawPublic : []
+    } catch (pubErr) {
+      console.error('Failed to load public branches:', pubErr)
+    }
   } finally {
     loading.value = false
   }
