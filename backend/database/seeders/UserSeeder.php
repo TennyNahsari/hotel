@@ -28,6 +28,24 @@ class UserSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        User::updateOrCreate(['email' => 'admin@hotel.com'], [
+            'role_id' => $ownerRole->id,
+            'name' => 'Admin User',
+            'email' => 'admin@hotel.com',
+            'phone' => '081234567899',
+            'password' => Hash::make('password'),
+            'is_active' => true,
+        ]);
+
+        User::updateOrCreate(['email' => 'admin123@hotel.com'], [
+            'role_id' => $ownerRole->id,
+            'name' => 'Admin 123 User',
+            'email' => 'admin123@hotel.com',
+            'phone' => '081234567898',
+            'password' => Hash::make('password123'),
+            'is_active' => true,
+        ]);
+
         User::updateOrCreate(['email' => 'frontdesk@hotel.com'], [
             'role_id' => $frontOfficeRole->id,
             'name' => 'Front Desk',
