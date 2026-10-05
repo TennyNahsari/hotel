@@ -50,6 +50,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/dashboard/refresh', [DashboardController::class, 'refresh']);
 
     // Branches Management
+    Route::post('/branches/{branch}/upload-image', [HotelBranchController::class, 'uploadImage']);
     Route::apiResource('branches', HotelBranchController::class);
 
     // Room Types Management

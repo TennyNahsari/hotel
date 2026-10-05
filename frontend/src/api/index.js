@@ -17,12 +17,32 @@ export const branchApi = {
   },
 
   async createBranch(data) {
-    const response = await api.post('/branches', data)
+    const isFormData = data instanceof FormData
+    const response = await api.post('/branches', data, {
+      headers: isFormData ? { 'Content-Type': 'multipart/form-data' } : {}
+    })
     return response.data
   },
 
   async updateBranch(id, data) {
+    const isFormData = data instanceof FormData
+    if (isFormData) {
+      data.append('_method', 'PUT')
+      const response = await api.post(`/branches/${id}`, data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      })
+      return response.data
+    }
     const response = await api.put(`/branches/${id}`, data)
+    return response.data
+  },
+
+  async uploadBranchImage(id, file) {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await api.post(`/branches/${id}/upload-image`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
     return response.data
   },
 

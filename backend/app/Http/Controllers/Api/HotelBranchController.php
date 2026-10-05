@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\HotelBranch;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class HotelBranchController extends Controller
 {
@@ -62,11 +63,17 @@ class HotelBranchController extends Controller
             'email' => 'nullable|email|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
             'is_active' => 'boolean',
         ]);
 
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
+        }
+
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('hotel-branches', 'public');
+            $validated['image'] = Storage::url($path);
         }
 
         $branch = HotelBranch::create($validated);
@@ -107,6 +114,7 @@ class HotelBranchController extends Controller
             'email' => 'nullable|email|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|string',
+            'image_file' => 'nullable|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
             'is_active' => 'boolean',
         ]);
 
@@ -114,11 +122,39 @@ class HotelBranchController extends Controller
             $validated['slug'] = Str::slug($validated['name']);
         }
 
+        if ($request->hasFile('image_file')) {
+            $path = $request->file('image_file')->store('hotel-branches', 'public');
+            $validated['image'] = Storage::url($path);
+        }
+
         $branch->update($validated);
 
         return response()->json([
             'success' => true,
             'message' => 'Data cabang hotel berhasil diperbarui',
+            'data' => $branch,
+        ]);
+    }
+
+    /**
+     * Upload branch image.
+     */
+    public function uploadImage(Request $request, $id)
+    {
+        $request->validate([
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp,gif|max:5120',
+        ]);
+
+        $branch = HotelBranch::findOrFail($id);
+        $path = $request->file('image')->store('hotel-branches', 'public');
+        $imageUrl = Storage::url($path);
+
+        $branch->update(['image' => $imageUrl]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto cabang berhasil diunggah',
+            'image_url' => $imageUrl,
             'data' => $branch,
         ]);
     }

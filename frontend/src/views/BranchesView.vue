@@ -221,14 +221,54 @@
               </div>
             </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-charcoal mb-1">{{ $t('branches.imageUrl') }}</label>
-              <input
-                v-model="form.image"
-                type="url"
-                placeholder="https://..."
-                class="w-full px-3 py-2 border border-sand/60 rounded-md focus:ring-2 focus:ring-forest/30 focus:outline-none"
-              />
+            <!-- Image Upload or URL Input -->
+            <div class="space-y-2">
+              <label class="block text-xs font-semibold text-charcoal">{{ $t('branches.uploadImage') }}</label>
+              
+              <div class="flex items-center space-x-4 text-xs mb-1">
+                <label class="inline-flex items-center cursor-pointer font-medium text-forest">
+                  <input type="radio" v-model="imageInputType" value="file" class="mr-1 text-forest" />
+                  {{ $t('branches.chooseImage') }}
+                </label>
+                <label class="inline-flex items-center cursor-pointer font-medium text-forest">
+                  <input type="radio" v-model="imageInputType" value="url" class="mr-1 text-forest" />
+                  {{ $t('branches.orUseUrl') }}
+                </label>
+              </div>
+
+              <div v-if="imageInputType === 'file'" class="space-y-2">
+                <input
+                  type="file"
+                  accept="image/*"
+                  @change="handleFileChange"
+                  class="w-full text-xs text-charcoal file:mr-3 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-forest/10 file:text-forest hover:file:bg-forest/20 cursor-pointer border border-sand/60 rounded-md p-1"
+                />
+              </div>
+
+              <div v-else>
+                <input
+                  v-model="form.image"
+                  type="url"
+                  placeholder="https://..."
+                  class="w-full px-3 py-2 border border-sand/60 rounded-md focus:ring-2 focus:ring-forest/30 focus:outline-none text-xs"
+                />
+              </div>
+
+              <!-- Image Preview -->
+              <div v-if="imagePreview || form.image" class="mt-2 relative h-32 bg-sand/20 rounded-lg overflow-hidden border border-sand/40 flex items-center justify-center">
+                <img
+                  :src="imagePreview || form.image"
+                  alt="Preview"
+                  class="h-full w-full object-cover"
+                />
+                <button
+                  type="button"
+                  @click="clearImage"
+                  class="absolute top-2 right-2 bg-black/60 hover:bg-black text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             <div>
@@ -285,6 +325,10 @@ const isEditing = ref(false)
 const editingId = ref(null)
 const saving = ref(false)
 
+const imageInputType = ref('file')
+const imageFile = ref(null)
+const imagePreview = ref('')
+
 const form = ref({
   name: '',
   slug: '',
@@ -304,6 +348,20 @@ const totalRoomsCount = computed(() => {
 const totalHallsCount = computed(() => {
   return branches.value.reduce((acc, b) => acc + (b.halls_count || 0), 0)
 })
+
+function handleFileChange(event) {
+  const file = event.target.files[0]
+  if (file) {
+    imageFile.value = file
+    imagePreview.value = URL.createObjectURL(file)
+  }
+}
+
+function clearImage() {
+  imageFile.value = null
+  imagePreview.value = ''
+  form.value.image = ''
+}
 
 async function fetchBranches() {
   loading.value = true
@@ -334,6 +392,9 @@ async function fetchBranches() {
 function openAddModal() {
   isEditing.value = false
   editingId.value = null
+  imageInputType.value = 'file'
+  imageFile.value = null
+  imagePreview.value = ''
   form.value = {
     name: '',
     slug: '',
@@ -351,6 +412,9 @@ function openAddModal() {
 function openEditModal(branch) {
   isEditing.value = true
   editingId.value = branch.id
+  imageInputType.value = branch.image && !branch.image.includes('/storage') ? 'url' : 'file'
+  imageFile.value = null
+  imagePreview.value = ''
   form.value = {
     name: branch.name,
     slug: branch.slug,
@@ -368,10 +432,26 @@ function openEditModal(branch) {
 async function saveBranch() {
   saving.value = true
   try {
+    const formData = new FormData()
+    formData.append('name', form.value.name)
+    if (form.value.slug) formData.append('slug', form.value.slug)
+    if (form.value.city) formData.append('city', form.value.city)
+    if (form.value.address) formData.append('address', form.value.address)
+    if (form.value.phone) formData.append('phone', form.value.phone)
+    if (form.value.email) formData.append('email', form.value.email)
+    if (form.value.description) formData.append('description', form.value.description)
+    formData.append('is_active', form.value.is_active ? '1' : '0')
+
+    if (imageInputType.value === 'file' && imageFile.value) {
+      formData.append('image_file', imageFile.value)
+    } else if (form.value.image) {
+      formData.append('image', form.value.image)
+    }
+
     if (isEditing.value) {
-      await branchApi.updateBranch(editingId.value, form.value)
+      await branchApi.updateBranch(editingId.value, formData)
     } else {
-      await branchApi.createBranch(form.value)
+      await branchApi.createBranch(formData)
     }
     showModal.value = false
     await fetchBranches()
