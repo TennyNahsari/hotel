@@ -2468,10 +2468,11 @@ const fetchPublicHeroSliders = async () => {
 watch(() => branchStore.activeBranchId, () => {
   fetchPublicHeroSliders()
   fetchPaymentSettings()
-})
+}, { immediate: true })
 
 onMounted(() => {
   fetchPublicHeroSliders()
+  fetchPaymentSettings()
 })
 
 onUnmounted(() => {
@@ -2733,6 +2734,7 @@ function openHallModal(hall) {
 }
 
 function openHallBookingModal(presetHall = null) {
+  fetchPaymentSettings()
   selectedHall.value = null
   hallBookingSuccessData.value = null
   hallBookingErrorMessage.value = ''
@@ -2896,12 +2898,14 @@ function selectBranch(branch) {
   branchStore.selectBranch(branch)
   fetchRoomTypes()
   fetchHalls()
+  fetchPaymentSettings()
 }
 
 function selectBranchById(id) {
   branchStore.selectBranchById(id)
   fetchRoomTypes()
   fetchHalls()
+  fetchPaymentSettings()
 }
 
 function openRoomModal(room) {
@@ -2909,6 +2913,7 @@ function openRoomModal(room) {
 }
 
 function openBookingModal(presetRoom = null) {
+  fetchPaymentSettings()
   selectedRoom.value = null
   bookingSuccessData.value = null
   bookingErrorMessage.value = ''
