@@ -845,8 +845,7 @@
   </LayoutMain>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import axios from '../api/axios'
 import { settingApi } from '../api'
 import { useBranchStore } from '../stores/branch'
@@ -862,6 +861,10 @@ const errorMessage = ref('')
 
 // Branch filtering for Hero Sliders
 const selectedBranchId = ref(null)
+
+watch(selectedBranchId, () => {
+  fetchHeroSliders()
+})
 
 // Hero Sliders State
 const heroSliders = ref([])
@@ -1188,8 +1191,11 @@ const saveCurrentTabSettings = async () => {
   }
 }
 
-onMounted(() => {
-  branchStore.fetchBranches()
-  fetchAllSettings()
+onMounted(async () => {
+  await branchStore.fetchAdminBranches()
+  if (branchStore.activeBranchId && selectedBranchId.value === null) {
+    selectedBranchId.value = branchStore.activeBranchId
+  }
+  await fetchAllSettings()
 })
 </script>

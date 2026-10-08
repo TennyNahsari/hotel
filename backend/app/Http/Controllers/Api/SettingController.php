@@ -233,6 +233,7 @@ class SettingController extends Controller
                 $slide['image_url'] = null;
             }
         }
+        unset($slide);
 
         return response()->json([
             'status' => 'success',
@@ -281,11 +282,20 @@ class SettingController extends Controller
 
         Setting::set('hero_sliders', $cleanSliders, $branchId);
 
+        // If saved under a specific branch, also save to global if global is empty
+        if ($branchId) {
+            $globalSliders = Setting::get('hero_sliders', null, null);
+            if (empty($globalSliders)) {
+                Setting::set('hero_sliders', $cleanSliders, null);
+            }
+        }
+
         foreach ($cleanSliders as &$slide) {
             if (!empty($slide['image_path'])) {
                 $slide['image_url'] = asset('storage/' . $slide['image_path']);
             }
         }
+        unset($slide);
 
         return response()->json([
             'message' => 'Pengaturan hero slider berhasil disimpan!',
