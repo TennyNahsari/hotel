@@ -95,4 +95,25 @@ class RoomTypeController extends Controller
             'message' => 'Room type deactivated successfully'
         ]);
     }
+
+    /**
+     * Upload Room Type Image File
+     */
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|file|mimes:jpeg,png,jpg,webp|max:10240',
+        ]);
+
+        $file = $request->file('image');
+        $filename = 'room_type_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('room_types', $filename, 'public');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Gambar tipe kamar berhasil diunggah',
+            'image_path' => $path,
+            'image_url' => asset('storage/' . $path)
+        ]);
+    }
 }

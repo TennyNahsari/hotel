@@ -55,6 +55,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::apiResource('branches', HotelBranchController::class);
 
     // Room Types Management
+    Route::post('/room-types/upload-image', [RoomTypeController::class, 'uploadImage']);
     Route::apiResource('room-types', RoomTypeController::class);
     
     // Rooms Management

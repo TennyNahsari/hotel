@@ -207,22 +207,49 @@
               />
             </div>
 
-            <div class="md:col-span-2">
-              <label class="block text-sm font-medium text-gray-700 mb-1">URL Gambar Thumbnail (Untuk Section "Stay Your Way")</label>
+            <div class="md:col-span-2 space-y-2">
+              <label class="block text-sm font-medium text-gray-700">Gambar Thumbnail (Untuk Section "Stay Your Way")</label>
+              
+              <!-- File Upload Button & Options -->
+              <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/webp"
+                  @change="handleImageFileUpload"
+                  class="hidden"
+                  id="roomTypeImageFileInput"
+                />
+                <label
+                  for="roomTypeImageFileInput"
+                  class="px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 cursor-pointer transition-colors inline-flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span>{{ uploadingImage ? 'Mengunggah...' : 'Unggah Gambar Lokal' }}</span>
+                </label>
+                <span class="text-xs text-gray-500">atau tempelkan URL gambar:</span>
+              </div>
+
+              <!-- URL Input -->
               <input
                 v-model="formData.image_url"
                 type="url"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                 placeholder="https://..."
               />
-              <p class="text-xs text-gray-500 mt-1">Masukkan URL gambar atau gunakan URL default yang disediakan.</p>
-              <div v-if="formData.image_url" class="mt-2 flex items-center gap-3">
+
+              <!-- Preview -->
+              <div v-if="formData.image_url" class="pt-1 flex items-center gap-3">
                 <img
                   :src="getStorageUrl(formData.image_url)"
                   alt="Thumbnail Preview"
-                  class="w-24 h-16 object-cover rounded border border-gray-300 shadow-xs"
+                  class="w-28 h-20 object-cover rounded-lg border border-gray-300 shadow-xs"
                 />
-                <span class="text-xs text-gray-500">Pratinjau Gambar Thumbnail</span>
+                <div class="text-xs text-gray-600 space-y-1">
+                  <span class="font-semibold text-gray-900 block">Pratinjau Gambar Thumbnail</span>
+                  <span class="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{{ formData.image_url }}</span>
+                </div>
               </div>
             </div>
 
@@ -334,6 +361,7 @@ const saving = ref(false)
 const deleting = ref(false)
 const error = ref('')
 const roomTypeToDelete = ref(null)
+const uploadingImage = ref(false)
 
 import { getApiHost, getStorageUrl } from '@/utils/url'
 
@@ -347,6 +375,29 @@ const formData = ref({
   image_url: defaultRoomImage,
   facilities: [],
 })
+
+async function handleImageFileUpload(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  if (file.size > 10 * 1024 * 1024) {
+    alert('Ukuran berkas gambar maksimal 10MB')
+    return
+  }
+
+  uploadingImage.value = true
+  try {
+    const res = await roomTypeApi.uploadImage(file)
+    if (res && res.image_url) {
+      formData.value.image_url = res.image_url
+    }
+  } catch (err) {
+    console.error('Failed to upload room type image:', err)
+    alert('Gagal mengunggah gambar. Pastikan format berkas JPG/PNG/WEBP.')
+  } finally {
+    uploadingImage.value = false
+  }
+}
 
 onMounted(async () => {
   // Ensure CSRF cookie is set first

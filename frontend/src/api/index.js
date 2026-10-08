@@ -154,6 +154,15 @@ export const roomTypeApi = {
     const response = await api.delete(`/room-types/${roomTypeId}`)
     return response.data
   },
+
+  async uploadImage(file) {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await api.post('/room-types/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
 }
 
 export const guestApi = {
