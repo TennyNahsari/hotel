@@ -3097,7 +3097,7 @@ const displayRooms = computed(() => {
       price: formatCurrency(rt.base_price),
       base_price: rt.base_price,
       description: rt.description || 'Kamar mewah dengan pemandangan dan fasilitas modern untuk kenyamanan terbaik Anda.',
-      image: sampleRoomImages[globalIdx % sampleRoomImages.length]
+      image: rt.image_url ? getStorageUrl(rt.image_url) : sampleRoomImages[globalIdx % sampleRoomImages.length]
     }
   })
 })

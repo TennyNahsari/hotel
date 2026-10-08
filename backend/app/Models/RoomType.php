@@ -17,6 +17,7 @@ class RoomType extends Model
         'base_price',
         'capacity',
         'facilities',
+        'image_url',
         'is_active',
     ];
 

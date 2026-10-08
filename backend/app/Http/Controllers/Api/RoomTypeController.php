@@ -36,6 +36,7 @@ class RoomTypeController extends Controller
             'base_price' => 'required|numeric|min:0',
             'capacity' => 'required|integer|min:1',
             'facilities' => 'nullable|array',
+            'image_url' => 'nullable|string',
         ]);
 
         if (empty($validated['hotel_branch_id'])) {
@@ -63,6 +64,7 @@ class RoomTypeController extends Controller
             'base_price' => 'sometimes|numeric|min:0',
             'capacity' => 'sometimes|integer|min:1',
             'facilities' => 'nullable|array',
+            'image_url' => 'nullable|string',
             'is_active' => 'boolean',
         ]);
 

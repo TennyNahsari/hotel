@@ -30,10 +30,15 @@
         <div class="block md:hidden">
           <div v-for="roomType in roomTypes" :key="roomType.id" class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
             <div class="space-y-3">
-              <div class="flex justify-between items-start">
-                <div class="flex-1">
-                  <div class="font-medium text-gray-900">{{ roomType.name }}</div>
-                  <div class="text-sm text-gray-500 mt-1">{{ roomType.description || '-' }}</div>
+              <div class="flex items-start gap-3">
+                <img
+                  :src="getStorageUrl(roomType.image_url || defaultRoomImage)"
+                  :alt="roomType.name"
+                  class="w-20 h-14 object-cover rounded border border-gray-200 flex-shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-900 truncate">{{ roomType.name }}</div>
+                  <div class="text-xs text-gray-500 mt-1 line-clamp-2">{{ roomType.description || '-' }}</div>
                 </div>
               </div>
               <div class="grid grid-cols-2 gap-2 text-sm">
@@ -74,6 +79,9 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Thumbnail
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ $t('roomTypes.name') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -95,6 +103,13 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="roomType in roomTypes" :key="roomType.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <img
+                    :src="getStorageUrl(roomType.image_url || defaultRoomImage)"
+                    :alt="roomType.name"
+                    class="w-16 h-11 object-cover rounded border border-gray-200 shadow-xs"
+                  />
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">{{ roomType.name }}</div>
                 </td>
@@ -190,6 +205,25 @@
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 :placeholder="$t('roomTypes.capacityPlaceholder')"
               />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700 mb-1">URL Gambar Thumbnail (Untuk Section "Stay Your Way")</label>
+              <input
+                v-model="formData.image_url"
+                type="url"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="https://..."
+              />
+              <p class="text-xs text-gray-500 mt-1">Masukkan URL gambar atau gunakan URL default yang disediakan.</p>
+              <div v-if="formData.image_url" class="mt-2 flex items-center gap-3">
+                <img
+                  :src="getStorageUrl(formData.image_url)"
+                  alt="Thumbnail Preview"
+                  class="w-24 h-16 object-cover rounded border border-gray-300 shadow-xs"
+                />
+                <span class="text-xs text-gray-500">Pratinjau Gambar Thumbnail</span>
+              </div>
             </div>
 
             <div class="md:col-span-2">
@@ -301,15 +335,18 @@ const deleting = ref(false)
 const error = ref('')
 const roomTypeToDelete = ref(null)
 
+import { getApiHost, getStorageUrl } from '@/utils/url'
+
+const defaultRoomImage = 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1000&q=80'
+
 const formData = ref({
   name: '',
   description: '',
   base_price: null,
   capacity: 2,
+  image_url: defaultRoomImage,
   facilities: [],
 })
-
-import { getApiHost } from '@/utils/url'
 
 onMounted(async () => {
   // Ensure CSRF cookie is set first
@@ -343,6 +380,7 @@ function openAddModal() {
     description: '',
     base_price: null,
     capacity: 2,
+    image_url: defaultRoomImage,
     facilities: [],
   }
   error.value = ''
@@ -357,6 +395,7 @@ function openEditModal(roomType) {
     description: roomType.description || '',
     base_price: roomType.base_price,
     capacity: roomType.capacity,
+    image_url: roomType.image_url || defaultRoomImage,
     facilities: Array.isArray(roomType.facilities) ? [...roomType.facilities] : [],
   }
   error.value = ''

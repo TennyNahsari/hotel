@@ -58,6 +58,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 450000,
                         'capacity' => 2,
                         'facilities' => ['AC', 'Smart TV 43"', 'High Speed WiFi', 'Shower Hot Water', 'Work Desk', 'Tea/Coffee Maker'],
+                        'image_url' => 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -75,6 +76,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 750000,
                         'capacity' => 2,
                         'facilities' => ['AC', 'Smart TV 50"', 'High Speed WiFi', 'Bathtub', 'Mini Bar', 'City View', 'Work Desk & Ergonomic Chair', 'Safe Deposit Box'],
+                        'image_url' => 'https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -91,6 +93,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 1350000,
                         'capacity' => 3,
                         'facilities' => ['AC', 'Smart TV 55"', 'High Speed WiFi', 'Bathtub & Jacuzzi', 'Mini Bar', 'Panoramic City View', 'Separate Living Room', 'Espresso Machine', 'Breakfast Included'],
+                        'image_url' => 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -106,6 +109,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 2500000,
                         'capacity' => 4,
                         'facilities' => ['AC', 'Smart TV 65"', 'High Speed WiFi', 'Private Jacuzzi', 'Full Mini Bar', 'Executive Lounge Access', 'Master Bedroom & Living Room', 'Dining Table', '24h Butler Service'],
+                        'image_url' => 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -121,6 +125,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 650000,
                         'capacity' => 2,
                         'facilities' => ['AC', 'Smart TV 43"', 'High Speed WiFi', 'Rain Shower', 'Private Balcony', 'Tropical Garden View', 'Tea/Coffee Maker'],
+                        'image_url' => 'https://images.unsplash.com/photo-1590490360182-c33d57733427?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -138,6 +143,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 1100000,
                         'capacity' => 2,
                         'facilities' => ['AC', 'Smart TV 50"', 'High Speed WiFi', 'Bathtub with Ocean View', 'Mini Bar', 'Direct Beach Access', 'Daybed Terrace', 'Espresso Machine'],
+                        'image_url' => 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -154,6 +160,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 1850000,
                         'capacity' => 3,
                         'facilities' => ['AC', 'Smart TV 55"', 'High Speed WiFi', 'Freestanding Bathtub', 'Private Plunge Pool', 'Panoramic Sunset View', 'Living Room', 'Daily Cocktail'],
+                        'image_url' => 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -169,6 +176,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 3200000,
                         'capacity' => 4,
                         'facilities' => ['AC', 'Smart TV 65"', 'High Speed WiFi', 'Private Infinity Pool', 'Gazebo & Sunbed', 'Full Ocean Sunset View', '2 Bedrooms', 'Private Chef Service'],
+                        'image_url' => 'https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -184,6 +192,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 400000,
                         'capacity' => 2,
                         'facilities' => ['AC', 'Smart TV 43"', 'High Speed WiFi', 'Standing Shower', 'Work Station', 'Tea/Coffee Maker'],
+                        'image_url' => 'https://images.unsplash.com/photo-1618773928121-c32242e63f39?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -201,6 +210,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 680000,
                         'capacity' => 2,
                         'facilities' => ['AC', 'Smart TV 50"', 'High Speed WiFi', 'Bathtub', 'Mini Bar', 'Historical City View', 'Ergonomic Desk'],
+                        'image_url' => 'https://images.unsplash.com/photo-1591088398332-8a7791972843?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -217,6 +227,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 1200000,
                         'capacity' => 3,
                         'facilities' => ['AC', 'Smart TV 55"', 'High Speed WiFi', 'Bathtub', 'Mini Bar', 'Living Room', 'Meeting Table', 'Free Laundry 2 Pcs/day'],
+                        'image_url' => 'https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
@@ -232,6 +243,7 @@ class RoomTypeSeeder extends Seeder
                         'base_price' => 2100000,
                         'capacity' => 5,
                         'facilities' => ['AC', 'Smart TV 65"', 'High Speed WiFi', 'Double Bathroom & Bathtub', 'Full Kitchenette', 'Dining Area', 'Spacious Living Room', 'Kids Area'],
+                        'image_url' => 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&w=1000&q=80',
                         'is_active' => true,
                     ],
                     'rooms' => [
