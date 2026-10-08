@@ -527,11 +527,13 @@ const formData = ref({
   notes: '',
 })
 
+import { getApiHost } from '@/utils/url'
+
 onMounted(async () => {
   // Ensure CSRF cookie
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
+    const apiHost = getApiHost()
+    await axios.get(`${apiHost}/sanctum/csrf-cookie`, {
       withCredentials: true
     })
   } catch (err) {

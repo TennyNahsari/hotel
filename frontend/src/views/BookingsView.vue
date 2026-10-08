@@ -809,6 +809,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { bookingApi, guestApi, roomApi } from '../api'
+import { getApiHost, getStorageUrl } from '../utils/url'
 import axios from 'axios'
 
 const { t } = useI18n()
@@ -862,8 +863,8 @@ const today = computed(() => {
 onMounted(async () => {
   // Ensure CSRF cookie
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
+    const apiHost = getApiHost()
+    await axios.get(`${apiHost}/sanctum/csrf-cookie`, {
       withCredentials: true
     })
   } catch (err) {
@@ -947,8 +948,8 @@ async function exportBookings() {
     
     // Build query string
     const queryString = new URLSearchParams(params).toString()
-    const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
-    const url = `${apiBaseUrl}/bookings/export${queryString ? '?' + queryString : ''}`
+    const apiHost = getApiHost()
+    const url = `${apiHost}/api/bookings/export${queryString ? '?' + queryString : ''}`
     
     // Download the file
     const response = await axios.get(url, {
@@ -1123,8 +1124,7 @@ function getBookingReceiptUrl(booking) {
   if (booking && booking.payments && booking.payments.length > 0) {
     const p = booking.payments.find(p => p.receipt_path)
     if (p && p.receipt_path) {
-      const cleanPath = p.receipt_path.replace(/^public\//, '').replace(/^storage\//, '')
-      return 'http://localhost:8000/storage/' + cleanPath
+      return getStorageUrl(p.receipt_path)
     }
   }
   return null

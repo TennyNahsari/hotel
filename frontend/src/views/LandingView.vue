@@ -2394,6 +2394,7 @@ import { useBranchStore } from '../stores/branch'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
 import { settingApi } from '../api'
+import { getApiHost, getStorageUrl } from '../utils/url'
 
 const authStore = useAuthStore()
 const branchStore = useBranchStore()
@@ -2510,11 +2511,7 @@ const hasQrisUrl = computed(() => {
 
 const formattedQrisUrl = computed(() => {
   const raw = paymentSettings.value?.qris_url || paymentSettings.value?.qris_image_path
-  if (!raw) return ''
-  if (raw.startsWith('http://') || raw.startsWith('https://')) return raw
-  if (raw.startsWith('storage/')) return `http://localhost:8000/${raw}`
-  if (raw.startsWith('/storage/')) return `http://localhost:8000${raw}`
-  return `http://localhost:8000/storage/${raw}`
+  return getStorageUrl(raw)
 })
 
 // Live Reservation Modal State
@@ -2558,7 +2555,8 @@ async function uploadReceiptFile(bookingNumber, contact) {
   formData.append('receipt', receiptFile.value)
 
   try {
-    const res = await axios.post('http://localhost:8000/api/public/bookings/upload-receipt', formData, {
+    const apiHost = getApiHost()
+    const res = await axios.post(`${apiHost}/api/public/bookings/upload-receipt`, formData, {
       headers: { 'Content-Type': 'multipart/form-data' }
     })
     if (res.data && res.data.message) {
@@ -2761,8 +2759,9 @@ async function submitHallBooking() {
   hallBookingSuccessData.value = null
 
   try {
+    const apiHost = getApiHost()
     const payload = { ...hallBookingForm.value, hotel_branch_id: branchStore.activeBranchId }
-    const res = await axios.post('http://localhost:8000/api/public/hall-bookings', payload)
+    const res = await axios.post(`${apiHost}/api/public/hall-bookings`, payload)
     if (res.data && (res.data.data || res.data.booking_number)) {
       const dataPayload = res.data.data || res.data
       const selectedHallObj = hallsList.value.find(h => h.id == hallBookingForm.value.hall_id)
@@ -2837,25 +2836,20 @@ onUnmounted(() => {
 
 async function fetchSocialSettings() {
   try {
-    const res = await axios.get('/api/public/settings/social')
+    const apiHost = getApiHost()
+    const res = await axios.get(`${apiHost}/api/public/settings/social`)
     if (res.data && res.data.data) {
       socialSettings.value = { ...socialSettings.value, ...res.data.data }
     }
   } catch (err) {
-    try {
-      const resFallback = await axios.get('http://localhost:8000/api/public/settings/social')
-      if (resFallback.data && resFallback.data.data) {
-        socialSettings.value = { ...socialSettings.value, ...resFallback.data.data }
-      }
-    } catch (e) {
-      console.warn('Could not load social settings, using default URLs.')
-    }
+    console.warn('Could not load social settings, using default URLs.')
   }
 }
 
 async function fetchPaymentSettings() {
   try {
-    const res = await axios.get('/api/public/settings/payment')
+    const apiHost = getApiHost()
+    const res = await axios.get(`${apiHost}/api/public/settings/payment`)
     if (res.data && res.data.data) {
       paymentSettings.value = res.data.data
       if (activeBankAccounts.value.length > 0 && (!bookingForm.value.bank_name || bookingForm.value.bank_name === 'BCA')) {
@@ -2863,23 +2857,14 @@ async function fetchPaymentSettings() {
       }
     }
   } catch (err) {
-    try {
-      const resFallback = await axios.get('http://localhost:8000/api/public/settings/payment')
-      if (resFallback.data && resFallback.data.data) {
-        paymentSettings.value = resFallback.data.data
-        if (activeBankAccounts.value.length > 0 && (!bookingForm.value.bank_name || bookingForm.value.bank_name === 'BCA')) {
-          bookingForm.value.bank_name = activeBankAccounts.value[0].bank_name
-        }
-      }
-    } catch (e) {
-      console.warn('Could not load payment settings, using default bank details.')
-    }
+    console.warn('Could not load payment settings, using default bank details.')
   }
 }
 
 async function fetchRoomTypes() {
   try {
-    const res = await axios.get('http://localhost:8000/api/public/room-types', {
+    const apiHost = getApiHost()
+    const res = await axios.get(`${apiHost}/api/public/room-types`, {
       params: { hotel_branch_id: branchStore.activeBranchId }
     })
     if (res.data) {
@@ -2892,7 +2877,8 @@ async function fetchRoomTypes() {
 
 async function fetchHalls() {
   try {
-    const res = await axios.get('http://localhost:8000/api/public/halls', {
+    const apiHost = getApiHost()
+    const res = await axios.get(`${apiHost}/api/public/halls`, {
       params: { hotel_branch_id: branchStore.activeBranchId }
     })
     if (res.data && Array.isArray(res.data)) {
@@ -2968,7 +2954,8 @@ async function submitTrackBooking() {
   fetchPaymentSettings()
   
   try {
-    const res = await axios.get('http://localhost:8000/api/public/bookings/search', {
+    const apiHost = getApiHost()
+    const res = await axios.get(`${apiHost}/api/public/bookings/search`, {
       params: trackForm.value
     })
     if (res.data && res.data.data) {
@@ -2991,8 +2978,9 @@ async function submitBooking() {
   bookingErrorMessage.value = ''
   
   try {
+    const apiHost = getApiHost()
     const payload = { ...bookingForm.value, hotel_branch_id: branchStore.activeBranchId }
-    const res = await axios.post('http://localhost:8000/api/public/bookings', payload)
+    const res = await axios.post(`${apiHost}/api/public/bookings`, payload)
     if (res.status === 201 || res.data) {
       bookingSuccessData.value = res.data
     }

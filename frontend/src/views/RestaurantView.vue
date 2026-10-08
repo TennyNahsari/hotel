@@ -813,9 +813,10 @@ import { ref, reactive, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { menuItemApi, restaurantOrderApi, bookingApi, hallBookingApi } from '../api'
+import { getApiHost } from '../utils/url'
 
 const { t } = useI18n()
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const apiUrl = getApiHost()
 
 // Tabs
 const activeTab = ref('menu')
@@ -1265,7 +1266,8 @@ const updateOrderStatus = async (orderId, status) => {
 const exportOrders = async () => {
   exporting.value = true
   try {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const apiHost = getApiHost()
+    const apiUrl = `${apiHost}/api`
     
     // Build query parameters
     const params = new URLSearchParams()

@@ -383,11 +383,13 @@ const formData = ref({
   address: '',
 })
 
+import { getApiHost } from '@/utils/url'
+
 onMounted(async () => {
   // Ensure CSRF cookie
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    await axios.get(`${apiUrl}/sanctum/csrf-cookie`, {
+    const apiHost = getApiHost()
+    await axios.get(`${apiHost}/sanctum/csrf-cookie`, {
       withCredentials: true
     })
   } catch (err) {
@@ -512,7 +514,8 @@ function formatDate(date) {
 async function exportGuests() {
   exporting.value = true
   try {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const apiHost = getApiHost()
+    const apiUrl = `${apiHost}/api`
     
     // Build query parameters
     const params = new URLSearchParams()

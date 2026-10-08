@@ -1080,10 +1080,12 @@ const getReceiptPath = (booking) => {
   return p ? p.receipt_path : null
 }
 
+import { getStorageUrl } from '@/utils/url'
+
 const getReceiptUrl = (booking) => {
   const path = getReceiptPath(booking)
   if (!path) return '#'
-  return `http://localhost:8000/storage/${path}`
+  return getStorageUrl(path)
 }
 
 // Format currency

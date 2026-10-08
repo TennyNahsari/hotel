@@ -731,19 +731,21 @@ const visiblePages = computed(() => {
   return [1, 2, '...', total - 1, total]
 })
 
+import { getApiHost } from '@/utils/url'
+
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
 onMounted(async () => {
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    await axios.get(`${apiUrl}/sanctum/csrf-cookie`, { withCredentials: true })
+    const apiHost = getApiHost()
+    await axios.get(`${apiHost}/sanctum/csrf-cookie`, { withCredentials: true })
   } catch (err) {
     console.error('Failed to get CSRF cookie:', err)
   }
 
   // Load hotel info
   try {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    const res = await axios.get(`${apiUrl}/api/public/settings/payment`)
+    const apiHost = getApiHost()
+    const res = await axios.get(`${apiHost}/api/public/settings/payment`)
     const data = res.data?.data || {}
     if (data.bank_accounts?.[0]?.account_holder) {
       hotelName.value = data.bank_accounts[0].account_holder
@@ -990,7 +992,8 @@ async function handleDelete() {
 async function exportPayments() {
   exporting.value = true
   try {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const apiHost = getApiHost()
+    const apiUrl = `${apiHost}/api`
     const params = new URLSearchParams()
     if (filters.value.start_date)   params.append('start_date',   filters.value.start_date)
     if (filters.value.end_date)     params.append('end_date',     filters.value.end_date)

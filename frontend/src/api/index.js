@@ -1,4 +1,6 @@
 import api from './axios'
+import axios from 'axios'
+import { getApiHost } from '../utils/url'
 
 export const branchApi = {
   async getPublicBranches() {
@@ -54,9 +56,9 @@ export const branchApi = {
 
 export const authApi = {
   async login(credentials) {
-    // Get CSRF cookie first
-    const apiUrl = import.meta.env.VITE_API_URL || ''
-    await api.get(`${apiUrl}/sanctum/csrf-cookie`)
+    // Get CSRF cookie first using dynamic API host
+    const apiHost = getApiHost()
+    await axios.get(`${apiHost}/sanctum/csrf-cookie`, { withCredentials: true })
     // Then login
     const response = await api.post('/login', credentials)
     return response.data

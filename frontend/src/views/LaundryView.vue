@@ -756,11 +756,14 @@ async function deleteOrder(orderId) {
   }
 }
 
+import { getApiHost } from '@/utils/url'
+
 // Export orders
 async function exportOrders() {
   exporting.value = true
   try {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api'
+    const apiHost = getApiHost()
+    const apiUrl = `${apiHost}/api`
     
     // Build query parameters
     const params = new URLSearchParams()
