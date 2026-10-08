@@ -2096,16 +2096,16 @@
           </div>
 
           <!-- QRIS Box in Hall Success Screen -->
-          <div v-if="paymentSettings.qris_url" class="p-3.5 bg-white border border-sand/40 rounded text-left space-y-2 shadow-xs">
+          <div v-if="hasQrisUrl" class="p-3.5 bg-white border border-sand/40 rounded text-left space-y-2 shadow-xs">
             <div class="flex items-center justify-between">
               <span class="text-xs font-bold text-forest uppercase tracking-wider">{{ $t('landing.bookingModal.payViaQris') }}</span>
               <span class="text-[10px] bg-gold text-forest px-2 py-0.5 rounded font-bold uppercase">{{ $t('landing.bookingModal.allEwallets') }}</span>
             </div>
             <div class="flex items-center gap-3">
               <img
-                :src="paymentSettings.qris_url"
+                :src="formattedQrisUrl"
                 alt="QRIS Code"
-                @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                @click="qrisPreviewModalUrl = formattedQrisUrl"
                 class="w-24 h-24 object-contain bg-white p-1.5 rounded border border-sand/30 shadow-xs cursor-pointer hover:scale-105 transition-transform"
                 :title="$t('landing.bookingModal.enlargeQris')"
               />
@@ -2113,7 +2113,7 @@
                 <p class="text-[11px] leading-snug">{{ paymentSettings.qris_notes || 'Pindai QRIS untuk pembayaran langsung.' }}</p>
                 <button
                   type="button"
-                  @click="qrisPreviewModalUrl = paymentSettings.qris_url"
+                  @click="qrisPreviewModalUrl = formattedQrisUrl"
                   class="text-[11px] text-forest font-bold underline hover:text-gold transition-colors inline-flex items-center space-x-1"
                 >
                   <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">

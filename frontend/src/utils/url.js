@@ -17,12 +17,19 @@ export function getApiHost() {
 
 export function getStorageUrl(path) {
   if (!path) return ''
-  if (path.startsWith('http://') || path.startsWith('https://')) {
-    return path
+  
+  let targetPath = path
+  if (targetPath.includes('localhost:8000')) {
+    const host = getApiHost()
+    targetPath = targetPath.replace('http://localhost:8000', host)
+  }
+  
+  if (targetPath.startsWith('http://') || targetPath.startsWith('https://')) {
+    return targetPath
   }
   
   const host = getApiHost()
-  const cleanPath = path.startsWith('/') ? path : '/' + path
+  const cleanPath = targetPath.startsWith('/') ? targetPath : '/' + targetPath
   if (cleanPath.startsWith('/storage/')) {
     return `${host}${cleanPath}`
   }

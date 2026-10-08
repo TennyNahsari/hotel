@@ -39,24 +39,33 @@ class SettingController extends Controller
             $branchId = null;
         }
 
+        $globalSettings = Setting::get('payment_settings', $default, null);
+        if (!is_array($globalSettings)) {
+            $globalSettings = $default;
+        }
+
         $settings = null;
         if ($branchId) {
             $settings = Setting::get('payment_settings', null, $branchId);
         }
 
         if (empty($settings) || !is_array($settings)) {
-            $settings = Setting::get('payment_settings', $default, null);
-        }
-
-        if (!is_array($settings)) {
-            $settings = $default;
+            $settings = $globalSettings;
+        } else {
+            // Fallback QRIS image and notes to global if not explicitly set for this branch
+            if (empty($settings['qris_image_path']) && !empty($globalSettings['qris_image_path'])) {
+                $settings['qris_image_path'] = $globalSettings['qris_image_path'];
+            }
+            if (empty($settings['qris_notes']) && !empty($globalSettings['qris_notes'])) {
+                $settings['qris_notes'] = $globalSettings['qris_notes'];
+            }
         }
 
         if (empty($settings['bank_accounts']) || !is_array($settings['bank_accounts']) || count($settings['bank_accounts']) === 0) {
-            $settings['bank_accounts'] = $default['bank_accounts'];
+            $settings['bank_accounts'] = $globalSettings['bank_accounts'] ?? $default['bank_accounts'];
         }
         if (empty($settings['whatsapp_number'])) {
-            $settings['whatsapp_number'] = '6281234567890';
+            $settings['whatsapp_number'] = $globalSettings['whatsapp_number'] ?? '6281234567890';
         }
 
         // Standardize output & construct full public URL for QRIS image
