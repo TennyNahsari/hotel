@@ -29,7 +29,6 @@
           <a href="#rooms" class="hover:text-gold transition-colors">{{ $t('landing.nav.rooms') }}</a>
           <a href="#facilities" class="hover:text-gold transition-colors">{{ $t('landing.nav.facilities') }}</a>
           <a href="#dining" class="hover:text-gold transition-colors">{{ $t('landing.nav.dining') }}</a>
-          <a href="#experiences" class="hover:text-gold transition-colors">{{ $t('landing.nav.experiences') }}</a>
         </nav>
 
         <!-- CTAs & Language Switcher -->
@@ -151,7 +150,6 @@
         <a @click="mobileMenuOpen = false" href="#rooms" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.rooms') }}</a>
         <a @click="mobileMenuOpen = false" href="#facilities" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.facilities') }}</a>
         <a @click="mobileMenuOpen = false" href="#dining" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.dining') }}</a>
-        <a @click="mobileMenuOpen = false" href="#experiences" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.experiences') }}</a>
         
         <div class="pt-4 border-t border-forest-600 space-y-2">
           <button
@@ -794,35 +792,6 @@
         </div>
       </div>
     </section>
-
-    <!-- 07. EXPERIENCES SECTION -->
-    <section id="experiences" class="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center max-w-3xl mx-auto space-y-3 mb-16">
-        <span class="text-xs uppercase tracking-[0.25em] text-gold font-semibold">{{ $t('landing.experiences.eyebrow') }}</span>
-        <h2 class="font-display text-3xl sm:text-4xl md:text-5xl text-charcoal font-normal">
-          {{ $t('landing.experiences.title') }}
-        </h2>
-        <p class="text-taupe text-base sm:text-lg font-light">
-          {{ $t('landing.experiences.subtitle') }}
-        </p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div
-          v-for="exp in getExperiencesList()"
-          :key="exp.id"
-          class="bg-white border border-sand/30 rounded-sm overflow-hidden group shadow-sm hover:shadow-lg transition-all"
-        >
-          <div class="aspect-[4/3] overflow-hidden">
-            <img :src="exp.image" :alt="exp.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-          </div>
-          <div class="p-6 space-y-2">
-            <span class="text-[10px] uppercase tracking-widest text-gold font-semibold">{{ exp.tag }}</span>
-            <h3 class="font-display text-xl text-charcoal group-hover:text-forest transition-colors">{{ exp.title }}</h3>
-            <p class="text-xs text-taupe font-light">{{ exp.description }}</p>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- 08. WHY TECHNOLOGY MATTERS -->
@@ -1084,7 +1053,6 @@
               <li><a href="#rooms" class="hover:text-gold transition-colors">{{ $t('landing.nav.rooms') }}</a></li>
               <li><a href="#dining" class="hover:text-gold transition-colors">{{ $t('landing.nav.dining') }}</a></li>
               <li><a href="#facilities" class="hover:text-gold transition-colors">{{ $t('landing.nav.facilities') }}</a></li>
-              <li><a href="#experiences" class="hover:text-gold transition-colors">{{ $t('landing.nav.experiences') }}</a></li>
             </ul>
           </div>
 
