@@ -18,13 +18,13 @@ class Setting extends Model
 
     public static function get($key, $default = null, $branchId = null)
     {
-        $query = static::where('key', $key);
-        if ($branchId) {
-            $query->where('hotel_branch_id', $branchId);
-        } else {
-            $query->whereNull('hotel_branch_id');
+        $settingKey = $branchId ? ($key . '_branch_' . $branchId) : $key;
+        $setting = static::where('key', $settingKey)->first();
+
+        if (!$setting && $branchId) {
+            $setting = static::where('key', $key)->first();
         }
-        $setting = $query->first();
+
         if (!$setting) {
             return $default;
         }
@@ -35,10 +35,11 @@ class Setting extends Model
 
     public static function set($key, $value, $branchId = null)
     {
+        $settingKey = $branchId ? ($key . '_branch_' . $branchId) : $key;
         $encoded = is_array($value) || is_object($value) ? json_encode($value) : $value;
         return static::updateOrCreate(
-            ['key' => $key, 'hotel_branch_id' => $branchId],
-            ['value' => $encoded]
+            ['key' => $settingKey],
+            ['hotel_branch_id' => $branchId, 'value' => $encoded]
         );
     }
 }
