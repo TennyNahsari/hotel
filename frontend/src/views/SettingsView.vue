@@ -845,6 +845,7 @@
   </LayoutMain>
 </template>
 
+<script setup>
 import { ref, onMounted, watch } from 'vue'
 import axios from '../api/axios'
 import { settingApi } from '../api'
