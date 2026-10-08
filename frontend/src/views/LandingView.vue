@@ -2693,7 +2693,7 @@ const displayHalls = computed(() => {
 
   return paginatedHalls.value.map((h, idx) => {
     const globalIdx = (hallsPage.value - 1) * hallsPerPage.value + idx
-    const imgUrl = h.image_url || sampleHallImages[globalIdx % sampleHallImages.length]
+    const imgUrl = h.image_url ? getStorageUrl(h.image_url) : sampleHallImages[globalIdx % sampleHallImages.length]
     return {
       ...h,
       formattedPrice: formatCurrency(h.price_per_hour),

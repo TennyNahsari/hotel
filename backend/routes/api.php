@@ -111,6 +111,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Halls Management
     Route::get('/halls/types', [HallController::class, 'getTypes']);
     Route::get('/halls/{hall}/availability', [HallController::class, 'checkAvailability']);
+    Route::post('/halls/upload-image', [HallController::class, 'uploadImage']);
+    Route::post('/halls/delete-image', [HallController::class, 'deleteImage']);
     Route::apiResource('halls', HallController::class);
 
     // Hall Bookings Management

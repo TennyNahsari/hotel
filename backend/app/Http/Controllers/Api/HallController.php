@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Hall;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
 
 class HallController extends Controller
 {
@@ -72,7 +73,7 @@ class HallController extends Controller
             'price_per_hour' => 'required|numeric|min:0',
             'facilities' => 'nullable|json',
             'description' => 'nullable|string',
-            'image_url' => 'nullable|url',
+            'image_url' => 'nullable|string',
             'status' => 'required|in:available,booked,occupied,maintenance,unavailable',
         ]);
 
@@ -123,7 +124,7 @@ class HallController extends Controller
             'price_per_hour' => 'required|numeric|min:0',
             'facilities' => 'nullable|json',
             'description' => 'nullable|string',
-            'image_url' => 'nullable|url',
+            'image_url' => 'nullable|string',
             'status' => 'required|in:available,booked,occupied,maintenance,unavailable',
         ]);
 
@@ -204,5 +205,50 @@ class HallController extends Controller
         ];
 
         return response()->json($types);
+    }
+
+    /**
+     * Upload Hall Image File
+     */
+    public function uploadImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|file|mimes:jpeg,png,jpg,webp|max:10240',
+        ]);
+
+        $file = $request->file('image');
+        $filename = 'hall_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('halls', $filename, 'public');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Gambar hall berhasil diunggah',
+            'image_path' => $path,
+            'image_url' => asset('storage/' . $path)
+        ]);
+    }
+
+    /**
+     * Delete Hall Image File
+     */
+    public function deleteImage(Request $request)
+    {
+        $request->validate([
+            'image_url' => 'required|string',
+        ]);
+
+        $url = $request->input('image_url');
+        if (str_contains($url, 'storage/')) {
+            $path = explode('storage/', $url)[1];
+            $path = str_replace('..', '', $path);
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berkas gambar berhasil dihapus'
+        ]);
     }
 }

@@ -382,6 +382,20 @@ export const hallApi = {
     const response = await api.post(`/halls/${hallId}/availability`, data)
     return response.data
   },
+
+  async uploadImage(file) {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await api.post('/halls/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    return response.data
+  },
+
+  async deleteImage(imageUrl) {
+    const response = await api.post('/halls/delete-image', { image_url: imageUrl })
+    return response.data
+  },
 }
 
 export const hallBookingApi = {

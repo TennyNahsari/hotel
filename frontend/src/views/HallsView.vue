@@ -71,10 +71,15 @@
         <div class="block md:hidden">
           <div v-for="hall in halls" :key="hall.id" class="p-4 border-b border-gray-200 last:border-b-0 hover:bg-gray-50">
             <div class="space-y-3">
-              <div class="flex justify-between items-start">
-                <div>
-                  <div class="font-medium text-gray-900">{{ hall.name }}</div>
-                  <div class="text-sm text-gray-600">{{ hall.hall_type }}</div>
+              <div class="flex items-start gap-3">
+                <img
+                  :src="getStorageUrl(hall.image_url || defaultHallImage)"
+                  :alt="hall.name"
+                  class="w-20 h-14 object-cover rounded border border-gray-200 flex-shrink-0"
+                />
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium text-gray-900 truncate">{{ hall.name }}</div>
+                  <div class="text-xs text-gray-600 mt-0.5">{{ hall.hall_type }}</div>
                 </div>
                 <span
                   :class="{
@@ -135,6 +140,9 @@
             <thead class="bg-gray-50">
               <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Thumbnail
+                </th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   {{ $t('halls.name') }}
                 </th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -159,6 +167,13 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
               <tr v-for="hall in halls" :key="hall.id" class="hover:bg-gray-50">
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <img
+                    :src="getStorageUrl(hall.image_url || defaultHallImage)"
+                    :alt="hall.name"
+                    class="w-16 h-11 object-cover rounded border border-gray-200 shadow-xs"
+                  />
+                </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm font-medium text-gray-900">{{ hall.name }}</div>
                 </td>
@@ -353,14 +368,64 @@
               </select>
             </div>
 
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">{{ $t('halls.imageUrl') }}</label>
+            <div class="md:col-span-2 space-y-2">
+              <label class="block text-sm font-medium text-gray-700">Gambar Thumbnail Hall</label>
+              
+              <!-- File Upload Button & Options -->
+              <div class="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/webp"
+                  @change="handleImageFileUpload"
+                  class="hidden"
+                  id="hallImageFileInput"
+                />
+                <label
+                  for="hallImageFileInput"
+                  class="px-4 py-2 bg-gray-100 hover:bg-gray-200 border border-gray-300 rounded-lg text-xs font-semibold text-gray-700 cursor-pointer transition-colors inline-flex items-center gap-2"
+                >
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span>{{ uploadingImage ? 'Mengunggah...' : 'Unggah Gambar Lokal' }}</span>
+                </label>
+                <span class="text-xs text-gray-500">atau tempelkan URL gambar:</span>
+              </div>
+
+              <!-- URL Input -->
               <input
                 v-model="formData.image_url"
-                type="url"
-                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                type="text"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm"
                 placeholder="https://..."
               />
+
+              <!-- Preview & Delete Button -->
+              <div v-if="formData.image_url" class="pt-2 flex items-center justify-between gap-3 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex items-center gap-3 min-w-0">
+                  <img
+                    :src="getStorageUrl(formData.image_url)"
+                    alt="Thumbnail Preview"
+                    class="w-24 h-16 object-cover rounded-md border border-gray-300 shadow-xs flex-shrink-0"
+                  />
+                  <div class="text-xs text-gray-600 space-y-1 min-w-0">
+                    <span class="font-semibold text-gray-900 block">Pratinjau Gambar Thumbnail</span>
+                    <span class="text-[11px] text-gray-500 truncate block max-w-[180px] sm:max-w-xs">{{ formData.image_url }}</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  @click="removeHallImage"
+                  :disabled="deletingImage"
+                  class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 flex-shrink-0 disabled:opacity-50"
+                  title="Hapus gambar thumbnail"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>{{ deletingImage ? 'Menghapus...' : 'Hapus Gambar' }}</span>
+                </button>
+              </div>
             </div>
 
             <div class="md:col-span-2">
@@ -484,9 +549,12 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { hallApi } from '@/api'
 import LayoutMain from '@/components/LayoutMain.vue'
+import { getStorageUrl } from '@/utils/url'
 
 const router = useRouter()
 const { t } = useI18n()
+
+const defaultHallImage = 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?auto=format&fit=crop&w=800&q=80'
 
 const halls = ref([])
 const hallTypes = ref([])
@@ -495,6 +563,49 @@ const showModal = ref(false)
 const showViewModal = ref(false)
 const isEditing = ref(false)
 const saving = ref(false)
+const uploadingImage = ref(false)
+const deletingImage = ref(false)
+
+async function handleImageFileUpload(event) {
+  const file = event.target.files?.[0]
+  if (!file) return
+
+  if (file.size > 10 * 1024 * 1024) {
+    alert('Ukuran berkas gambar maksimal 10MB')
+    return
+  }
+
+  uploadingImage.value = true
+  try {
+    const res = await hallApi.uploadImage(file)
+    if (res && res.image_url) {
+      formData.value.image_url = res.image_url
+    }
+  } catch (err) {
+    console.error('Failed to upload hall image:', err)
+    alert('Gagal mengunggah gambar hall. Pastikan format berkas JPG/PNG/WEBP.')
+  } finally {
+    uploadingImage.value = false
+  }
+}
+
+async function removeHallImage() {
+  if (!formData.value.image_url) return
+
+  if (confirm('Apakah Anda yakin ingin menghapus gambar ini?')) {
+    deletingImage.value = true
+    try {
+      if (formData.value.image_url.includes('storage/')) {
+        await hallApi.deleteImage(formData.value.image_url)
+      }
+    } catch (err) {
+      console.error('Failed to delete image file from server:', err)
+    } finally {
+      formData.value.image_url = ''
+      deletingImage.value = false
+    }
+  }
+}
 const pagination = ref({
   current_page: 1,
   last_page: 1,
