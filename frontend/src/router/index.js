@@ -102,19 +102,19 @@ const router = createRouter({
       path: '/settings',
       name: 'settings',
       component: () => import('../views/SettingsView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresOwner: true },
     },
     {
       path: '/users',
       name: 'users',
       component: () => import('../views/UsersView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresOwner: true },
     },
     {
       path: '/branches',
       name: 'branches',
       component: () => import('../views/BranchesView.vue'),
-      meta: { requiresAuth: true },
+      meta: { requiresAuth: true, requiresOwner: true },
     },
   ],
 })
@@ -132,12 +132,19 @@ router.beforeEach(async (to, from, next) => {
   }
 
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    next({ name: 'login' })
-  } else if (to.meta.requiresGuest && authStore.isAuthenticated) {
-    next({ name: 'dashboard' })
-  } else {
-    next()
+    return next({ name: 'login' })
   }
+  
+  if (to.meta.requiresGuest && authStore.isAuthenticated) {
+    return next({ name: 'dashboard' })
+  }
+
+  const isOwner = authStore.user?.role?.name === 'owner' || authStore.user?.email === 'owner@hotel.com'
+  if (to.meta.requiresOwner && !isOwner) {
+    return next({ name: 'dashboard' })
+  }
+
+  next()
 })
 
 export default router
