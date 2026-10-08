@@ -546,7 +546,12 @@ async function saveUser() {
     await loadUsers()
   } catch (err) {
     console.error('Failed to save user:', err)
-    modalError.value = err.response?.data?.message || err.response?.data?.errors?.email?.[0] || 'Gagal menyimpan data user'
+    const errObj = err.response?.data
+    if (errObj?.errors) {
+      modalError.value = Object.values(errObj.errors).flat().join(', ')
+    } else {
+      modalError.value = errObj?.message || 'Gagal menyimpan data user'
+    }
   } finally {
     saving.value = false
   }

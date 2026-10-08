@@ -55,34 +55,42 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
-        if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
-            $request->merge(['hotel_branch_id' => null]);
+        try {
+            if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
+                $request->merge(['hotel_branch_id' => null]);
+            }
+            if ($request->phone === '') {
+                $request->merge(['phone' => null]);
+            }
+
+            $validated = $request->validate([
+                'name' => 'required|string|max:100',
+                'email' => 'required|email|unique:users,email',
+                'phone' => 'nullable|string|max:20',
+                'password' => 'required|string|min:6',
+                'role_id' => 'required|exists:roles,id',
+                'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
+                'is_active' => 'boolean',
+            ]);
+
+            $validated['password'] = Hash::make($validated['password']);
+            if (!isset($validated['is_active'])) {
+                $validated['is_active'] = true;
+            }
+
+            $user = User::create($validated);
+
+            return response()->json([
+                'message' => 'User created successfully',
+                'user' => $user->load(['role', 'hotelBranch']),
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Gagal membuat user: ' . $e->getMessage()
+            ], 422);
         }
-        if ($request->phone === '') {
-            $request->merge(['phone' => null]);
-        }
-
-        $validated = $request->validate([
-            'name' => 'required|string|max:100',
-            'email' => 'required|email|unique:users,email',
-            'phone' => 'nullable|string|max:20',
-            'password' => 'required|string|min:6',
-            'role_id' => 'required|exists:roles,id',
-            'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
-            'is_active' => 'boolean',
-        ]);
-
-        $validated['password'] = Hash::make($validated['password']);
-        if (!isset($validated['is_active'])) {
-            $validated['is_active'] = true;
-        }
-
-        $user = User::create($validated);
-
-        return response()->json([
-            'message' => 'User created successfully',
-            'user' => $user->load(['role', 'hotelBranch']),
-        ], 201);
     }
 
     public function show($id)
@@ -94,58 +102,72 @@ class UserController extends Controller
 
     public function update(Request $request, $id)
     {
-        $user = ($id instanceof User) ? $id : User::findOrFail($id);
+        try {
+            $user = ($id instanceof User) ? $id : User::findOrFail($id);
 
-        if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
-            $request->merge(['hotel_branch_id' => null]);
+            if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
+                $request->merge(['hotel_branch_id' => null]);
+            }
+            if ($request->phone === '') {
+                $request->merge(['phone' => null]);
+            }
+            if ($request->has('password') && ($request->password === '' || is_null($request->password))) {
+                $request->offsetUnset('password');
+            }
+
+            $validated = $request->validate([
+                'name' => 'sometimes|required|string|max:100',
+                'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($user->id)],
+                'phone' => 'nullable|string|max:20',
+                'password' => 'nullable|string|min:6',
+                'role_id' => 'sometimes|required|exists:roles,id',
+                'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
+                'is_active' => 'boolean',
+            ]);
+
+            if (!empty($validated['password'])) {
+                $validated['password'] = Hash::make($validated['password']);
+            } else {
+                unset($validated['password']);
+            }
+
+            $user->update($validated);
+
+            return response()->json([
+                'message' => 'User updated successfully',
+                'user' => $user->load(['role', 'hotelBranch']),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Gagal memperbarui user: ' . $e->getMessage()
+            ], 422);
         }
-        if ($request->phone === '') {
-            $request->merge(['phone' => null]);
-        }
-        if ($request->has('password') && (is_null($request->password) || $request->password === '')) {
-            $request->request->remove('password');
-        }
-
-        $validated = $request->validate([
-            'name' => 'sometimes|required|string|max:100',
-            'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($user->id)],
-            'phone' => 'nullable|string|max:20',
-            'password' => 'nullable|string|min:6',
-            'role_id' => 'sometimes|required|exists:roles,id',
-            'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
-            'is_active' => 'boolean',
-        ]);
-
-        if (!empty($validated['password'])) {
-            $validated['password'] = Hash::make($validated['password']);
-        } else {
-            unset($validated['password']);
-        }
-
-        $user->update($validated);
-
-        return response()->json([
-            'message' => 'User updated successfully',
-            'user' => $user->load(['role', 'hotelBranch']),
-        ]);
     }
 
     public function destroy($id)
     {
-        $user = ($id instanceof User) ? $id : User::findOrFail($id);
+        try {
+            $user = ($id instanceof User) ? $id : User::findOrFail($id);
 
-        // Don't delete the logged-in user
-        if ($user->id === auth()->id()) {
+            // Don't delete the logged-in user
+            if ($user->id === auth()->id()) {
+                return response()->json([
+                    'message' => 'Tidak dapat menghapus akun Anda sendiri'
+                ], 422);
+            }
+
+            $user->delete();
+
             return response()->json([
-                'message' => 'Tidak dapat menghapus akun Anda sendiri'
+                'message' => 'User deleted successfully'
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Gagal menghapus user: ' . $e->getMessage()
             ], 422);
         }
-
-        $user->delete();
-
-        return response()->json([
-            'message' => 'User deleted successfully'
-        ]);
     }
 
     public function getRoles()
