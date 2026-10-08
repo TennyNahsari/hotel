@@ -486,6 +486,7 @@
             </div>
           </div>
         </div>
+      </div>
 
         <!-- ==================== TAB 3: MEDIA SOSIAL ==================== -->
         <div v-else-if="activeTab === 'social'" class="max-w-2xl mx-auto bg-white rounded-md border border-sand/30 shadow-sm overflow-hidden p-6 space-y-5">
