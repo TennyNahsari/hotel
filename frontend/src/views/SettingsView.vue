@@ -284,7 +284,35 @@
         </div>
 
         <!-- ==================== TAB 2: REKENING BANK & QRIS ==================== -->
-        <div v-else-if="activeTab === 'payment'" class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div v-else-if="activeTab === 'payment'" class="space-y-6">
+          <!-- Banner Information & Branch Selector -->
+          <div class="bg-gradient-to-r from-forest to-forest-800 text-white p-5 rounded-md shadow-md border border-gold/40 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="space-y-1 max-w-2xl">
+              <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-gold/20 text-gold border border-gold/30 text-[10px] font-bold uppercase tracking-wider">
+                <span>💳 Rekening & WhatsApp Per-Cabang</span>
+              </div>
+              <h3 class="font-display text-lg text-white font-semibold">Pengaturan Rekening Bank, QRIS & WhatsApp</h3>
+              <p class="text-xs text-sand/90 font-light leading-relaxed">
+                Kelola nomor rekening bank, QRIS, dan nomor WhatsApp kontak hotel per cabang. Tamu yang memesan di cabang terkait akan melihat informasi pembayaran dan menghubungi WhatsApp cabang ini.
+              </p>
+            </div>
+
+            <!-- Branch Filter Selector -->
+            <div class="bg-white/10 backdrop-blur-md p-3 rounded border border-white/20 flex flex-col gap-1 min-w-[220px]">
+              <label class="text-[10px] text-sand uppercase font-bold tracking-wider">Pilih Target Cabang Hotel:</label>
+              <select
+                v-model="selectedBranchId"
+                class="bg-forest border border-gold/40 text-gold text-xs font-bold rounded px-3 py-2 focus:outline-none cursor-pointer"
+              >
+                <option :value="null" class="bg-forest text-white">🌐 Semua Cabang (Global Default)</option>
+                <option v-for="b in branchStore.branches" :key="b.id" :value="b.id" class="bg-forest text-white">
+                  🏢 {{ b.name }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <!-- LEFT COLUMN: BANK ACCOUNTS MANAGEMENT (7 Cols) -->
           <div class="lg:col-span-7 space-y-6">
             <div class="bg-white rounded-md border border-sand/30 shadow-sm overflow-hidden">
@@ -865,6 +893,7 @@ const selectedBranchId = ref(null)
 
 watch(selectedBranchId, () => {
   fetchHeroSliders()
+  fetchPaymentSettings()
 })
 
 // Hero Sliders State
@@ -918,18 +947,13 @@ const bankForm = ref({
   is_active: true,
 })
 
-// Fetch All Settings
-const fetchAllSettings = async () => {
-  loading.value = true
-  errorMessage.value = ''
+// Fetch Payment Settings by Selected Branch
+const fetchPaymentSettings = async () => {
   try {
-    const [payRes, socialRes] = await Promise.all([
-      axios.get('/api/settings/payment'),
-      axios.get('/api/settings/social'),
-    ])
-    
-    // Payment Settings
-    const data = payRes.data?.data || {}
+    const res = await axios.get('/api/settings/payment', {
+      params: { branch_id: selectedBranchId.value }
+    })
+    const data = res.data?.data || {}
     bankAccounts.value = data.bank_accounts || []
     qrisNotes.value = data.qris_notes || ''
     whatsappNumber.value = data.whatsapp_number || '6281234567890'
@@ -937,7 +961,20 @@ const fetchAllSettings = async () => {
     selectedQrisFile.value = null
     qrisPreviewUrl.value = null
     deleteQrisFlag.value = false
+  } catch (err) {
+    console.error('Failed to fetch payment settings:', err)
+  }
+}
 
+// Fetch All Settings
+const fetchAllSettings = async () => {
+  loading.value = true
+  errorMessage.value = ''
+  try {
+    const [socialRes] = await Promise.all([
+      axios.get('/api/settings/social'),
+    ])
+    
     // Social Settings
     const socialData = socialRes.data?.data || {}
     socialForm.value = {
@@ -949,8 +986,9 @@ const fetchAllSettings = async () => {
       threads: socialData.threads || '',
     }
 
-    // Hero Sliders Settings
+    // Hero Sliders & Payment Settings per branch
     await fetchHeroSliders()
+    await fetchPaymentSettings()
   } catch (err) {
     console.error('Failed to fetch settings:', err)
     errorMessage.value = 'Gagal memuat pengaturan. Pastikan koneksi server baik.'
@@ -1150,6 +1188,9 @@ const saveCurrentTabSettings = async () => {
       formData.append('bank_accounts', JSON.stringify(bankAccounts.value))
       formData.append('qris_notes', qrisNotes.value)
       formData.append('whatsapp_number', whatsappNumber.value)
+      if (selectedBranchId.value !== null && selectedBranchId.value !== undefined) {
+        formData.append('branch_id', selectedBranchId.value)
+      }
 
       if (deleteQrisFlag.value) {
         formData.append('delete_qris', '1')

@@ -2467,6 +2467,7 @@ const fetchPublicHeroSliders = async () => {
 
 watch(() => branchStore.activeBranchId, () => {
   fetchPublicHeroSliders()
+  fetchPaymentSettings()
 })
 
 onMounted(() => {
@@ -2849,7 +2850,9 @@ async function fetchSocialSettings() {
 async function fetchPaymentSettings() {
   try {
     const apiHost = getApiHost()
-    const res = await axios.get(`${apiHost}/api/public/settings/payment`)
+    const res = await axios.get(`${apiHost}/api/public/settings/payment`, {
+      params: { branch_id: branchStore.activeBranchId }
+    })
     if (res.data && res.data.data) {
       paymentSettings.value = res.data.data
       if (activeBankAccounts.value.length > 0 && (!bookingForm.value.bank_name || bookingForm.value.bank_name === 'BCA')) {

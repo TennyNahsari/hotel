@@ -12,7 +12,7 @@ class SettingController extends Controller
     /**
      * Get Payment Settings (Public API)
      */
-    public function getPaymentSettings()
+    public function getPaymentSettings(Request $request)
     {
         $default = [
             'bank_accounts' => [
@@ -34,7 +34,24 @@ class SettingController extends Controller
             'whatsapp_number' => '6281234567890',
         ];
 
-        $settings = Setting::get('payment_settings', $default);
+        $branchId = $request->query('branch_id');
+        if ($branchId === 'null' || $branchId === 'undefined' || $branchId === '') {
+            $branchId = null;
+        }
+
+        $settings = null;
+        if ($branchId) {
+            $settings = Setting::get('payment_settings', null, $branchId);
+        }
+
+        if (empty($settings) || !is_array($settings)) {
+            $settings = Setting::get('payment_settings', $default, null);
+        }
+
+        if (!is_array($settings)) {
+            $settings = $default;
+        }
+
         if (empty($settings['bank_accounts']) || !is_array($settings['bank_accounts']) || count($settings['bank_accounts']) === 0) {
             $settings['bank_accounts'] = $default['bank_accounts'];
         }
@@ -66,6 +83,7 @@ class SettingController extends Controller
             'whatsapp_number' => 'nullable|string',
             'qris_image' => 'nullable|file|mimes:jpeg,png,jpg,webp|max:5120',
             'delete_qris' => 'nullable|boolean',
+            'branch_id' => 'nullable',
         ]);
 
         $default = [
@@ -75,7 +93,16 @@ class SettingController extends Controller
             'whatsapp_number' => '6281234567890',
         ];
 
-        $currentSettings = Setting::get('payment_settings', $default);
+        $rawBranchId = $request->input('branch_id');
+        $branchId = ($rawBranchId === 'null' || $rawBranchId === 'undefined' || $rawBranchId === '') ? null : $rawBranchId;
+
+        $currentSettings = Setting::get('payment_settings', null, $branchId);
+        if (!is_array($currentSettings) || empty($currentSettings)) {
+            $currentSettings = Setting::get('payment_settings', $default, null);
+        }
+        if (!is_array($currentSettings)) {
+            $currentSettings = $default;
+        }
 
         // Process Bank Accounts payload
         if ($request->has('bank_accounts')) {
@@ -126,7 +153,15 @@ class SettingController extends Controller
         }
 
         // Save updated settings
-        Setting::set('payment_settings', $currentSettings);
+        Setting::set('payment_settings', $currentSettings, $branchId);
+
+        // If saved for a specific branch, sync to global if global is empty
+        if ($branchId) {
+            $global = Setting::get('payment_settings', null, null);
+            if (empty($global)) {
+                Setting::set('payment_settings', $currentSettings, null);
+            }
+        }
 
         // Attach full URL for response
         if (!empty($currentSettings['qris_image_path'])) {
