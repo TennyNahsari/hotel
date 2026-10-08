@@ -21,23 +21,29 @@ class RoomController extends Controller
         }
 
         // Filter by status
-        if ($request->has('status')) {
+        if ($request->has('status') && !empty($request->status)) {
             $query->where('status', $request->status);
         }
 
         // Filter by room type
-        if ($request->has('room_type_id')) {
+        if ($request->has('room_type_id') && !empty($request->room_type_id)) {
             $query->where('room_type_id', $request->room_type_id);
         }
 
         // Filter by floor
-        if ($request->has('floor')) {
+        if ($request->has('floor') && !empty($request->floor)) {
             $query->where('floor', $request->floor);
         }
 
         // Only active rooms by default
         if (!$request->has('include_inactive')) {
             $query->where('is_active', true);
+        }
+
+        if ($request->has('page') || $request->has('paginate')) {
+            $perPage = (int) $request->get('per_page', 12);
+            $rooms = $query->orderBy('room_number')->paginate($perPage);
+            return response()->json($rooms);
         }
 
         $rooms = $query->orderBy('room_number')->get();

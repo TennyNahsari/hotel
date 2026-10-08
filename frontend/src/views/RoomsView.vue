@@ -41,7 +41,7 @@
               <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByStatus') }}</label>
             <select 
               v-model="filters.status" 
-              @change="loadRooms"
+              @change="handleFilterChange"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{{ $t('rooms.allStatus') }}</option>
@@ -59,7 +59,7 @@
               <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByType') }}</label>
             <select 
               v-model="filters.room_type_id" 
-              @change="loadRooms"
+              @change="handleFilterChange"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{{ $t('rooms.allTypes') }}</option>
@@ -74,7 +74,7 @@
               <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1">{{ $t('rooms.filterByFloor') }}</label>
             <select 
               v-model="filters.floor" 
-              @change="loadRooms"
+              @change="handleFilterChange"
               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             >
               <option value="">{{ $t('rooms.allFloors') }}</option>
@@ -177,6 +177,78 @@
               {{ $t('rooms.outOfOrder') }}
             </button>
           </div>
+        </div>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div v-if="pagination.last_page > 1" class="bg-white rounded-lg shadow px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+          <div>
+            <p class="text-xs sm:text-sm text-gray-700">
+              Menampilkan
+              <span class="font-medium">{{ (pagination.current_page - 1) * pagination.per_page + 1 }}</span>
+              sampai
+              <span class="font-medium">{{ Math.min(pagination.current_page * pagination.per_page, pagination.total) }}</span>
+              dari
+              <span class="font-medium">{{ pagination.total }}</span>
+              kamar
+            </p>
+          </div>
+          <div class="flex gap-1 items-center">
+            <!-- Prev Button -->
+            <button
+              @click="changePage(pagination.current_page - 1)"
+              :disabled="pagination.current_page === 1"
+              class="px-3 py-1.5 border border-gray-300 rounded text-xs sm:text-sm font-medium text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors flex items-center space-x-1"
+            >
+              <span>← Prev</span>
+            </button>
+            
+            <!-- Page Numbers with Ellipsis -->
+            <template v-for="(page, idx) in getPageNumbers()" :key="idx">
+              <button
+                v-if="page !== '...'"
+                @click="changePage(page)"
+                :class="[
+                  'px-3 py-1.5 border rounded text-xs sm:text-sm font-medium transition-colors',
+                  pagination.current_page === page
+                    ? 'bg-blue-600 text-white border-blue-600 font-bold shadow-xs'
+                    : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                ]"
+              >
+                {{ page }}
+              </button>
+              <span v-else class="px-2 py-1 text-xs sm:text-sm text-gray-400 font-bold">...</span>
+            </template>
+
+            <!-- Next Button -->
+            <button
+              @click="changePage(pagination.current_page + 1)"
+              :disabled="pagination.current_page === pagination.last_page"
+              class="px-3 py-1.5 border border-gray-300 rounded text-xs sm:text-sm font-medium text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-50 transition-colors flex items-center space-x-1"
+            >
+              <span>Next →</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Mobile Pagination View -->
+        <div class="flex sm:hidden w-full justify-between items-center">
+          <button
+            @click="changePage(pagination.current_page - 1)"
+            :disabled="pagination.current_page === 1"
+            class="px-3 py-1.5 border border-gray-300 rounded text-xs font-medium disabled:opacity-40"
+          >
+            ← Prev
+          </button>
+          <span class="text-xs text-gray-600 font-medium">Halaman {{ pagination.current_page }} dari {{ pagination.last_page }}</span>
+          <button
+            @click="changePage(pagination.current_page + 1)"
+            :disabled="pagination.current_page === pagination.last_page"
+            class="px-3 py-1.5 border border-gray-300 rounded text-xs font-medium disabled:opacity-40"
+          >
+            Next →
+          </button>
         </div>
       </div>
     </div>
@@ -344,10 +416,18 @@ const deleting = ref(false)
 const error = ref('')
 const roomToDelete = ref(null)
 
+const pagination = ref({
+  current_page: 1,
+  last_page: 1,
+  per_page: 12,
+  total: 0,
+})
+
 const filters = ref({
   status: '',
   room_type_id: '',
   floor: '',
+  page: 1,
 })
 
 const formData = ref({
@@ -376,15 +456,79 @@ onMounted(async () => {
   loadStatistics()
 })
 
+function handleFilterChange() {
+  filters.value.page = 1
+  loadRooms()
+}
+
+function changePage(newPage) {
+  if (newPage < 1 || newPage > pagination.value.last_page) return
+  filters.value.page = newPage
+  loadRooms()
+}
+
+function getPageNumbers() {
+  const current = pagination.value.current_page
+  const last = pagination.value.last_page
+  if (!last || last <= 1) return [1]
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+
+  const pages = []
+  pages.push(1, 2)
+
+  if (current > 4) {
+    pages.push('...')
+  }
+
+  const start = Math.max(3, current - 1)
+  const end = Math.min(last - 2, current + 1)
+  for (let i = start; i <= end; i++) {
+    if (!pages.includes(i)) {
+      pages.push(i)
+    }
+  }
+
+  if (current < last - 3) {
+    pages.push('...')
+  }
+
+  if (!pages.includes(last - 1)) pages.push(last - 1)
+  if (!pages.includes(last)) pages.push(last)
+
+  return pages
+}
+
 async function loadRooms() {
   loading.value = true
   try {
-    const params = {}
+    const params = {
+      page: filters.value.page || 1,
+      per_page: 12,
+    }
     if (filters.value.status) params.status = filters.value.status
     if (filters.value.room_type_id) params.room_type_id = filters.value.room_type_id
     if (filters.value.floor) params.floor = filters.value.floor
 
-    rooms.value = await roomApi.getRooms(params)
+    const res = await roomApi.getRooms(params)
+    if (res && res.data && Array.isArray(res.data)) {
+      rooms.value = res.data
+      pagination.value = {
+        current_page: res.current_page || 1,
+        last_page: res.last_page || 1,
+        per_page: res.per_page || 12,
+        total: res.total || res.data.length,
+      }
+    } else if (Array.isArray(res)) {
+      rooms.value = res
+      pagination.value = {
+        current_page: 1,
+        last_page: 1,
+        per_page: res.length,
+        total: res.length,
+      }
+    } else {
+      rooms.value = []
+    }
   } catch (err) {
     console.error('Failed to load rooms:', err)
   } finally {
