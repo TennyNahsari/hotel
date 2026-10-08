@@ -889,8 +889,14 @@ const saving = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
 
-// Branch filtering for Hero Sliders
-const selectedBranchId = ref(null)
+// Branch filtering for Hero Sliders & Payment Settings
+const selectedBranchId = ref(branchStore.activeBranchId || null)
+
+watch(() => branchStore.activeBranchId, (newBranchId) => {
+  if (newBranchId !== undefined) {
+    selectedBranchId.value = newBranchId
+  }
+})
 
 watch(selectedBranchId, () => {
   fetchHeroSliders()
