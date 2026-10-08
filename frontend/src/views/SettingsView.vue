@@ -951,7 +951,7 @@ const bankForm = ref({
 // Fetch Payment Settings by Selected Branch
 const fetchPaymentSettings = async () => {
   try {
-    const res = await axios.get('/api/settings/payment', {
+    const res = await axios.get('/settings/payment', {
       params: { branch_id: selectedBranchId.value }
     })
     const data = res.data?.data || {}
@@ -973,7 +973,7 @@ const fetchAllSettings = async () => {
   errorMessage.value = ''
   try {
     const [socialRes] = await Promise.all([
-      axios.get('/api/settings/social'),
+      axios.get('/settings/social'),
     ])
     
     // Social Settings
@@ -1199,7 +1199,7 @@ const saveCurrentTabSettings = async () => {
         formData.append('qris_image', selectedQrisFile.value)
       }
 
-      const payRes = await axios.post('/api/settings/payment', formData, {
+      const payRes = await axios.post('/settings/payment', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       })
 
@@ -1214,7 +1214,7 @@ const saveCurrentTabSettings = async () => {
 
       successMessage.value = 'Pengaturan Rekening Bank & QRIS berhasil diperbarui!'
     } else if (activeTab.value === 'social') {
-      const socialRes = await axios.post('/api/settings/social', socialForm.value)
+      const socialRes = await axios.post('/settings/social', socialForm.value)
       const updatedSocial = socialRes.data?.data || {}
       socialForm.value = {
         instagram: updatedSocial.instagram || '',
