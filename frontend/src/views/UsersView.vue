@@ -165,14 +165,16 @@
                       {{ getUserInitials(u.name) }}
                     </div>
                     <div>
-                      <div class="text-sm font-semibold text-gray-900">{{ u.name }}</div>
-                      <div class="text-xs text-gray-500 font-mono">ID: #{{ u.id }}</div>
+                      <div class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                        <span>{{ u.name }}</span>
+                        <span v-if="u.email === 'owner@hotel.com' || u.role?.name === 'owner'" class="px-1.5 py-0.5 text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 rounded uppercase">Super Admin</span>
+                      </div>
+                      <div class="text-xs text-blue-600 font-medium">{{ u.email }}</div>
                     </div>
                   </div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">{{ u.email }}</div>
-                  <div class="text-xs text-gray-500">{{ u.phone || '-' }}</div>
+                  <div class="text-sm text-gray-900">{{ u.phone || '-' }}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">
@@ -456,9 +458,11 @@ async function loadUsers() {
   loading.value = true
   try {
     const params = { ...filters.value }
-    users.value = await userApi.getUsers(params)
+    const res = await userApi.getUsers(params)
+    users.value = Array.isArray(res) ? res : (res?.data || [])
   } catch (err) {
     console.error('Failed to load users:', err)
+    users.value = []
   } finally {
     loading.value = false
   }

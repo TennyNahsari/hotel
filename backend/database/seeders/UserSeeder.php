@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
 
         User::updateOrCreate(['email' => 'owner@hotel.com'], [
             'role_id' => $ownerRole->id,
-            'name' => 'Admin Owner',
+            'name' => 'Owner (Super Admin)',
             'email' => 'owner@hotel.com',
             'phone' => '081234567890',
             'password' => Hash::make('password'),
