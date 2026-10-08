@@ -44,7 +44,7 @@ class UserController extends Controller
         }
 
         // Filter by active status
-        if ($request->has('is_active') && $request->is_active !== '') {
+        if ($request->filled('is_active')) {
             $query->where('is_active', filter_var($request->is_active, FILTER_VALIDATE_BOOLEAN));
         }
 

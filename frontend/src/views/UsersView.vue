@@ -457,7 +457,12 @@ async function loadRoles() {
 async function loadUsers() {
   loading.value = true
   try {
-    const params = { ...filters.value }
+    const params = {}
+    if (filters.value.search) params.search = filters.value.search
+    if (filters.value.role_id) params.role_id = filters.value.role_id
+    if (filters.value.hotel_branch_id) params.hotel_branch_id = filters.value.hotel_branch_id
+    if (filters.value.is_active !== '') params.is_active = filters.value.is_active
+
     const res = await userApi.getUsers(params)
     users.value = Array.isArray(res) ? res : (res?.data || [])
   } catch (err) {
