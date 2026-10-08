@@ -209,13 +209,16 @@ class SettingController extends Controller
     public function getHeroSliders(Request $request)
     {
         $branchId = $request->query('branch_id');
+        if ($branchId === 'null' || $branchId === 'undefined' || $branchId === '') {
+            $branchId = null;
+        }
 
         $sliders = null;
         if ($branchId) {
             $sliders = Setting::get('hero_sliders', null, $branchId);
         }
 
-        if ($sliders === null) {
+        if (empty($sliders) || !is_array($sliders)) {
             $sliders = Setting::get('hero_sliders', [], null);
         }
 
@@ -243,15 +246,21 @@ class SettingController extends Controller
     public function updateHeroSliders(Request $request)
     {
         $request->validate([
-            'sliders' => 'required|array',
+            'sliders' => 'present|array',
             'branch_id' => 'nullable',
         ]);
 
-        $branchId = $request->input('branch_id') ?: null;
+        $rawBranchId = $request->input('branch_id');
+        $branchId = ($rawBranchId === 'null' || $rawBranchId === 'undefined' || $rawBranchId === '') ? null : $rawBranchId;
         $sliders = $request->input('sliders', []);
 
         $cleanSliders = [];
         foreach ($sliders as $index => $slide) {
+            $isActive = $slide['is_active'] ?? true;
+            if (is_string($isActive)) {
+                $isActive = filter_var($isActive, FILTER_VALIDATE_BOOLEAN);
+            }
+
             $cleanSliders[] = [
                 'id' => $slide['id'] ?? ('slide_' . time() . '_' . $index),
                 'title' => $slide['title'] ?? '',
@@ -265,7 +274,7 @@ class SettingController extends Controller
                 'button_secondary_text' => $slide['button_secondary_text'] ?? '',
                 'button_secondary_action' => $slide['button_secondary_action'] ?? 'hall',
                 'button_secondary_link' => $slide['button_secondary_link'] ?? '',
-                'is_active' => filter_var($slide['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'is_active' => (bool) $isActive,
                 'sort_order' => intval($slide['sort_order'] ?? ($index + 1)),
             ];
         }

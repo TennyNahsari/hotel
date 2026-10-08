@@ -2399,9 +2399,9 @@ const authStore = useAuthStore()
 const branchStore = useBranchStore()
 const { t, locale } = useI18n()
 
-// Dynamic Hero Slider State & Autoplay Logic
+const isTrue = (val) => val === true || val === 'true' || val === 1 || val === '1'
 const heroSliders = ref([])
-const activeSliders = computed(() => heroSliders.value.filter(s => s.is_active !== false))
+const activeSliders = computed(() => heroSliders.value.filter(s => isTrue(s.is_active)))
 const currentSlideIndex = ref(0)
 const isSliderPaused = ref(false)
 let sliderTimer = null

@@ -221,10 +221,10 @@
                       <span
                         :class="[
                           'px-2 py-0.5 text-[10px] font-bold rounded uppercase tracking-wider',
-                          slide.is_active !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700'
+                          isTrue(slide.is_active) ? 'bg-emerald-100 text-emerald-800' : 'bg-gray-200 text-gray-700'
                         ]"
                       >
-                        {{ slide.is_active !== false ? '✓ Aktif' : '✕ Non-Aktif' }}
+                        {{ isTrue(slide.is_active) ? '✓ Aktif' : '✕ Non-Aktif' }}
                       </span>
                     </div>
 
@@ -252,15 +252,15 @@
                 <!-- Slide Actions -->
                 <div class="flex items-center space-x-2 self-end md:self-center">
                   <button
-                    @click="slide.is_active = !slide.is_active"
+                    @click="toggleSlideActive(slide)"
                     :class="[
-                      'px-3 py-1.5 text-xs font-semibold rounded border transition-colors',
-                      slide.is_active !== false
+                      'px-3 py-1.5 text-xs font-semibold rounded border transition-colors cursor-pointer',
+                      isTrue(slide.is_active)
                         ? 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
                         : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
                     ]"
                   >
-                    {{ slide.is_active !== false ? 'Nonaktifkan' : 'Aktifkan' }}
+                    {{ isTrue(slide.is_active) ? 'Nonaktifkan' : 'Aktifkan' }}
                   </button>
                   <button
                     @click="openSliderModal(slide, index)"
@@ -1016,7 +1016,14 @@ const handleSliderImageUpload = async (e) => {
   }
 }
 
-const saveSliderModal = () => {
+const isTrue = (val) => val === true || val === 'true' || val === 1 || val === '1'
+
+const toggleSlideActive = async (slide) => {
+  slide.is_active = !isTrue(slide.is_active)
+  await saveCurrentTabSettings()
+}
+
+const saveSliderModal = async () => {
   if (!sliderForm.value.image_url) {
     alert('Harap masukkan URL atau unggah gambar slider.')
     return
@@ -1028,27 +1035,31 @@ const saveSliderModal = () => {
     heroSliders.value.push({ ...sliderForm.value })
   }
   sliderModalOpen.value = false
+  await saveCurrentTabSettings()
 }
 
-const removeSlide = (index) => {
+const removeSlide = async (index) => {
   if (confirm('Hapus slide banner ini?')) {
     heroSliders.value.splice(index, 1)
+    await saveCurrentTabSettings()
   }
 }
 
-const moveSlideUp = (index) => {
+const moveSlideUp = async (index) => {
   if (index > 0) {
     const temp = heroSliders.value[index]
     heroSliders.value[index] = heroSliders.value[index - 1]
     heroSliders.value[index - 1] = temp
+    await saveCurrentTabSettings()
   }
 }
 
-const moveSlideDown = (index) => {
+const moveSlideDown = async (index) => {
   if (index < heroSliders.value.length - 1) {
     const temp = heroSliders.value[index]
     heroSliders.value[index] = heroSliders.value[index + 1]
     heroSliders.value[index + 1] = temp
+    await saveCurrentTabSettings()
   }
 }
 

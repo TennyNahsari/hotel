@@ -21,6 +21,8 @@ class Setting extends Model
         $query = static::where('key', $key);
         if ($branchId) {
             $query->where('hotel_branch_id', $branchId);
+        } else {
+            $query->whereNull('hotel_branch_id');
         }
         $setting = $query->first();
         if (!$setting) {
