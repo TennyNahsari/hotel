@@ -110,11 +110,11 @@ export const roomApi = {
   },
 
   async exportRooms(params = {}) {
-    const response = await api.get('/rooms/export', { 
+    const response = await api.get('/rooms/export', {
       params,
-      responseType: 'blob' 
+      responseType: 'blob'
     })
-    
+
     // Create download link
     const url = window.URL.createObjectURL(new Blob([response.data]))
     const link = document.createElement('a')
@@ -557,3 +557,31 @@ export const laundryOrderApi = {
     return response.data
   },
 }
+
+export const settingApi = {
+  async getPublicHeroSliders(params = {}) {
+    const response = await api.get('/public/settings/hero-sliders', { params })
+    return response.data
+  },
+  async getHeroSliders(params = {}) {
+    const response = await api.get('/settings/hero-sliders', { params })
+    return response.data
+  },
+  async updateHeroSliders(data) {
+    const response = await api.post('/settings/hero-sliders', data)
+    return response.data
+  },
+  async uploadHeroSliderImage(file) {
+    const formData = new FormData()
+    formData.append('image', file)
+    const response = await api.post('/settings/hero-sliders/upload-image', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+    return response.data
+  },
+  async deleteHeroSliderImage(imagePath) {
+    const response = await api.post('/settings/hero-sliders/delete-image', { image_path: imagePath })
+    return response.data
+  },
+}
+

@@ -202,4 +202,126 @@ class SettingController extends Controller
             'data' => $currentSettings
         ]);
     }
+
+    /**
+     * Get Hero Sliders (Public & Protected API)
+     */
+    public function getHeroSliders(Request $request)
+    {
+        $branchId = $request->query('branch_id');
+
+        $sliders = null;
+        if ($branchId) {
+            $sliders = Setting::get('hero_sliders', null, $branchId);
+        }
+
+        if ($sliders === null) {
+            $sliders = Setting::get('hero_sliders', [], null);
+        }
+
+        if (!is_array($sliders)) {
+            $sliders = [];
+        }
+
+        foreach ($sliders as &$slide) {
+            if (!empty($slide['image_path'])) {
+                $slide['image_url'] = asset('storage/' . $slide['image_path']);
+            } elseif (empty($slide['image_url'])) {
+                $slide['image_url'] = null;
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $sliders
+        ]);
+    }
+
+    /**
+     * Update Hero Sliders (Protected API for Admin)
+     */
+    public function updateHeroSliders(Request $request)
+    {
+        $request->validate([
+            'sliders' => 'required|array',
+            'branch_id' => 'nullable',
+        ]);
+
+        $branchId = $request->input('branch_id') ?: null;
+        $sliders = $request->input('sliders', []);
+
+        $cleanSliders = [];
+        foreach ($sliders as $index => $slide) {
+            $cleanSliders[] = [
+                'id' => $slide['id'] ?? ('slide_' . time() . '_' . $index),
+                'title' => $slide['title'] ?? '',
+                'subtitle' => $slide['subtitle'] ?? '',
+                'badge' => $slide['badge'] ?? '',
+                'image_url' => $slide['image_url'] ?? '',
+                'image_path' => $slide['image_path'] ?? null,
+                'button_primary_text' => $slide['button_primary_text'] ?? '',
+                'button_primary_action' => $slide['button_primary_action'] ?? 'booking',
+                'button_primary_link' => $slide['button_primary_link'] ?? '',
+                'button_secondary_text' => $slide['button_secondary_text'] ?? '',
+                'button_secondary_action' => $slide['button_secondary_action'] ?? 'hall',
+                'button_secondary_link' => $slide['button_secondary_link'] ?? '',
+                'is_active' => filter_var($slide['is_active'] ?? true, FILTER_VALIDATE_BOOLEAN),
+                'sort_order' => intval($slide['sort_order'] ?? ($index + 1)),
+            ];
+        }
+
+        Setting::set('hero_sliders', $cleanSliders, $branchId);
+
+        foreach ($cleanSliders as &$slide) {
+            if (!empty($slide['image_path'])) {
+                $slide['image_url'] = asset('storage/' . $slide['image_path']);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Pengaturan hero slider berhasil disimpan!',
+            'data' => $cleanSliders
+        ]);
+    }
+
+    /**
+     * Upload Hero Slider Image File
+     */
+    public function uploadHeroSliderImage(Request $request)
+    {
+        $request->validate([
+            'image' => 'required|file|mimes:jpeg,png,jpg,webp|max:10240',
+        ]);
+
+        $file = $request->file('image');
+        $filename = 'slider_' . time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+        $path = $file->storeAs('hero_sliders', $filename, 'public');
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Gambar slider berhasil diunggah',
+            'image_path' => $path,
+            'image_url' => asset('storage/' . $path)
+        ]);
+    }
+
+    /**
+     * Delete Hero Slider Image File
+     */
+    public function deleteHeroSliderImage(Request $request)
+    {
+        $request->validate([
+            'image_path' => 'required|string',
+        ]);
+
+        $path = $request->input('image_path');
+        if (!empty($path) && Storage::disk('public')->exists($path)) {
+            Storage::disk('public')->delete($path);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Gambar slider berhasil dihapus'
+        ]);
+    }
 }

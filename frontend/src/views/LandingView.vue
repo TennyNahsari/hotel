@@ -172,57 +172,186 @@
 
     <!-- 02. HERO SECTION -->
     <section id="hero" class="relative h-screen min-h-[650px] flex items-center justify-center overflow-hidden">
-      <!-- Background Image with Ambient Zoom -->
-      <div class="absolute inset-0 z-0">
-        <img
-          src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85"
-          alt="AURA Luxury Hotel Exterior"
-          class="w-full h-full object-cover scale-105 animate-[pulse_10s_infinite_alternate]"
-        />
-        <!-- Dark Transparent Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/50"></div>
-      </div>
-
-      <!-- Hero Content -->
-      <div class="relative z-10 max-w-5xl mx-auto px-4 text-center text-white space-y-6 animate-fade-in mt-12">
-        <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
-          <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
-          <span class="text-xs uppercase tracking-[0.3em] font-medium text-sand">{{ $t('landing.hero.welcome') }}</span>
+      <!-- DYNAMIC SLIDER DISPLAY (If active sliders exist) -->
+      <template v-if="activeSliders.length > 0">
+        <!-- Slider Background Images with Fade & Zoom Transition -->
+        <div
+          @mouseenter="isSliderPaused = true"
+          @mouseleave="isSliderPaused = false"
+          class="absolute inset-0 z-0"
+        >
+          <div
+            v-for="(slide, idx) in activeSliders"
+            :key="slide.id || idx"
+            :class="[
+              'absolute inset-0 transition-opacity duration-1000 ease-in-out',
+              idx === currentSlideIndex ? 'opacity-100 z-10' : 'opacity-0 z-0'
+            ]"
+          >
+            <img
+              :src="slide.image_url || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85'"
+              :alt="slide.title || 'AURA Hotel Slider'"
+              class="w-full h-full object-cover transition-transform duration-[10000ms] ease-out"
+              :class="idx === currentSlideIndex ? 'scale-105' : 'scale-100'"
+            />
+            <!-- Dark Gradient Overlay -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/45 to-black/55"></div>
+          </div>
         </div>
 
-        <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-normal leading-[1.1] tracking-tight">
-          {{ $t('landing.hero.title') }}
-        </h1>
+        <!-- Slider Hero Content -->
+        <div
+          v-if="activeSliders[currentSlideIndex]"
+          @mouseenter="isSliderPaused = true"
+          @mouseleave="isSliderPaused = false"
+          class="relative z-20 max-w-5xl mx-auto px-4 text-center text-white space-y-6 animate-fade-in mt-12"
+        >
+          <!-- Badge Upper Text -->
+          <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            <span class="text-xs uppercase tracking-[0.3em] font-medium text-sand">
+              {{ activeSliders[currentSlideIndex].badge || $t('landing.hero.welcome') }}
+            </span>
+          </div>
 
-        <p class="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-white/85 font-light leading-relaxed">
-          {{ $t('landing.hero.description') }}
-        </p>
+          <!-- Main Title -->
+          <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-normal leading-[1.1] tracking-tight">
+            {{ activeSliders[currentSlideIndex].title || $t('landing.hero.title') }}
+          </h1>
 
-        <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button
-            @click="openBookingModal()"
-            class="w-full sm:w-auto px-7 py-4 bg-forest text-white text-sm font-semibold uppercase tracking-widest rounded hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-          >
-            {{ $t('landing.hero.bookStay') }}
-          </button>
-          <button
-            @click="openHallBookingModal()"
-            class="w-full sm:w-auto px-7 py-4 bg-gold text-forest text-sm font-bold uppercase tracking-widest rounded hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
-          >
-            Pesan Hall
-          </button>
-          <button
-            @click="openTrackModal()"
-            class="w-full sm:w-auto px-7 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium uppercase tracking-widest rounded transition-all"
-          >
-            Cek Status Pesanan
-          </button>
+          <!-- Description -->
+          <p class="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-white/85 font-light leading-relaxed">
+            {{ activeSliders[currentSlideIndex].subtitle || $t('landing.hero.description') }}
+          </p>
+
+          <!-- Buttons CTAs -->
+          <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <!-- Primary Button -->
+            <button
+              @click="handleSliderButtonClick(activeSliders[currentSlideIndex].button_primary_action, activeSliders[currentSlideIndex].button_primary_link)"
+              class="w-full sm:w-auto px-7 py-4 bg-forest text-white text-sm font-semibold uppercase tracking-widest rounded hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            >
+              {{ activeSliders[currentSlideIndex].button_primary_text || $t('landing.hero.bookStay') }}
+            </button>
+
+            <!-- Secondary Button -->
+            <button
+              @click="handleSliderButtonClick(activeSliders[currentSlideIndex].button_secondary_action || 'hall', activeSliders[currentSlideIndex].button_secondary_link)"
+              class="w-full sm:w-auto px-7 py-4 bg-gold text-forest text-sm font-bold uppercase tracking-widest rounded hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            >
+              {{ activeSliders[currentSlideIndex].button_secondary_text || 'Pesan Hall' }}
+            </button>
+
+            <!-- Track Order Button -->
+            <button
+              @click="openTrackModal()"
+              class="w-full sm:w-auto px-7 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium uppercase tracking-widest rounded transition-all"
+            >
+              Cek Status Pesanan
+            </button>
+          </div>
         </div>
-      </div>
+
+        <!-- Slider Navigation Controls (Next / Prev Arrows) -->
+        <template v-if="activeSliders.length > 1">
+          <button
+            @click="prevSlide"
+            @mouseenter="isSliderPaused = true"
+            @mouseleave="isSliderPaused = false"
+            class="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/30 hover:bg-gold hover:text-forest text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-lg group cursor-pointer"
+            aria-label="Previous Slide"
+          >
+            <svg class="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <button
+            @click="nextSlide"
+            @mouseenter="isSliderPaused = true"
+            @mouseleave="isSliderPaused = false"
+            class="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/30 hover:bg-gold hover:text-forest text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-lg group cursor-pointer"
+            aria-label="Next Slide"
+          >
+            <svg class="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+
+          <!-- Slider Pagination Dots -->
+          <div
+            @mouseenter="isSliderPaused = true"
+            @mouseleave="isSliderPaused = false"
+            class="absolute bottom-20 left-1/2 -translate-x-1/2 z-20 flex items-center space-x-2.5 bg-black/30 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10"
+          >
+            <button
+              v-for="(slide, idx) in activeSliders"
+              :key="'dot-' + idx"
+              @click="currentSlideIndex = idx"
+              :class="[
+                'h-2 rounded-full transition-all duration-300 cursor-pointer',
+                idx === currentSlideIndex ? 'w-8 bg-gold' : 'w-2 bg-white/40 hover:bg-white/80'
+              ]"
+              :aria-label="'Go to slide ' + (idx + 1)"
+            ></button>
+          </div>
+        </template>
+      </template>
+
+      <!-- DEFAULT HERO DISPLAY (If no active sliders configured) -->
+      <template v-else>
+        <!-- Background Image with Ambient Zoom -->
+        <div class="absolute inset-0 z-0">
+          <img
+            src="https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=2000&q=85"
+            alt="AURA Luxury Hotel Exterior"
+            class="w-full h-full object-cover scale-105 animate-[pulse_10s_infinite_alternate]"
+          />
+          <!-- Dark Transparent Gradient Overlay -->
+          <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/50"></div>
+        </div>
+
+        <!-- Hero Content -->
+        <div class="relative z-10 max-w-5xl mx-auto px-4 text-center text-white space-y-6 animate-fade-in mt-12">
+          <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            <span class="text-xs uppercase tracking-[0.3em] font-medium text-sand">{{ $t('landing.hero.welcome') }}</span>
+          </div>
+
+          <h1 class="font-display text-4xl sm:text-6xl md:text-7xl font-normal leading-[1.1] tracking-tight">
+            {{ $t('landing.hero.title') }}
+          </h1>
+
+          <p class="max-w-2xl mx-auto text-base sm:text-lg md:text-xl text-white/85 font-light leading-relaxed">
+            {{ $t('landing.hero.description') }}
+          </p>
+
+          <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <button
+              @click="openBookingModal()"
+              class="w-full sm:w-auto px-7 py-4 bg-forest text-white text-sm font-semibold uppercase tracking-widest rounded hover:bg-forest-800 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            >
+              {{ $t('landing.hero.bookStay') }}
+            </button>
+            <button
+              @click="openHallBookingModal()"
+              class="w-full sm:w-auto px-7 py-4 bg-gold text-forest text-sm font-bold uppercase tracking-widest rounded hover:bg-yellow-400 transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5"
+            >
+              Pesan Hall
+            </button>
+            <button
+              @click="openTrackModal()"
+              class="w-full sm:w-auto px-7 py-4 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/30 text-white text-sm font-medium uppercase tracking-widest rounded transition-all"
+            >
+              Cek Status Pesanan
+            </button>
+          </div>
+        </div>
+      </template>
 
       <!-- Scroll Indicator -->
-      <a href="#hotel" class="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center text-white/60 hover:text-white transition-colors">
-        <span class="text-[10px] uppercase tracking-[0.25em] mb-2">{{ $t('landing.hero.scroll') }}</span>
+      <a href="#hotel" class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center text-white/60 hover:text-white transition-colors">
+        <span class="text-[10px] uppercase tracking-[0.25em] mb-1.5">{{ $t('landing.hero.scroll') }}</span>
         <svg class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7-7-7" />
         </svg>
@@ -2259,15 +2388,93 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, h } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted, h } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import { useBranchStore } from '../stores/branch'
 import { useI18n } from 'vue-i18n'
 import axios from 'axios'
+import { settingApi } from '../api'
 
 const authStore = useAuthStore()
 const branchStore = useBranchStore()
 const { t, locale } = useI18n()
+
+// Dynamic Hero Slider State & Autoplay Logic
+const heroSliders = ref([])
+const activeSliders = computed(() => heroSliders.value.filter(s => s.is_active !== false))
+const currentSlideIndex = ref(0)
+const isSliderPaused = ref(false)
+let sliderTimer = null
+
+const startSliderAutoplay = () => {
+  stopSliderAutoplay()
+  if (activeSliders.value.length > 1) {
+    sliderTimer = setInterval(() => {
+      if (!isSliderPaused.value && activeSliders.value.length > 1) {
+        nextSlide()
+      }
+    }, 6000)
+  }
+}
+
+const stopSliderAutoplay = () => {
+  if (sliderTimer) {
+    clearInterval(sliderTimer)
+    sliderTimer = null
+  }
+}
+
+const nextSlide = () => {
+  if (activeSliders.value.length === 0) return
+  currentSlideIndex.value = (currentSlideIndex.value + 1) % activeSliders.value.length
+}
+
+const prevSlide = () => {
+  if (activeSliders.value.length === 0) return
+  currentSlideIndex.value = (currentSlideIndex.value - 1 + activeSliders.value.length) % activeSliders.value.length
+}
+
+const handleSliderButtonClick = (actionType, customLink) => {
+  if (actionType === 'booking') {
+    openBookingModal()
+  } else if (actionType === 'hall') {
+    openHallBookingModal()
+  } else if (actionType === 'track') {
+    openTrackModal()
+  } else if (actionType === 'custom' && customLink) {
+    if (customLink.startsWith('#')) {
+      const el = document.querySelector(customLink)
+      if (el) el.scrollIntoView({ behavior: 'smooth' })
+    } else {
+      window.open(customLink, '_blank')
+    }
+  } else {
+    openBookingModal()
+  }
+}
+
+const fetchPublicHeroSliders = async () => {
+  try {
+    const res = await settingApi.getPublicHeroSliders({ branch_id: branchStore.activeBranchId })
+    heroSliders.value = res.data || []
+    currentSlideIndex.value = 0
+    startSliderAutoplay()
+  } catch (err) {
+    console.error('Failed to fetch public hero sliders:', err)
+  }
+}
+
+watch(() => branchStore.activeBranchId, () => {
+  fetchPublicHeroSliders()
+})
+
+onMounted(() => {
+  fetchPublicHeroSliders()
+})
+
+onUnmounted(() => {
+  stopSliderAutoplay()
+})
 
 const currentLocale = computed(() => locale.value)
 const isScrolled = ref(false)
