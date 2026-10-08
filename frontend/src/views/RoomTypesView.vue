@@ -240,16 +240,30 @@
               />
 
               <!-- Preview -->
-              <div v-if="formData.image_url" class="pt-1 flex items-center gap-3">
-                <img
-                  :src="getStorageUrl(formData.image_url)"
-                  alt="Thumbnail Preview"
-                  class="w-28 h-20 object-cover rounded-lg border border-gray-300 shadow-xs"
-                />
-                <div class="text-xs text-gray-600 space-y-1">
-                  <span class="font-semibold text-gray-900 block">Pratinjau Gambar Thumbnail</span>
-                  <span class="text-[11px] text-gray-500 line-clamp-1 max-w-xs">{{ formData.image_url }}</span>
+              <div v-if="formData.image_url" class="pt-2 flex items-center justify-between gap-3 p-2.5 bg-gray-50 rounded-lg border border-gray-200">
+                <div class="flex items-center gap-3 min-w-0">
+                  <img
+                    :src="getStorageUrl(formData.image_url)"
+                    alt="Thumbnail Preview"
+                    class="w-24 h-16 object-cover rounded-md border border-gray-300 shadow-xs flex-shrink-0"
+                  />
+                  <div class="text-xs text-gray-600 space-y-1 min-w-0">
+                    <span class="font-semibold text-gray-900 block">Pratinjau Gambar Thumbnail</span>
+                    <span class="text-[11px] text-gray-500 truncate block max-w-[180px] sm:max-w-xs">{{ formData.image_url }}</span>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  @click="removeRoomTypeImage"
+                  :disabled="deletingImage"
+                  class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 flex-shrink-0 disabled:opacity-50"
+                  title="Hapus gambar thumbnail"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>{{ deletingImage ? 'Menghapus...' : 'Hapus Gambar' }}</span>
+                </button>
               </div>
             </div>
 
@@ -362,6 +376,7 @@ const deleting = ref(false)
 const error = ref('')
 const roomTypeToDelete = ref(null)
 const uploadingImage = ref(false)
+const deletingImage = ref(false)
 
 import { getApiHost, getStorageUrl } from '@/utils/url'
 
@@ -396,6 +411,24 @@ async function handleImageFileUpload(event) {
     alert('Gagal mengunggah gambar. Pastikan format berkas JPG/PNG/WEBP.')
   } finally {
     uploadingImage.value = false
+  }
+}
+
+async function removeRoomTypeImage() {
+  if (!formData.value.image_url) return
+
+  if (confirm('Apakah Anda yakin ingin menghapus gambar ini?')) {
+    deletingImage.value = true
+    try {
+      if (formData.value.image_url.includes('storage/')) {
+        await roomTypeApi.deleteImage(formData.value.image_url)
+      }
+    } catch (err) {
+      console.error('Failed to delete image file from server:', err)
+    } finally {
+      formData.value.image_url = ''
+      deletingImage.value = false
+    }
   }
 }
 

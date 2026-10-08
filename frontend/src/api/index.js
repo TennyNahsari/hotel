@@ -163,6 +163,11 @@ export const roomTypeApi = {
     })
     return response.data
   },
+
+  async deleteImage(imageUrl) {
+    const response = await api.post('/room-types/delete-image', { image_url: imageUrl })
+    return response.data
+  },
 }
 
 export const guestApi = {

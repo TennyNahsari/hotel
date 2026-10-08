@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\RoomType;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class RoomTypeController extends Controller
 {
@@ -114,6 +115,30 @@ class RoomTypeController extends Controller
             'message' => 'Gambar tipe kamar berhasil diunggah',
             'image_path' => $path,
             'image_url' => asset('storage/' . $path)
+        ]);
+    }
+
+    /**
+     * Delete Room Type Image File
+     */
+    public function deleteImage(Request $request)
+    {
+        $request->validate([
+            'image_url' => 'required|string',
+        ]);
+
+        $url = $request->input('image_url');
+        if (str_contains($url, 'storage/')) {
+            $path = explode('storage/', $url)[1];
+            $path = str_replace('..', '', $path);
+            if (Storage::disk('public')->exists($path)) {
+                Storage::disk('public')->delete($path);
+            }
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Berkas gambar berhasil dihapus'
         ]);
     }
 }

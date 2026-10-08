@@ -56,6 +56,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     // Room Types Management
     Route::post('/room-types/upload-image', [RoomTypeController::class, 'uploadImage']);
+    Route::post('/room-types/delete-image', [RoomTypeController::class, 'deleteImage']);
     Route::apiResource('room-types', RoomTypeController::class);
     
     // Rooms Management
