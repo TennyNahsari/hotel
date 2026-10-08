@@ -7,13 +7,15 @@ use App\Models\User;
 use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
     public function index(Request $request)
     {
-        $query = User::with(['role', 'hotelBranch']);
+        $hasBranchCol = Schema::hasColumn('users', 'hotel_branch_id');
+        $query = $hasBranchCol ? User::with(['role', 'hotelBranch']) : User::with(['role']);
 
         // Search by name or email
         if ($request->filled('search')) {
@@ -35,7 +37,7 @@ class UserController extends Controller
         }
 
         // Filter by branch
-        if ($request->filled('hotel_branch_id')) {
+        if ($hasBranchCol && $request->filled('hotel_branch_id')) {
             if ($request->hotel_branch_id === 'global') {
                 $query->whereNull('hotel_branch_id');
             } else {
@@ -56,6 +58,8 @@ class UserController extends Controller
     public function store(Request $request)
     {
         try {
+            $hasBranchCol = Schema::hasColumn('users', 'hotel_branch_id');
+
             if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
                 $request->merge(['hotel_branch_id' => null]);
             }
@@ -63,15 +67,24 @@ class UserController extends Controller
                 $request->merge(['phone' => null]);
             }
 
-            $validated = $request->validate([
+            $rules = [
                 'name' => 'required|string|max:100',
                 'email' => 'required|email|unique:users,email',
                 'phone' => 'nullable|string|max:20',
                 'password' => 'required|string|min:6',
                 'role_id' => 'required|exists:roles,id',
-                'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
                 'is_active' => 'boolean',
-            ]);
+            ];
+
+            if ($hasBranchCol) {
+                $rules['hotel_branch_id'] = 'nullable|exists:hotel_branches,id';
+            }
+
+            $validated = $request->validate($rules);
+
+            if (!$hasBranchCol) {
+                unset($validated['hotel_branch_id']);
+            }
 
             $validated['password'] = Hash::make($validated['password']);
             if (!isset($validated['is_active'])) {
@@ -79,10 +92,11 @@ class UserController extends Controller
             }
 
             $user = User::create($validated);
+            $relations = $hasBranchCol ? ['role', 'hotelBranch'] : ['role'];
 
             return response()->json([
                 'message' => 'User created successfully',
-                'user' => $user->load(['role', 'hotelBranch']),
+                'user' => $user->load($relations),
             ], 201);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
@@ -95,14 +109,17 @@ class UserController extends Controller
 
     public function show($id)
     {
+        $hasBranchCol = Schema::hasColumn('users', 'hotel_branch_id');
         $user = ($id instanceof User) ? $id : User::findOrFail($id);
-        $user->load(['role', 'hotelBranch']);
+        $relations = $hasBranchCol ? ['role', 'hotelBranch'] : ['role'];
+        $user->load($relations);
         return response()->json($user);
     }
 
     public function update(Request $request, $id)
     {
         try {
+            $hasBranchCol = Schema::hasColumn('users', 'hotel_branch_id');
             $user = ($id instanceof User) ? $id : User::findOrFail($id);
 
             if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
@@ -115,15 +132,24 @@ class UserController extends Controller
                 $request->offsetUnset('password');
             }
 
-            $validated = $request->validate([
+            $rules = [
                 'name' => 'sometimes|required|string|max:100',
                 'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($user->id)],
                 'phone' => 'nullable|string|max:20',
                 'password' => 'nullable|string|min:6',
                 'role_id' => 'sometimes|required|exists:roles,id',
-                'hotel_branch_id' => 'nullable|exists:hotel_branches,id',
                 'is_active' => 'boolean',
-            ]);
+            ];
+
+            if ($hasBranchCol) {
+                $rules['hotel_branch_id'] = 'nullable|exists:hotel_branches,id';
+            }
+
+            $validated = $request->validate($rules);
+
+            if (!$hasBranchCol) {
+                unset($validated['hotel_branch_id']);
+            }
 
             if (!empty($validated['password'])) {
                 $validated['password'] = Hash::make($validated['password']);
@@ -132,10 +158,11 @@ class UserController extends Controller
             }
 
             $user->update($validated);
+            $relations = $hasBranchCol ? ['role', 'hotelBranch'] : ['role'];
 
             return response()->json([
                 'message' => 'User updated successfully',
-                'user' => $user->load(['role', 'hotelBranch']),
+                'user' => $user->load($relations),
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
             throw $e;
