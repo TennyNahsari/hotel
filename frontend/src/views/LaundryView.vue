@@ -543,10 +543,34 @@ const filteredBookingsList = computed(() => {
 
 // Visible pages for pagination
 const visiblePages = computed(() => {
-  const last = pagination.value.last_page
+  const current = pagination.value.current_page || 1
+  const last = pagination.value.last_page || 1
   if (!last || last <= 1) return [1]
-  if (last <= 5) return Array.from({ length: last }, (_, i) => i + 1)
-  return [1, 2, '...', last - 1, last]
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+
+  const pages = []
+  pages.push(1, 2)
+
+  if (current > 4) {
+    pages.push('...')
+  }
+
+  const start = Math.max(3, current - 1)
+  const end = Math.min(last - 2, current + 1)
+  for (let i = start; i <= end; i++) {
+    if (!pages.includes(i)) {
+      pages.push(i)
+    }
+  }
+
+  if (current < last - 3) {
+    pages.push('...')
+  }
+
+  if (!pages.includes(last - 1)) pages.push(last - 1)
+  if (!pages.includes(last)) pages.push(last)
+
+  return pages
 })
 
 function selectBookingItem(b) {

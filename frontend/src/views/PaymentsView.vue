@@ -725,10 +725,34 @@ const formData = ref({
 
 // ─── Computed ─────────────────────────────────────────────────────────────────
 const visiblePages = computed(() => {
-  const total = pagination.value.last_page
-  if (!total || total <= 1) return [1]
-  if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1)
-  return [1, 2, '...', total - 1, total]
+  const current = pagination.value.current_page || 1
+  const last = pagination.value.last_page || 1
+  if (!last || last <= 1) return [1]
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+
+  const pages = []
+  pages.push(1, 2)
+
+  if (current > 4) {
+    pages.push('...')
+  }
+
+  const start = Math.max(3, current - 1)
+  const end = Math.min(last - 2, current + 1)
+  for (let i = start; i <= end; i++) {
+    if (!pages.includes(i)) {
+      pages.push(i)
+    }
+  }
+
+  if (current < last - 3) {
+    pages.push('...')
+  }
+
+  if (!pages.includes(last - 1)) pages.push(last - 1)
+  if (!pages.includes(last)) pages.push(last)
+
+  return pages
 })
 
 import { getApiHost } from '@/utils/url'
