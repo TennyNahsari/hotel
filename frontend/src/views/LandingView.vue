@@ -792,7 +792,6 @@
         </div>
       </div>
     </section>
-    </section>
 
     <!-- 08. WHY TECHNOLOGY MATTERS -->
     <section class="py-20 bg-ivory border-t border-sand/30">
