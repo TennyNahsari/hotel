@@ -316,6 +316,18 @@
             </svg>
             {{ $t('nav.branches') }}
           </router-link>
+
+          <!-- Manajemen User -->
+          <router-link
+            to="/users"
+            class="flex items-center px-3.5 py-2.5 text-sm text-charcoal rounded-md hover:bg-sand/20 hover:text-forest transition-colors"
+            active-class="bg-forest/10 text-forest font-semibold border-l-4 border-gold"
+          >
+            <svg class="w-5 h-5 mr-3 text-forest" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+            Manajemen User
+          </router-link>
         </nav>
 
         <!-- User section -->
@@ -362,12 +374,17 @@
           <select
             v-model="selectedBranchId"
             @change="handleBranchChange"
-            class="bg-ivory border border-sand/60 text-forest text-sm font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all cursor-pointer shadow-2xs"
+            :disabled="isBranchUser"
+            class="bg-ivory border border-sand/60 text-forest text-sm font-semibold rounded-lg px-3 py-1.5 focus:outline-none focus:ring-2 focus:ring-forest/30 transition-all cursor-pointer shadow-2xs disabled:opacity-85 disabled:cursor-not-allowed disabled:bg-gray-100"
           >
             <option v-for="b in branchStore.branches" :key="b.id" :value="b.id">
               🏢 {{ b.name }} ({{ b.city }})
             </option>
           </select>
+          <span v-if="isBranchUser" class="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-50 text-amber-800 border border-amber-300 rounded-md text-xs font-semibold" title="Hak akses Anda dikunci khusus untuk cabang ini saja">
+            <span>🔒</span>
+            <span class="hidden sm:inline">Cabang Terkunci</span>
+          </span>
         </div>
         <div class="hidden sm:flex items-center space-x-2 text-xs font-medium text-taupe bg-ivory/80 px-3 py-1.5 rounded-full border border-sand/40">
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -405,13 +422,34 @@ const servicesOpen = ref(true) // Default open
 
 const user = computed(() => authStore.user)
 
-onMounted(async () => {
-  await branchStore.fetchAdminBranches()
-  selectedBranchId.value = branchStore.activeBranchId
+const isBranchUser = computed(() => {
+  return !!user.value?.hotel_branch_id
 })
 
+onMounted(async () => {
+  await branchStore.fetchAdminBranches()
+
+  if (isBranchUser.value && user.value?.hotel_branch_id) {
+    branchStore.selectBranchById(user.value.hotel_branch_id)
+    selectedBranchId.value = user.value.hotel_branch_id
+  } else {
+    selectedBranchId.value = branchStore.activeBranchId
+  }
+})
+
+watch(() => user.value, (u) => {
+  if (u?.hotel_branch_id) {
+    branchStore.selectBranchById(u.hotel_branch_id)
+    selectedBranchId.value = u.hotel_branch_id
+  }
+}, { immediate: true })
+
 watch(() => branchStore.activeBranchId, (newId) => {
-  selectedBranchId.value = newId
+  if (isBranchUser.value && user.value?.hotel_branch_id) {
+    selectedBranchId.value = user.value.hotel_branch_id
+  } else {
+    selectedBranchId.value = newId
+  }
 })
 
 function handleBranchChange() {

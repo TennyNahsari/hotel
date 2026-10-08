@@ -41,6 +41,8 @@ class AuthController extends Controller
                 ]);
             }
 
+            $user->load(['role', 'hotelBranch']);
+
             return response()->json([
                 'message' => 'Login successful',
                 'user' => [
@@ -48,7 +50,11 @@ class AuthController extends Controller
                     'name' => $user->name,
                     'email' => $user->email,
                     'phone' => $user->phone,
+                    'role_id' => $user->role_id,
                     'role' => $user->role,
+                    'hotel_branch_id' => $user->hotel_branch_id,
+                    'hotel_branch' => $user->hotelBranch,
+                    'is_global' => $user->is_global,
                 ],
             ]);
         }
@@ -80,13 +86,19 @@ class AuthController extends Controller
             ], 401);
         }
 
+        $user->load(['role', 'hotelBranch']);
+
         return response()->json([
             'user' => [
                 'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email,
                 'phone' => $user->phone,
+                'role_id' => $user->role_id,
                 'role' => $user->role,
+                'hotel_branch_id' => $user->hotel_branch_id,
+                'hotel_branch' => $user->hotelBranch,
+                'is_global' => $user->is_global,
             ],
         ]);
     }

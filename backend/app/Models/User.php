@@ -19,11 +19,21 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'role_id',
+        'hotel_branch_id',
         'name',
         'email',
         'phone',
         'password',
         'is_active',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'is_global',
     ];
 
     /**
@@ -52,9 +62,19 @@ class User extends Authenticatable
         return $this->belongsTo(Role::class);
     }
 
+    public function hotelBranch()
+    {
+        return $this->belongsTo(HotelBranch::class, 'hotel_branch_id');
+    }
+
     public function hotelBranches()
     {
         return $this->belongsToMany(HotelBranch::class, 'user_hotel_branches');
+    }
+
+    public function getIsGlobalAttribute()
+    {
+        return is_null($this->hotel_branch_id) || $this->isSuperAdmin();
     }
 
     // Helper methods

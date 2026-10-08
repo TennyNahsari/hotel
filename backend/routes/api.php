@@ -104,9 +104,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/breakfasts/statistics', [BreakfastController::class, 'statistics']);
     Route::patch('/bookings/{booking}/breakfast', [BreakfastController::class, 'updateStatus']);
 
-    // Users Management
-    Route::get('/users', [UserController::class, 'index']);
-    Route::get('/users/{user}', [UserController::class, 'show']);
+    // Users & Roles Management
+    Route::get('/roles', [UserController::class, 'getRoles']);
+    Route::apiResource('users', UserController::class);
 
     // Halls Management
     Route::get('/halls/types', [HallController::class, 'getTypes']);
