@@ -55,6 +55,13 @@ class UserController extends Controller
 
     public function store(Request $request)
     {
+        if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
+            $request->merge(['hotel_branch_id' => null]);
+        }
+        if ($request->phone === '') {
+            $request->merge(['phone' => null]);
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:100',
             'email' => 'required|email|unique:users,email',
@@ -78,14 +85,27 @@ class UserController extends Controller
         ], 201);
     }
 
-    public function show(User $user)
+    public function show($id)
     {
+        $user = ($id instanceof User) ? $id : User::findOrFail($id);
         $user->load(['role', 'hotelBranch']);
         return response()->json($user);
     }
 
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
+        $user = ($id instanceof User) ? $id : User::findOrFail($id);
+
+        if ($request->hotel_branch_id === '' || $request->hotel_branch_id === 'global') {
+            $request->merge(['hotel_branch_id' => null]);
+        }
+        if ($request->phone === '') {
+            $request->merge(['phone' => null]);
+        }
+        if ($request->has('password') && (is_null($request->password) || $request->password === '')) {
+            $request->request->remove('password');
+        }
+
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:100',
             'email' => ['sometimes', 'required', 'email', Rule::unique('users')->ignore($user->id)],
@@ -110,9 +130,11 @@ class UserController extends Controller
         ]);
     }
 
-    public function destroy(User $user)
+    public function destroy($id)
     {
-        // Don't delete the logged-in user or super admin owner if sole user
+        $user = ($id instanceof User) ? $id : User::findOrFail($id);
+
+        // Don't delete the logged-in user
         if ($user->id === auth()->id()) {
             return response()->json([
                 'message' => 'Tidak dapat menghapus akun Anda sendiri'
