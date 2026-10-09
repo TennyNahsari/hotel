@@ -130,9 +130,6 @@
           </div>
         </div>
 
-        <!-- AI Predictions Section -->
-        <AIPredictionsCard />
-
         <!-- Payment Report Section -->
         <div class="bg-white rounded-lg shadow p-4 md:p-6">
           <h2 class="text-base md:text-lg font-semibold text-gray-900 mb-4">{{ $t('dashboard.paymentReport') }}</h2>
@@ -463,7 +460,6 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
-import AIPredictionsCard from '../components/AIPredictionsCard.vue'
 import { dashboardApi } from '../api'
 import axios from 'axios'
 
