@@ -706,7 +706,6 @@ const fetchHalls = async (page = 1) => {
       ...filters.value
     }
     const response = await hallApi.getHalls(params)
-    console.log('Halls API Response:', response)
     
     // Handle both array and paginated response
     if (Array.isArray(response)) {

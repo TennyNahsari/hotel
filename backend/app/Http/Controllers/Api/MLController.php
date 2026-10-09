@@ -227,9 +227,10 @@ class MLController extends Controller
 
             if ($predictions->isEmpty()) {
                 return response()->json([
-                    'success' => false,
-                    'message' => 'No predictions available. Please generate predictions first.'
-                ], 404);
+                    'success' => true,
+                    'data' => null,
+                    'message' => 'No predictions available yet.'
+                ], 200);
             }
 
             return response()->json([
