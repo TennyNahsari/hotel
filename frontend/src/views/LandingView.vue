@@ -148,6 +148,7 @@
         <a @click="mobileMenuOpen = false" href="#hero" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.home') }}</a>
         <a @click="mobileMenuOpen = false" href="#hotel" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.hotel') }}</a>
         <a @click="mobileMenuOpen = false" href="#rooms" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.rooms') }}</a>
+        <a @click="mobileMenuOpen = false" href="#halls" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.halls.title') }}</a>
         <a @click="mobileMenuOpen = false" href="#facilities" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.facilities') }}</a>
         <a @click="mobileMenuOpen = false" href="#dining" class="block py-2 text-sm uppercase tracking-wider hover:text-sand">{{ $t('landing.nav.dining') }}</a>
         
@@ -176,6 +177,8 @@
         <div
           @mouseenter="isSliderPaused = true"
           @mouseleave="isSliderPaused = false"
+          @touchstart.passive="handleTouchStart"
+          @touchend.passive="handleTouchEnd"
           class="absolute inset-0 z-0"
         >
           <div
@@ -256,10 +259,10 @@
             @click="prevSlide"
             @mouseenter="isSliderPaused = true"
             @mouseleave="isSliderPaused = false"
-            class="absolute left-4 sm:left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/30 hover:bg-gold hover:text-forest text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-lg group cursor-pointer"
+            class="absolute left-2 sm:left-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-gold hover:text-forest text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-lg group cursor-pointer"
             aria-label="Previous Slide"
           >
-            <svg class="w-6 h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:-translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
@@ -268,10 +271,10 @@
             @click="nextSlide"
             @mouseenter="isSliderPaused = true"
             @mouseleave="isSliderPaused = false"
-            class="absolute right-4 sm:right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-black/30 hover:bg-gold hover:text-forest text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-lg group cursor-pointer"
+            class="absolute right-2 sm:right-8 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/40 hover:bg-gold hover:text-forest text-white backdrop-blur-md border border-white/20 flex items-center justify-center transition-all shadow-lg group cursor-pointer"
             aria-label="Next Slide"
           >
-            <svg class="w-6 h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg class="w-5 h-5 sm:w-6 sm:h-6 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
@@ -2389,6 +2392,27 @@ const stopSliderAutoplay = () => {
   if (sliderTimer) {
     clearInterval(sliderTimer)
     sliderTimer = null
+  }
+}
+
+const touchStartX = ref(0)
+const touchEndX = ref(0)
+
+const handleTouchStart = (e) => {
+  touchStartX.value = e.changedTouches[0].screenX
+  isSliderPaused.value = true
+}
+
+const handleTouchEnd = (e) => {
+  touchEndX.value = e.changedTouches[0].screenX
+  isSliderPaused.value = false
+  const diffX = touchEndX.value - touchStartX.value
+  if (Math.abs(diffX) > 40) {
+    if (diffX < 0) {
+      nextSlide()
+    } else {
+      prevSlide()
+    }
   }
 }
 
