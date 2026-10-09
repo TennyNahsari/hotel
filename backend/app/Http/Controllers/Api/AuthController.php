@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -41,7 +42,9 @@ class AuthController extends Controller
                 ]);
             }
 
-            $user->load(['role', 'hotelBranch']);
+            $hasBranchCol = Schema::hasColumn('users', 'hotel_branch_id');
+            $relations = $hasBranchCol ? ['role', 'hotelBranch'] : ['role'];
+            $user->load($relations);
 
             return response()->json([
                 'message' => 'Login successful',
@@ -52,8 +55,8 @@ class AuthController extends Controller
                     'phone' => $user->phone,
                     'role_id' => $user->role_id,
                     'role' => $user->role,
-                    'hotel_branch_id' => $user->hotel_branch_id,
-                    'hotel_branch' => $user->hotelBranch,
+                    'hotel_branch_id' => $hasBranchCol ? $user->hotel_branch_id : null,
+                    'hotel_branch' => $hasBranchCol ? $user->hotelBranch : null,
                     'is_global' => $user->is_global,
                 ],
             ]);
@@ -86,7 +89,9 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $user->load(['role', 'hotelBranch']);
+        $hasBranchCol = Schema::hasColumn('users', 'hotel_branch_id');
+        $relations = $hasBranchCol ? ['role', 'hotelBranch'] : ['role'];
+        $user->load($relations);
 
         return response()->json([
             'user' => [
@@ -96,8 +101,8 @@ class AuthController extends Controller
                 'phone' => $user->phone,
                 'role_id' => $user->role_id,
                 'role' => $user->role,
-                'hotel_branch_id' => $user->hotel_branch_id,
-                'hotel_branch' => $user->hotelBranch,
+                'hotel_branch_id' => $hasBranchCol ? $user->hotel_branch_id : null,
+                'hotel_branch' => $hasBranchCol ? $user->hotelBranch : null,
                 'is_global' => $user->is_global,
             ],
         ]);

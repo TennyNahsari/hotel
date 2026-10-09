@@ -74,6 +74,9 @@ class User extends Authenticatable
 
     public function getIsGlobalAttribute()
     {
+        if (!array_key_exists('hotel_branch_id', $this->attributes)) {
+            return true;
+        }
         return is_null($this->hotel_branch_id) || $this->isSuperAdmin();
     }
 
