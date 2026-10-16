@@ -270,10 +270,11 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import LayoutMain from '../components/LayoutMain.vue'
 import { breakfastApi } from '../api'
+import { getApiHost } from '@/utils/url'
 import axios from 'axios'
 
 const { t } = useI18n()
@@ -324,8 +325,6 @@ const filters = ref({
   search: '',
   breakfast_status: ''
 })
-
-import { getApiHost } from '@/utils/url'
 
 onMounted(async () => {
   try {
