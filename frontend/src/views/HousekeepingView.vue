@@ -503,6 +503,7 @@ const pagination = ref({
 })
 const showModal = ref(false)
 const showDeleteConfirm = ref(false)
+const taskToDelete = ref(null)
 const isEditing = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
